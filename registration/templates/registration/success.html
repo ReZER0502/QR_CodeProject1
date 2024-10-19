@@ -1,0 +1,22 @@
+<!-- success.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Success</title>
+</head>
+<body>
+    <h1>Registration Successful</h1>
+    <p><strong>Name:</strong> {{ attendee.name }}</p>
+    <p><strong>Email:</strong> {{ attendee.email }}</p>
+    
+    <h2>Your QR Code:</h2>
+    {% if attendee.qr_code %}  <!-- Check if the QR code exists -->
+        <img src="{{ attendee.qr_code.url }}" alt="QR Code">  <!-- Use url attribute -->
+    {% else %}
+        <p>No QR Code generated.</p>  <!-- Message if no QR code is present -->
+    {% endif %}
+    
+    <p><a href="{% url 'register' %}">Register another attendee</a></p>
+</body>
+</html>
