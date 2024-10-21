@@ -7,33 +7,31 @@ from .models import Attendee
 import os
 from django.conf import settings  
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+import logging
 
 def register(request):
     if request.method == 'POST':
-        form = AttendeeForm(request.POST)  # Create a form instance with the posted data
-        if form.is_valid():  # Check if the form is valid
-            attendee = form.save(commit=False)  # Create attendee instance but don't save yet
+        form = AttendeeForm(request.POST)  
+        if form.is_valid():  
+            attendee = form.save(commit=False)  
             
-            # Generate QR code
-            qr_data = f"Name: {attendee.name}, Email: {attendee.email}"  # Use data from form
+            qr_data = f"Name: {attendee.name}, Email: {attendee.email}"  
             qr = qrcode.make(qr_data)
 
-            # Ensure the QR code directory exists
-            qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')  # Use MEDIA_ROOT
-            os.makedirs(qr_code_dir, exist_ok=True)  # Create the directory if it doesn't exist
+            qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')  
+            os.makedirs(qr_code_dir, exist_ok=True) 
             
-            # Save the QR code image
             qr_code_filename = f'{attendee.name}_qr.png'
-            qr_code_path = os.path.join(qr_code_dir, qr_code_filename)  # Save using name
+            qr_code_path = os.path.join(qr_code_dir, qr_code_filename) 
             qr.save(qr_code_path)
 
-            # Save the relative URL of the QR code in the database
-            attendee.qr_code = os.path.join('qr_codes', qr_code_filename)  # Store relative path
-            attendee.save()  # Now save the attendee instance to the database
+            attendee.qr_code = os.path.join('qr_codes', qr_code_filename) 
+            attendee.save()  
             
-            return redirect('success', attendee_id=attendee.id)  # Redirect to success view with attendee ID
+            return redirect('success', attendee_id=attendee.id) 
     else:
-        form = AttendeeForm()  # Create a new form instance for GET requests
+        form = AttendeeForm()  
 
     return render(request, 'registration/register.html', {'form': form})
 
@@ -52,13 +50,12 @@ def success(request, attendee_id):
 
 def mark_attendance(request):
     attendee_id = request.GET.get('attendee_id')
+    logging.debug(f'Received attendee_id: {attendee_id}')  
     if attendee_id:
         try:
             attendee = Attendee.objects.get(id=attendee_id)
-            # Update the attendance status
-            # Assuming you have an `is_present` field in your model
-            attendee.is_present = True  # Set this to True if using an is_present field
-            attendee.attendance_time = timezone.now()  # Log the time
+            attendee.is_present = True  
+            attendee.present_time = timezone.now() 
             attendee.save()
             return JsonResponse({'success': True, 'message': 'Attendance marked successfully!'})
         except Attendee.DoesNotExist:
