@@ -1,44 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>I-Register</title>
+    <link rel="icon" type="image/png" href="{% static 'my_logo.png' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"> <!-- Add Font Awesome -->
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            height: 100vh;
+            background-color: black; /* Background color */
+        }
+        
+        .register-container {
             padding: 20px;
-            background-color: #f4f4f4;
+            width: 350px; /* Adjusted width */
+            text-align: left; /* Align text to the left */
+            background: transparent; /* Make background transparent */
         }
-        h1 {
-            color: #333;
+        
+        .logo {
+            display: block;
+            margin: 0 auto; /* Center the logo */
+            font-size: 100px; /* Adjust size of the icon */
+            color: blue; /* Set the color of the icon */
+            text-align: center; /* Center the icon */
+            border-radius: 40%; /* Make it circular */
+            border-width: 1px
+            padding: 20px; /* Padding around the icon */
+            background: transparent; /* No background color */
         }
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+        .input-container {
+            position: relative; /* Position for absolute icon placement */
+            margin: 10px 0; /* Margin between inputs */
         }
+
+        input, select {
+            width: 100%;
+            padding: 10px 40px; /* Padding adjusted for icon */
+            margin: 10px 0;
+            border: 2px solid white; /* White border */
+            border-radius: 25px; /* Make it oblong */
+            background: transparent; /* Ensure background is transparent for input fields */
+            color: white; /* Text color */
+            box-sizing: border-box; /* Include padding in width */
+            transition: border-color 0.3s; /* Smooth transition for border color */
+        }
+        
+        input:focus, select:focus {
+            outline: none; /* Remove default focus outline */
+            border-color: #feb47b; /* Change border color on focus */
+        }
+
+        /* Positioning icons inside the input fields */
+        .input-container i {
+            position: absolute;
+            left: 10px; /* Space from left edge */
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Center vertically */
+            color: white; /* Icon color */
+        }
+
         button {
-            background-color: #4CAF50; /* Green */
+            width: 100%;
+            max-width: 250px; /* Limit max width of button */
+            padding: 10px;
+            margin: 10px 0;
+            border: none; /* Remove borders */
+            border-radius: 25px; /* Make button oblong */
+            background-color: #ff7e5f;
             color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s; /* Smooth transition for background color */
         }
+        
         button:hover {
-            background-color: #45a049; /* Darker green */
+            background-color: #feb47b;
         }
     </style>
+    <script>
+        // JavaScript for dynamic sub-department dropdown
+        function updateSubDepartment() {
+            const departmentSelect = document.getElementById('department');
+            const subDepartmentSelect = document.getElementById('sub_department');
+
+            const departments = {
+                'IT': ['Software Development', 'Hardware Maintenance', 'Network Support'],
+                'HR': ['Recruitment', 'Employee Relations'],
+                'Finance': ['Accounting', 'Payroll'],
+                // Add more departments and their sub-departments as needed
+            };
+
+            // Clear the existing options
+            subDepartmentSelect.innerHTML = '';
+
+            const selectedDepartment = departmentSelect.value;
+            if (selectedDepartment && departments[selectedDepartment]) {
+                departments[selectedDepartment].forEach(function(subDept) {
+                    const option = document.createElement('option');
+                    option.value = subDept;
+                    option.textContent = subDept;
+                    subDepartmentSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
 </head>
 <body>
-    <h1>Register</h1>
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}  <!-- Render form fields (name, email, department) -->
-        <button type="submit">Submit</button>
-    </form>
+    <div class="register-container">
+        <div class="logo">
+            <i class="far fa-user-circle"></i> <!-- Person logo -->
+        </div>
+        <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+            <div class="input-container">
+                <i class="fas fa-user-alt"></i>
+                <input type="text" name="name" placeholder="Your Name" required>
+            </div>
+            <div class="input-container">
+                <i class="fas fa-at"></i>
+                <input type="email" name="email" placeholder="Your Email" required>
+            </div>
+            <div class="input-container">
+                <i class="fas fa-address-card"></i>
+                <select id="department" name="department" onchange="updateSubDepartment()" required>
+                    <option value="">Select Department</option>
+                    <option value="IT">IT</option>
+                    <option value="HR">HR</option>
+                    <option value="Finance">Finance</option>
+                    <!-- Add more departments as needed -->
+                </select>
+            </div>
+            <div class="input-container">
+                <i class="fas fa-address-card"></i>
+                <select id="sub_department" name="sub_department" required>
+                    <option value="">Select Sub Department</option>
+                    <!-- Sub-departments will be populated here -->
+                </select>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+    </div>
 </body>
 </html>

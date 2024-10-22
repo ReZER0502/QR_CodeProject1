@@ -9,44 +9,38 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 import logging
+from io import BytesIO
+from datetime import timedelta
 
 def register(request):
-    if request.method == 'POST':
-        form = AttendeeForm(request.POST)  
-        if form.is_valid():  
-            attendee = form.save(commit=False)  
-            
-            qr_data = f"Name: {attendee.name}, Email: {attendee.email}"  
-            qr = qrcode.make(qr_data)
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        department = request.POST.get('department')
+        sub_department = request.POST.get('sub_department') 
 
-            qr_code_dir = os.path.join(settings.MEDIA_ROOT, 'qr_codes')  
-            os.makedirs(qr_code_dir, exist_ok=True) 
-            
-            qr_code_filename = f'{attendee.name}_qr.png'
-            qr_code_path = os.path.join(qr_code_dir, qr_code_filename) 
-            qr.save(qr_code_path)
+        attendee = Attendee(
+            name=name,
+            email=email,
+            department=department,
+            sub_department=sub_department  
+        )
+        attendee.save()
 
-            attendee.qr_code = os.path.join('qr_codes', qr_code_filename) 
-            attendee.save()  
-            
-            return redirect('success', attendee_id=attendee.id) 
-    else:
-        form = AttendeeForm()  
+        return redirect('success', attendee_id=attendee.id)
 
-    return render(request, 'registration/register.html', {'form': form})
+    return render(request, 'registration/register.html')
 
 def success(request, attendee_id):
-    try:
-        attendee = Attendee.objects.get(id=attendee_id)
-    except Attendee.DoesNotExist:
-        return render(request, 'registration/error.html', {'message': 'Attendee not found!'})
+    attendee = get_object_or_404(Attendee, id=attendee_id)
 
-    qr_code_image_path = attendee.qr_code
+    qr_data = f"http://10.0.0.52:8000/registration/mark_attendance/?attendee_id={attendee.id}"
+    qrcode_img = qrcode.make(qr_data)
+    canvas = BytesIO()
+    qrcode_img.save(canvas, format='PNG')
+    canvas.seek(0)
 
-    return render(request, 'registration/success.html', {
-        'attendee': attendee,
-        'qr_code_image_path': qr_code_image_path,
-    })
+    return HttpResponse(canvas.getvalue(), content_type="image/png")
 
 def mark_attendance(request):
     attendee_id = request.GET.get('attendee_id')
@@ -55,7 +49,9 @@ def mark_attendance(request):
         try:
             attendee = Attendee.objects.get(id=attendee_id)
             attendee.is_present = True  
-            attendee.present_time = timezone.now() 
+            utc_now = timezone.now()
+            manila_cubao_time = utc_now + timedelta(hours=8)
+            attendee.present_time = manila_cubao_time 
             attendee.save()
             return JsonResponse({'success': True, 'message': 'Attendance marked successfully!'})
         except Attendee.DoesNotExist:
