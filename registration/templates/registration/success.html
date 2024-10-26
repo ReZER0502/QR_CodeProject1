@@ -6,11 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Success</title>
-    
-    <!-- QR Code Favicon -->
     <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
-    
-    <!-- Add Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
@@ -27,7 +23,6 @@
             background: rgba(255, 255, 255, 0.8);
         }
 
-        /* Video background */
         .video-background {
             position: fixed;
             top: 0;
@@ -123,6 +118,7 @@
                 <button>Register Another Attendee</button>
             </a>
         </div>
+        <p><a href="{% url 'download_attendee_info' attendee.id %}">Download Your QR Here!</a></p>
     </div>
 </body>
 
