@@ -215,6 +215,8 @@
                 'IT': ['Software Development', 'Hardware Maintenance', 'Network Support'],
                 'HR': ['Recruitment', 'Employee Relations'],
                 'Finance': ['Accounting', 'Payroll'],
+                'ASG': ['Procurement', 'Gen. Services', 'HR Assistant'],
+                'ETCG': ['Stab-Fund', 'Consultancy', 'KRC']
             };
             subDepartmentSelect.innerHTML = '';
             const selectedDepartment = departmentSelect.value;
@@ -238,12 +240,11 @@
             }, 1000);
         });
         
-        // Function to show success message
         function showMessage(message) {
             const messageBox = document.getElementById('message-box');
             const messageText = document.getElementById('message-text');
-            messageText.textContent = message; // Set message text
-            messageBox.style.display = 'block'; // Show the message box
+            messageText.textContent = message; 
+            messageBox.style.display = 'block';
         }
     </script>
 </head>
@@ -276,6 +277,8 @@
                     <option value="IT">IT</option>
                     <option value="HR">HR</option>
                     <option value="Finance">Finance</option>
+                    <option value="ASG">ASG</option>
+                    <option value="ETCG">ETCG</option>
                 </select>
             </div>
             <div class="input-container">

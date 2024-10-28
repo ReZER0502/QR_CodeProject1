@@ -10,6 +10,7 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from PIL import Image, ImageDraw, ImageFont
 import os
+from django.contrib import messages
 
 def register(request):
     if request.method == 'POST':
@@ -37,34 +38,41 @@ def success(request, attendee_id):
     return render(request, 'registration/success.html', {'attendee': attendee})
 
 def mark_attendance(request):
-    allowed_ips = ['10.0.0.10', '192.168.1.101']  # Example of whitelisted IPs
+    allowed_ips = ['10.0.0.10', '192.168.1.101']
     ip = request.META.get('REMOTE_ADDR')
     if ip not in allowed_ips:
         return render(request, 'res.html', {
             'success': False,
-            'message': 'WALA KANG JOWA!! DI KA NYA CRUSH. MASAKPLAY PA, MAY IBA NA YUN.'
+            'message': 'WALA KANG JOWA!! DI KA NYA CRUSH. ANG MASAKPLAP PA AY MAY IBA NA YUN.'
         })
 
     attendee_id = request.GET.get('attendee_id')
     if attendee_id:
         try:
             attendee = Attendee.objects.get(id=attendee_id)
+            print(f'Before marking attendee: {attendee.name}, is_present: {attendee.is_present}')
+
             if attendee.is_present:
+                print(f"Attendee {attendee.name} already marked present.")
                 return render(request, 'res.html', {
                     'success': False,
-                    'message': 'You already scanned this.'
+                    'message': 'Attendance marked successfully!'
                 })
-
-            attendee.is_present = True  
-            utc_now = timezone.now()
-            manila_cubao_time = utc_now + timedelta(hours=8)
-            attendee.present_time = manila_cubao_time 
-            attendee.save()
+                
+            else:
+                attendee.is_present = True
+                attendee.present_time = timezone.now() + timedelta(hours=8)  
+                attendee.save(update_fields=['is_present', 'present_time']) 
+                print(f"Marked {attendee.name} as present.")  
+                
+            print(f"After Marking: {attendee.name}, is_present: {attendee.is_present}")
+                 
             return render(request, 'res.html', {
                 'success': True,
                 'message': 'Attendance marked successfully!',
-                'attendee_name': attendee.name  
+                'attendee_name': attendee.name
             })
+
         except Attendee.DoesNotExist:
             return render(request, 'res.html', {
                 'success': False,
@@ -76,33 +84,47 @@ def mark_attendance(request):
         'message': 'Invalid request.'
     })
 
-#'C:\Windows\Fonts\ArialNova-Bold.ttf'
+#'C:\Windows\Fonts\ArialNova-Bold.ttf' We can change this
 
 def download_attendee_info(request, attendee_id):
     try:
         attendee = Attendee.objects.get(id=attendee_id)
-        font_path = os.path.join('C:\Windows\Fonts\ArialNova-Bold.ttf', 'ArialNova-Bold.ttf')  
+        background_path = os.path.join('C:/xampp/htdocs/test/QR_CodeProject1/static/img/my_qr.jpg')  # or .gif if you're using one
+        background = Image.open(background_path)
+        image_width = 600
+        image_height = 800
+        background = background.resize((image_width, image_height))
+        
+        overlay = Image.new('RGBA', (image_width, image_height), (255, 255, 255, 0))  
+        draw = ImageDraw.Draw(overlay)
+
+        font_path = os.path.join('C:\Windows\Fonts\ArialNova-Bold.ttf')
         font = ImageFont.truetype(font_path, 36)
         small_font = ImageFont.truetype(font_path, 24)
 
-        image_width = 500
-        image_height = 600
-        image = Image.new('RGB', (image_width, image_height), color='white')
-        draw = ImageDraw.Draw(image)
         name_text = f"Name: {attendee.name}"
-        email_text = f"Email: {attendee.email}"
-        name_position = (50, 50)
-        email_position = (50, 150)
-        qr_code_position = (50, 250)  #space before the QR code
+        department_text = f"Department: {attendee.department}"
+        sub_department_text = f"Sub-Department: {attendee.sub_department}"
+        
+        name_position = (50, 100)
+        department_position = (50, 200)
+        sub_department_position = (50, 250)
+        
+        draw.text(name_position, name_text, font=small_font, fill='black')
+        draw.text(department_position, department_text, font=small_font, fill='black')
+        draw.text(sub_department_position, sub_department_text, font=small_font, fill='black')
+        line_position = (50, 300, image_width - 50, 300)
+        draw.line(line_position, fill="gray", width=3)
+        qr_code_position = (150, 350)  
+        qr_code_image = Image.open(attendee.qr_code.path)
+        qr_code_image = qr_code_image.resize((300, 300))  
+        overlay.paste(qr_code_image, qr_code_position, qr_code_image.convert('RGBA'))
+        final_image = Image.alpha_composite(background.convert('RGBA'), overlay)
 
-        draw.text(name_position, name_text, font=font, fill='black')
-        draw.text(email_position, email_text, font=small_font, fill='black')
-        qr_code_image = Image.open(attendee.qr_code.path) 
-        qr_code_image = qr_code_image.resize((300, 300))  # Resize qr here
-        image.paste(qr_code_image, qr_code_position)
         response = HttpResponse(content_type='image/png')
-        image.save(response, 'PNG')
-        response['Content-Disposition'] = f'attachment; filename="attendee_info_{attendee.id}.png"'
+        final_image = final_image.convert('RGB')  
+        final_image.save(response, 'PNG')
+        response['Content-Disposition'] = f'attachment; filename="{attendee.name}_info.png"'
 
         return response
 

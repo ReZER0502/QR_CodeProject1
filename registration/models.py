@@ -1,7 +1,6 @@
 from django.db import models
 import qrcode
 from io import BytesIO
-import re
 
 class Attendee(models.Model):
     name = models.CharField(max_length=100)
@@ -10,7 +9,6 @@ class Attendee(models.Model):
     is_present = models.BooleanField(default=False)
     present_time = models.DateTimeField(null=True, blank=True)
     sub_department = models.CharField(max_length=100, blank = True, null = True)
-    
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
     def __str__(self):
