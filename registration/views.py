@@ -10,7 +10,6 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from PIL import Image, ImageDraw, ImageFont
 import os
-from django.contrib import messages
 
 def register(request):
     if request.method == 'POST':
