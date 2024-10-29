@@ -21,13 +21,12 @@
             height: 100%;
             font-family: Arial, sans-serif;
             color: black;
-            overflow: hidden;
+            overflow: hidden; /* Prevent scrollbars */
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
-        /* Video background */
+        
         .video-background {
             position: fixed;
             top: 0;
@@ -39,172 +38,223 @@
             opacity: 1;
             transition: opacity 1s ease-in-out;
         }
-
+        
         .video-background.fade-out {
             opacity: 0;
         }
-
+        
         .register-container {
+            max-height: 60vh; /* Adjusted height */
             z-index: 1;
-            padding: 50px;
-            width: 500px;
+            padding: 25px; /* Reduced padding */
+            width: 300px; /* Reduced width */
             text-align: left;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 15px;
             box-shadow: 0 4px 40px rgba(0, 0, 0, 0.6);
             animation: fadeIn 1s ease-in-out;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             border: 4px solid rgba(0, 0, 0, 0.5);
         }
-
+        
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
+        
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
+        
         .logo {
             display: block;
             margin: 0 auto;
-            font-size: 100px;
+            font-size: 60px; /* Further reduced logo size */
             color: black;
             text-align: center;
             border-radius: 50%;
-            padding: 20px;
+            padding: 8px; /* Reduced padding */
             background: rgba(255, 255, 255, 0.1);
             transition: transform 0.3s;
         }
-
+        
         .logo:hover {
             transform: scale(1.1);
         }
-
+        
         .input-container {
             position: relative;
-            margin: 20px 0;
+            margin: 8px 0; /* Reduced margin */
         }
-
+        
         input, select {
             width: 100%;
-            padding: 15px 40px;
-            margin: 10px 0;
+            padding: 10px 30px; /* Reduced padding */
+            margin: 6px 0;
             border: 2px solid black;
-            border-radius: 25px;
+            border-radius: 20px;
             background: transparent;
             color: black;
             box-sizing: border-box;
             transition: border-color 0.3s, background 0.3s, transform 0.3s;
-            font-size: 18px;
+            font-size: 10px; /* Reduced font size */
             outline: none;
         }
-
+        
         input::placeholder, select {
             color: rgba(0, 0, 0, 0.7);
         }
-
+        
         select option {
             background: white;
             color: black;
         }
-
+        
         .qr-code {
-            text-align: center; /* Center the QR code */
-            margin-top: 20px; /* Add some spacing */
+            text-align: center;
+            margin-top: 7px; /* Adjusted margin */
         }
-
+        
         input:focus, select:focus {
             border-color: #feb47b;
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
-
+        
         .input-container i {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: black;
-            font-size: 20px;
+            font-size: 12px; /* Reduced icon size */
         }
-
+        
         input:focus + i, select:focus + i {
             color: #feb47b;
         }
-
+        
         .button-container {
             display: flex;
             justify-content: center;
         }
-
+        
         button {
             width: 100%;
-            max-width: 250px;
-            padding: 15px;
-            margin: 10px auto;
+            max-width: 150px; /* Reduced button size */
+            padding: 10px;
+            margin: 8px auto;
             border: 2px solid black;
-            border-radius: 20px;
+            border-radius: 15px;
             color: black;
             cursor: pointer;
             background-color: transparent;
-            font-size: 20px;
+            font-size: 13px; /* Reduced font size */
             transition: background-color 0.3s, transform 0.3s;
         }
-
+        
         button:hover {
             background-color: #feb47b;
             transform: translateY(-3px);
         }
-
+        
         .admin-container {
-            margin-top: 20px;
+            margin-top: 10px; /* Reduced margin */
             text-align: center;
         }
-
+        
         .admin-container h2 {
-            margin: 10px 0;
+            margin: 8px 0;
             color: black;
-            font-size: 24px;
+            font-size: 14px; /* Reduced font size */
         }
-
+        
         .admin-container p {
-            font-size: 18px;
+            font-size: 10px; /* Reduced font size */
         }
-
-        /* Success message styles */
+        
         .message-container {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 20px;
-            background-color: #d4edda; /* Light green background */
-            border: 2px solid #c3e6cb; /* Darker green border */
+            padding: 15px;
+            background-color: #d4edda;
+            border: 2px solid #c3e6cb;
             border-radius: 10px;
             text-align: center;
-            width: 300px; /* Width of the message box */
-            font-size: 18px; /* Font size */
-            color: #155724; /* Text color */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Shadow effect */
-            z-index: 1000; /* Ensures it appears on top */
-            display: none; /* Initially hidden */
+            width: 200px; /* Reduced message box size */
+            font-size: 13px; /* Reduced font size */
+            color: #155724;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
         }
-
+        
+        /* Mobile screens (max-width: 768px) */
         @media (max-width: 768px) {
             .register-container {
-                width: 90%;
-                padding: 20px; /* Adjust padding for smaller screens */
+                width: 50%; /* Adjusted width for smaller screens */
+                padding: 20px;
+                background: rgba(255, 255, 255, 0.5); /* Adjusted background transparency */
             }
-            
+        
+            input, select {
+                font-size: 16px; /* Smaller text for smaller screens */
+                padding: 12px 40px 12px 35px; /* Adjust input padding: more padding for icons */
+            }
+        
+            .logo {
+                font-size: 80px; /* Reduced logo size */
+            }
+        
+            .input-container {
+                margin: 10px 0; /* Reduced input margins */
+            }
+        
+            /* Adjust icon position */
+            .input-container i {
+                font-size: 18px; /* Slightly smaller icon */
+                left: 10px; /* Positioned closer to the input edge */
+            }
+        
             button {
-                max-width: 100%;
+                padding: 12px;
+                max-width: 150px; /* Adjusted button size */
+            }
+        
+            .video-background {
+                object-fit: cover; /* Ensure video fits the screen without distortion */
             }
         }
+        
+        /* Very small screens like tablets and small phones (max-width: 480px) */
+        @media (max-width: 480px) {
+            .register-container {
+                width: 100%; /* Adjusted to fit screen */
+                padding: 15px;
+            }
+        
+            input, select {
+                font-size: 14px; /* Smaller font size for smaller devices */
+                padding: 10px 40px 10px 30px; /* Adjust padding: more room for icons */
+            }
+        
+            .logo {
+                font-size: 60px; /* Smaller logo */
+            }
+        
+            /* Adjust icon position for smaller screens */
+            .input-container i {
+                font-size: 16px; /* Further reduced icon size */
+                left: 8px; /* Closer to the edge */
+            }
+        }
+        
+        
     </style>
 
     <script>
@@ -293,7 +343,7 @@
         </form>
 
         <div class="admin-container">
-            <h2>Attendee Access</h2>
+            <h2>Attendee Registration</h2>
             <p>Please have your administrator scan your QR code.</p> 
         </div>
 

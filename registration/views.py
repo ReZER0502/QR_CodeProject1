@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 import qrcode
 from .models import Attendee
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from io import BytesIO
 from datetime import timedelta
@@ -13,21 +12,41 @@ import os
 
 def register(request):
     if request.method == 'POST':
+        name = request.POST['name']
+        email = request.POST['email']
+        department = request.POST['department']
+        sub_department = request.POST['sub_department']
+        
+        # Check for existing attendee with the same name or email
+        existing_attendee = Attendee.objects.filter(name=name).first() or Attendee.objects.filter(email=email).first()
+        
+        if existing_attendee:
+            # Handle the case when the name or email already exists
+            print('The name or email you entered is already registered.')
+            # You might want to render a message to the user instead of just printing
+            return render(request, 'registration/register.html', {'error': 'The name or email you entered is already registered.'})
+
+        # Create a new attendee if no existing one is found
         attendee = Attendee.objects.create(
-            name=request.POST['name'],
-            email=request.POST['email'],
-            department=request.POST['department'],
-            sub_department=request.POST['sub_department'],
+            name=name,
+            email=email,
+            department=department,
+            sub_department=sub_department,
         )
-        attendee.save()
+        
+        # Generate the QR code
         qr_data = f"http://10.0.0.52:8000/registration/mark_attendance/?attendee_id={attendee.id}"
         qrcode_img = qrcode.make(qr_data)
         canvas = BytesIO()
         qrcode_img.save(canvas, format='PNG')
         canvas.seek(0)
         qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.id}.png')
-        attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)  
-        attendee.save() 
+        attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)
+        
+        # Save the attendee instance
+        attendee.save()
+        
+        # Redirect to success page
         return redirect('success', attendee_id=attendee.id)
 
     return render(request, 'registration/register.html')
