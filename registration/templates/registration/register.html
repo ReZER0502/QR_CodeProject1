@@ -176,22 +176,24 @@
             font-size: 10px; /* Reduced font size */
         }
         
-        .message-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .message {
+            margin: 20px;
             padding: 15px;
-            background-color: #d4edda;
-            border: 2px solid #c3e6cb;
-            border-radius: 10px;
-            text-align: center;
-            width: 200px; /* Reduced message box size */
-            font-size: 13px; /* Reduced font size */
-            color: #155724;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
+            border-radius: 5px;
+            color: white;
+            background-color: #d9534f; /* Red for error */
+            display: none; /* Initially hidden */
+            transition: opacity 0.5s ease-out;
+            position: absolute; /* Positioning for centering */
+            top: 50%; /* Center vertically */
+            left: 50%; /* Center horizontally */
+            transform: translate(-50%, -50%); /* Adjust for element size */
+            z-index: 10; /* Ensure it appears above other elements */
+            text-align: center; /* Center text */
+        }
+
+        .fade-out {
+            opacity: 0;
         }
         
         /* Mobile screens (max-width: 768px) */
@@ -254,7 +256,6 @@
             }
         }
         
-        
     </style>
 
     <script>
@@ -296,6 +297,20 @@
             messageText.textContent = message; 
             messageBox.style.display = 'block';
         }
+
+        window.onload = function() {
+            var messageDiv = document.getElementById("message");
+            if (messageDiv.innerHTML.trim() !== "") {
+                messageDiv.style.display = "block";
+                setTimeout(function() {
+                    messageDiv.classList.add("fade-out");
+                    setTimeout(function() {
+                        messageDiv.style.display = "none"; 
+                    }, 500); 
+                }, 3000); 
+            }
+        };
+        
     </script>
 </head>
 
@@ -310,6 +325,7 @@
         <div class="logo">
             <i class="fas fa-qrcode"></i>
         </div>
+
         <form method="POST" action="{% url 'register' %}">
             {% csrf_token %}
             <div class="input-container">
@@ -321,7 +337,7 @@
                 <input type="email" name="email" placeholder="Email" required>
             </div>
             <div class="input-container">
-                <i class="fas fa-address-card"></i>
+                <i class="fas fa-building"></i>
                 <select id="department" name="department" onchange="updateSubDepartment()" required>
                     <option value="">Select Department</option>
                     <option value="IT">IT</option>
@@ -332,7 +348,7 @@
                 </select>
             </div>
             <div class="input-container">
-                <i class="fas fa-address-card"></i>
+                <i class="fas fa-sitemap"></i>
                 <select id="sub_department" name="sub_department" required>
                     <option value="">Select Sub-Department</option>
                 </select>
@@ -347,8 +363,17 @@
             <p>Please have your administrator scan your QR code.</p> 
         </div>
 
+        <div class="message" id="message">
+            {% if messages %}
+                {% for message in messages %}
+                    <div>{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
     </div>
 
 </body>
 
 </html>
+

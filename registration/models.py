@@ -2,6 +2,12 @@ from django.db import models
 import qrcode
 from io import BytesIO
 
+#import 2 input boxes for first name and last name instead of 1 only.
+#email is ok for duplicates. 
+#use other alternatives rather than IP Address for whitelisting etg: email address.
+#Approximately 5-10 admin scanners are only the ones allowed to scan.
+#integrate security measure when trying to log in to website to prevent public registering.
+#Plan for domain
 class Attendee(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)

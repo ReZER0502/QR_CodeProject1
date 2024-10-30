@@ -9,45 +9,44 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from PIL import Image, ImageDraw, ImageFont
 import os
+from django.contrib import messages
 
 def register(request):
     if request.method == 'POST':
-        name = request.POST['name']
-        email = request.POST['email']
-        department = request.POST['department']
-        sub_department = request.POST['sub_department']
-        
-        # Check for existing attendee with the same name or email
-        existing_attendee = Attendee.objects.filter(name=name).first() or Attendee.objects.filter(email=email).first()
-        
-        if existing_attendee:
-            # Handle the case when the name or email already exists
-            print('The name or email you entered is already registered.')
-            # You might want to render a message to the user instead of just printing
-            return render(request, 'registration/register.html', {'error': 'The name or email you entered is already registered.'})
+        try:
+            my_email = Attendee.objects.filter(email=request.POST['email']).first()
+            my_name = Attendee.objects.filter(name=request.POST['name']).first()
 
-        # Create a new attendee if no existing one is found
-        attendee = Attendee.objects.create(
-            name=name,
-            email=email,
-            department=department,
-            sub_department=sub_department,
-        )
-        
-        # Generate the QR code
-        qr_data = f"http://10.0.0.52:8000/registration/mark_attendance/?attendee_id={attendee.id}"
-        qrcode_img = qrcode.make(qr_data)
-        canvas = BytesIO()
-        qrcode_img.save(canvas, format='PNG')
-        canvas.seek(0)
-        qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.id}.png')
-        attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)
-        
-        # Save the attendee instance
-        attendee.save()
-        
-        # Redirect to success page
-        return redirect('success', attendee_id=attendee.id)
+            if my_email:
+                messages.error(request, "This email is already registered.")
+                return render(request, 'registration/register.html')
+
+            if my_name:
+                messages.error(request, "This name is already registered. Please use a different name.")
+                return render(request, 'registration/register.html')
+
+            attendee = Attendee.objects.create(
+                name=request.POST['name'],
+                email=request.POST['email'],
+                department=request.POST['department'],
+                sub_department=request.POST['sub_department'],
+            )
+
+            qr_data = f"http://10.0.0.52:8000/registration/mark_attendance/?attendee_id={attendee.id}"
+            qrcode_img = qrcode.make(qr_data)
+            canvas = BytesIO()
+            qrcode_img.save(canvas, format='PNG')
+            canvas.seek(0)
+            qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.id}.png')
+            attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)
+            attendee.save() 
+            messages.success(request, "Registration Successful!")  
+            return redirect('success', attendee_id=attendee.id)
+
+        except Exception as e:
+            messages.error(request, "An error occurred while registering. Please try again.")
+            print(f"Error: {e}")  
+            return render(request, 'registration/register.html') 
 
     return render(request, 'registration/register.html')
 
@@ -107,7 +106,8 @@ def mark_attendance(request):
 def download_attendee_info(request, attendee_id):
     try:
         attendee = Attendee.objects.get(id=attendee_id)
-        background_path = os.path.join('C:/xampp/htdocs/test/QR_CodeProject1/static/img/my_qr.jpg')  # or .gif if you're using one
+         #Eto yung sa background change natin right after implementing the design 
+        background_path = os.path.join('C:/xampp/htdocs/test/QR_CodeProject1/static/img/my_qr.jpg')
         background = Image.open(background_path)
         image_width = 600
         image_height = 800
