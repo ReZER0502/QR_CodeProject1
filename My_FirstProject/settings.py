@@ -25,9 +25,10 @@ SECRET_KEY = "django-insecure-luj&v0_#m=o4whr1yh-o%#1fp$o=zf0p4*rr7*&@1y(tr#3e2^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '10.0.0.52', '*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','*']
 
 # Application definition
+AUTH_USER_MODEL = "registration.AdminUser"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,7 +55,7 @@ ROOT_URLCONF = "My_FirstProject.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -76,14 +77,13 @@ WSGI_APPLICATION = "My_FirstProject.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'system_logs',  
+        'NAME': 'qr_code',  
         'USER': 'root',  
         'PASSWORD': '',  
         'HOST': 'localhost',  
         'PORT': '3306',  
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -126,3 +126,5 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+BASE_URL = 'http://10.0.0.52:8000'  # or use your domain when deployed

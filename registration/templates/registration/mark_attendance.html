@@ -1,0 +1,17 @@
+<form method="post">
+    {% csrf_token %}
+    <label for="email">Email:</label>
+    <input type="email" name="email" required>
+
+    <label for="password">Password:</label>
+    <input type="password" name="password" required>
+
+    <button type="submit">Login</button>
+
+    {% if error %}
+        <p>{{ error }}</p>
+    {% endif %}
+</form>
+
+<!-- Update this link to point to the admin registration page -->
+<p>Don't have an admin account? <a href="{% url 'register_admin' %}">Register here</a></p>

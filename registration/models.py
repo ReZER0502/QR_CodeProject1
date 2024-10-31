@@ -1,38 +1,47 @@
 from django.db import models
 import qrcode
 from io import BytesIO
-
-#import 2 input boxes for first name and last name instead of 1 only.
-#email is ok for duplicates. 
-#use other alternatives rather than IP Address for whitelisting etg: email address.
-#Approximately 5-10 admin scanners are only the ones allowed to scan.
-#integrate security measure when trying to log in to website to prevent public registering.
-#Plan for domain
+from django.contrib.auth.models import  AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.core.files.base import ContentFile 
 class Attendee(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20, default='N/A')
+    email = models.EmailField(max_length=254, unique=True)
     department = models.CharField(max_length=100)
     is_present = models.BooleanField(default=False)
     present_time = models.DateTimeField(null=True, blank=True)
-    sub_department = models.CharField(max_length=100, blank = True, null = True)
+    sub_department = models.CharField(max_length=100, blank=True, null=True)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.first_name} {self.last_name}"
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        
-        print(f"Attendee ID after saving: {self.id}")
-        
-        if self.id is not None:
-            qr_data = f"http://10.0.0.52:8000/registration/mark_attendance/?attendee_id={self.id}"
-            print(f"Generated QR Code URL: {qr_data}")
 
-            qrcode_img = qrcode.make(qr_data)
-            canvas = BytesIO()
-            qrcode_img.save(canvas, format='PNG')
+class AdminUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
 
-            self.qr_code_image_data = canvas.getvalue()  
-        else:
-            print("Error: Attendee ID is None, QR code will not be generated.")
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class AdminUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=30)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    objects = AdminUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
