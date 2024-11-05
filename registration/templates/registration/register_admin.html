@@ -1,18 +1,147 @@
-<!-- registration/templates/registration/register_admin.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Registration</title>
+    <link rel="icon" href="{% static 'C:/xampp/htdocs/test/FINAL/static/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>I-Scan Admin</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+    
+        .bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+    
+        .content-container {
+            max-height: 70vh; /* Adjusted height */
+            z-index: 1;
+            padding: 25px; /* Reduced padding */
+            width: 300px; /* Reduced width */
+            text-align: left;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            animation: fadeIn 1s ease-in-out;
+            border: 4px solid rgba(0, 0, 0, 0.5);
+        }
+    
+        .content-container:hover {
+            transform: scale(1.02);
+        }
+    
+        h1 {
+            font-size: 1.5rem; /* Reduced font size */
+            margin-bottom: 15px; /* Reduced margin */
+            color: #007bff;
+        }
+    
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            transition: background-color 0.3s;
+            font-size: 0.875rem; /* Smaller button font */
+            padding: 8px; /* Reduced button padding */
+        }
+    
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    
+        p {
+            margin-top: 10px; /* Reduced margin */
+            font-size: 0.875rem; /* Smaller paragraph font */
+        }
+    
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.875rem; /* Smaller link font */
+        }
+    
+        a:hover {
+            text-decoration: underline;
+        }
+    
+        .form-control {
+            border-radius: 0.25rem;  /* Rounded corners for input fields */
+            font-size: 0.875rem; /* Smaller input font */
+            padding: 8px; /* Reduced input padding */
+        }
+    
+        .form-group label {
+            font-weight: bold;
+            color: #333; /* Darker color for labels */
+            font-size: 0.875rem; /* Smaller label font */
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Register as Admin</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Register</button>
-    </form>
-    <p>Already have an account? <a href="{% url 'mark_attendance' %}">Login here</a>.</p>
+    <!-- Background Video -->
+    <video class="bg-video" autoplay muted loop>
+        <source src="{% static 'C:/xampp/htdocs/test/FINAL/static/img/video.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="content-container">
+        <h1 class="text-center">Admin Registry</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.first_name }}
+                {% for error in form.first_name.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.last_name }}
+                {% for error in form.last_name.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password }}
+                {% for error in form.password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.confirm_password }}
+                {% for error in form.confirm_password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+        </form>
+        <p class="text-center">Already have an account? <a href="{% url 'mark_attendance' %}">Login here</a>.</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
+
 </html>

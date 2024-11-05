@@ -1,11 +1,90 @@
-<h1>Admin Request Approvals</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'C:/xampp/htdocs/test/FINAL/static/favicon.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>Admin Dashboard</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
 
-{% if admin_requests %}
-    <ul>
-        {% for request in admin_requests %}
-            <li>{{ request.user.email }} - Approved: {{ request.is_approved }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No admin requests found.</p>
-{% endif %}
+        .bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .content-container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <video class="bg-video" autoplay muted loop>
+        <source src="{% static 'C:/xampp/htdocs/test/FINAL/static/img/video.mp4' %}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="container mt-5 content-container">
+        <h1 class="mb-4">Admin Request Approvals</h1>
+
+        {% if admin_requests %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Approve Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in admin_requests %}
+                        <tr>
+                            <td>{{ request.user.email }}</td>
+                            <td>{{ request.is_approved|yesno:"Approved,Not Approved" }}</td>
+                            <td>
+                                {% if not request.is_approved %}
+                                    <form action="{% url 'approve_admin_request' request.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+                                    <form action="{% url 'reject_admin_request' request.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-success">Approved</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No pending admin requests.</p>
+        {% endif %}
+    </div>
+
+    <footer class="text-center mt-4">
+        <p>&copy; 2024 NATCCO Company</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

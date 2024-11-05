@@ -9,5 +9,6 @@ urlpatterns = [
     path('mark_attendance/', views.mark_attendance, name='mark_attendance'),
     path('download/<int:attendee_id>/', download_attendee_info, name='download_attendee_info'),
     path('admin/register/',views.register_admin, name='register_admin'),
-    path('admin/dashboard/',views.admin_dashboard, name='admin_dashboard')
+    path('admin/dashboard/',views.admin_dashboard, name='admin_dashboard'),
+    path('admin/approve/<int:request_id>/', views.approve_admin_request, name='approve_admin_request')
 ]

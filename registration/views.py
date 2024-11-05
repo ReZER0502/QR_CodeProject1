@@ -18,23 +18,13 @@ from django.conf import settings
 from .models import Attendee, AdminWhitelist, AdminRequest
 import logging
 
-@user_passes_test(lambda u: u.is_superuser)
-def approve_admin(request):
-    pending_requests = AdminRequest.objects.filter(is_approved=False)
-    
+def approve_admin_request(request, request_id):
     if request.method == 'POST':
-        user_id = request.POST.get('user_id')
-        try:
-            admin_request = AdminRequest.objects.get(user_id=user_id)
-            admin_request.is_approved = True  # Mark the request as approved
-            admin_request.user.is_active = True  # Activate the user's account
-            admin_request.user.save()
-            admin_request.save()
-            messages.success(request, f"Admin {admin_request.user.email} approved.")
-        except AdminRequest.DoesNotExist:
-            messages.error(request, "Request not found.")
-
-    return render(request, 'registration/admin_dashboard.html', {'pending_requests': pending_requests})
+        admin_request = get_object_or_404(AdminRequest, id=request_id)
+        admin_request.is_approved = True
+        admin_request.save()
+        messages.success(request, f"Admin request for {admin_request.user.email} has been approved.")
+        return redirect('admin_dashboard')
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -44,21 +34,15 @@ def register_admin(request):
         if form.is_valid():
             email = form.cleaned_data.get('email')
 
-            # Check if the email is in the whitelist
+            # EMAIL WHITELISTING DITO. MEANING ONLY AUTHORIZED EMAILS ARE ALLOWED TO REGISTER
             if not AdminWhitelist.objects.filter(email=email).exists():
                 messages.error(request, "This email is not authorized to register as an admin.")
                 return redirect('register_admin')
-
-            # Save the admin user
             admin_user = form.save()
-            
-            # Check if admin_user is saved
             if admin_user:
                 logging.debug(f"Admin user created with email: {admin_user.email}")
             else:
                 logging.error("Admin user creation failed.")
-            
-            # Create the AdminRequest entry
             try:
                 admin_request = AdminRequest.objects.create(user=admin_user)
                 logging.debug(f"AdminRequest created for user: {admin_user.email}")
@@ -75,7 +59,7 @@ def register_admin(request):
     return render(request, 'registration/register_admin.html', {'form': form})
 
 def admin_dashboard(request):
-    admin_requests = AdminRequest.objects.all()  # Fetch all admin requests
+    admin_requests = AdminRequest.objects.all()  
     return render(request, 'registration/admin_dashboard.html', {'admin_requests': admin_requests})
 
 def register(request):
@@ -83,14 +67,11 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             try:
-                # Check if the email is already registered
                 existing_attendee = Attendee.objects.filter(email=form.cleaned_data['email']).first()
                 if existing_attendee:
                     print(f"Existing attendee found: {existing_attendee.id}, email: {existing_attendee.email}")
                     messages.error(request, "This email is already registered.")
                     return render(request, 'registration/register.html', {'form': form})
-
-                # Create the attendee after validating the form
                 attendee = Attendee.objects.create(
                     first_name=form.cleaned_data['first_name'],
                     last_name=form.cleaned_data['last_name'],
@@ -98,8 +79,6 @@ def register(request):
                     department=form.cleaned_data['department'],
                     sub_department=form.cleaned_data['sub_department'],
                 )
-
-                # Now attendee is defined, you can use it to generate the QR code
                 qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
                 qrcode_img = qrcode.make(qr_data)
                 canvas = BytesIO()
@@ -135,48 +114,60 @@ def mark_attendance(request):
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
-            login(request, user)  
-            
+            login(request, user)
+    
     if request.user.is_authenticated:
-        attendee_id = request.GET.get('attendee_id')
-        if attendee_id:
-            try:
-                attendee = Attendee.objects.get(id=attendee_id)
+        try:
+            admin_request = AdminRequest.objects.get(user=request.user)
+            if not admin_request.is_approved:
+                messages.error(request, "Unauthorized admin!!!!")
+                return render(request, 'registration/mark_attendance.html', {
+                    'error': 'Unauthorized admin!!!!'
+                })
+            attendee_id = request.GET.get('attendee_id')
+            if attendee_id:
+                try:
+                    attendee = Attendee.objects.get(id=attendee_id)
 
-                if attendee.is_present:
+                    if attendee.is_present:
+                        return render(request, 'res.html', {
+                            'success': False,
+                            'message': 'Attendee already marked present!'
+                        })
+                    else:
+                        attendee.is_present = True
+                        # Cubao_NCR-MANILA TIME INTERVAL
+                        attendee.present_time = timezone.now() + timedelta(hours=8)
+                        attendee.save()
+                    attendee_name = f"{attendee.first_name} {attendee.last_name}"
+
+                    return render(request, 'res.html', {
+                        'success': True,
+                        'message': 'Attendance marked successfully!',
+                        'attendee_name': attendee_name
+                    })
+
+                except Attendee.DoesNotExist:
                     return render(request, 'res.html', {
                         'success': False,
-                        'message': 'Attendee already marked present!'
+                        'message': 'Attendee not found.'
                     })
-                else:
-                    attendee.is_present = True
-                    #Cubao_NCR-MANILA TIME INTERVAL
-                    attendee.present_time = timezone.now() + timedelta(hours=8)
-                    attendee.save()
-                attendee_name = f"{attendee.first_name} {attendee.last_name}"
 
-                return render(request, 'res.html', {
-                    'success': True,
-                    'message': 'Attendance marked successfully!',
-                    'attendee_name': attendee_name
-                })
+            return render(request, 'res.html', {
+                'success': False,
+                'message': 'Invalid request.'
+            })
 
-            except Attendee.DoesNotExist:
-                return render(request, 'res.html', {
-                    'success': False,
-                    'message': 'Attendee not found.'
-                })
-
-        return render(request, 'res.html', {
-            'success': False,
-            'message': 'Invalid request.'
-        })
+        except AdminRequest.DoesNotExist:
+            return render(request, 'registration/mark_attendance.html', {
+                'error': 'You need to register as an admin first.'
+            })
 
     return render(request, 'registration/mark_attendance.html', {
         'error': 'Please log in to mark attendance.'
     })
 
-#'C:\Windows\Fonts\ArialNova-Bold.ttf' We can change this
+#'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende kay sir ron.
 
 def download_attendee_info(request, attendee_id):
     try:

@@ -22,12 +22,25 @@ class RegistrationForm(forms.ModelForm):
         return last_name
 
 class AdminUserCreationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput)
-    confirm_password = forms.CharField(widget=forms.PasswordInput, label="Confirm Password")
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+        label='Password'
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}),
+        label='Confirm Password'
+    )
 
     class Meta:
         model = AdminUser  # Use your custom AdminUser model here
         fields = ['email', 'first_name', 'last_name', 'password', 'confirm_password']
+
+        # Optionally add custom widgets for other fields
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+        }
 
     def clean(self):
         cleaned_data = super().clean()
