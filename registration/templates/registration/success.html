@@ -14,15 +14,15 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             color: black;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(240, 240, 240, 1); /* Light gray background for a softer look */
         }
-
+        
         .video-background {
             position: fixed;
             top: 0;
@@ -31,20 +31,23 @@
             height: 100%;
             object-fit: cover;
             z-index: -1;
-            opacity: 0.5;
+            opacity: 0.3; /* Slightly lighter for a softer background */
         }
-
+        
         .success-container {
             z-index: 1;
-            padding: 50px;
-            width: 500px;
+            padding: 20px; /* Increased padding */
+            width: 300px; /* Adjusted width */
+            height: auto; /* Auto height for flexibility */
             text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.6);
-            animation: fadeIn 1s ease-in-out;
+            background: rgba(255, 255, 255, 0.9); /* Slightly transparent white background */
+            border-radius: 15px; /* Rounded corners */
+            border: 2px solid black; /* Black border */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Enhanced shadow for depth */
+            animation: fadeIn 1s ease-in-out; /* Fade-in animation */
         }
-
+        
+        /* Fade-in animation */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -55,44 +58,64 @@
                 transform: translateY(0);
             }
         }
-
+        
         h1 {
-            color: #28a745; /* Success color */
-            font-size: 36px;
+            color: black; /* Black heading color */
+            font-size: 24px; /* Medium font size */
+            margin-bottom: 15px; /* Space below the heading */
         }
-
+        
         img {
-            margin: 20px 0;
-            max-width: 200px; /* Adjust based on your design */
-            height: auto;
+            margin: 10px 0; /* Adjusted margin */
+            max-width: 40%; /* Smaller QR code size */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 10px; /* Rounded corners for images */
+            background-color: black; /* Solid black background for QR code */
+            animation: zoomIn 0.5s; /* Zoom-in effect for the QR code */
         }
-
-        .button-container {
-            margin-top: 20px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #28a745; /* Success color */
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #218838; /* Darker success color */
-        }
-
-        @media (max-width: 768px) {
-            .success-container {
-                width: 90%;
-                padding: 20px;
+        
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
             }
         }
-    </style>
+        
+        .button-container {
+            margin-top: 20px; /* Space above the button */
+            text-align: center; /* Center the button */
+        }
+        
+        button {
+            padding: 12px 24px; /* Adjusted padding for better touch targets */
+            border: none; /* No border for a cleaner look */
+            border-radius: 5px;
+            background-color: black; /* Black button background */
+            color: white; /* White text on button */
+            font-size: 18px; /* Medium font size */
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s; /* Smooth transition for hover effects */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Shadow for buttons */
+        }
+        
+        button:hover {
+            background-color: #555; /* Darker background on hover */
+            transform: scale(1.05); /* Slightly increase size on hover */
+        }
+        
+        @media (max-width: 600px) {
+            .success-container {
+                width: 90%; /* Full width on small screens */
+                height: auto; /* Auto height on small screens */
+                padding: 10px; /* Adjusted padding for small screens */
+            }
+        }
+        
+    </style>    
 </head>
 
 <body>
@@ -103,11 +126,9 @@
 
     <div class="success-container">
         <h1>Registration Successful!</h1>
-        <p><strong>Name:</strong> {{ attendee.first_name }} {{attendee.last_name}}</p>
-        <p><strong>Email:</strong> {{ attendee.email }}</p>
-        <p><strong>Department:</strong> {{ attendee.department}}</p>
+        <p><strong></strong> {{ attendee.first_name }} {{attendee.last_name}}</p>
+        <p><strong></strong> {{ attendee.department}}</p>
 
-        <h2>Your QR Code:</h2>
         {% if attendee.qr_code %}  
             <img src="{{ attendee.qr_code.url }}" alt="QR Code">  
         {% else %}

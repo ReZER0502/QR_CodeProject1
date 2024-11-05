@@ -1,2 +1,11 @@
-<h1>Welcome, Admin!</h1>
-<p>Here, you can view all attendees who attended and didnt attend the event.</p>
+<h1>Admin Request Approvals</h1>
+
+{% if admin_requests %}
+    <ul>
+        {% for request in admin_requests %}
+            <li>{{ request.user.email }} - Approved: {{ request.is_approved }}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No admin requests found.</p>
+{% endif %}

@@ -103,6 +103,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Set the session expiry time in seconds (e.g., 2 hours)
+SESSION_COOKIE_AGE = 3600  # 2 hours (7200 seconds)
+
+# Ensure that the session persists even if the browser is closed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# Optionally enable session save on every request, to keep it active during QR scans
+SESSION_SAVE_EVERY_REQUEST = True
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

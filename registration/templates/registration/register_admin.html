@@ -10,7 +10,7 @@
     <h1>Register as Admin</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }},,
+        {{ form.as_p }}
         <button type="submit">Register</button>
     </form>
     <p>Already have an account? <a href="{% url 'mark_attendance' %}">Login here</a>.</p>

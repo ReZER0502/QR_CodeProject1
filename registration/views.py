@@ -12,26 +12,72 @@ import os
 from django.contrib import messages
 from .forms import RegistrationForm
 from .forms import AdminUserCreationForm
-from django.contrib.auth import authenticate,login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate,login, get_user_model
+from django.contrib.auth.decorators import user_passes_test
 from django.conf import settings
-from .models import Attendee
+from .models import Attendee, AdminWhitelist, AdminRequest
+import logging
+
+@user_passes_test(lambda u: u.is_superuser)
+def approve_admin(request):
+    pending_requests = AdminRequest.objects.filter(is_approved=False)
+    
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        try:
+            admin_request = AdminRequest.objects.get(user_id=user_id)
+            admin_request.is_approved = True  # Mark the request as approved
+            admin_request.user.is_active = True  # Activate the user's account
+            admin_request.user.save()
+            admin_request.save()
+            messages.success(request, f"Admin {admin_request.user.email} approved.")
+        except AdminRequest.DoesNotExist:
+            messages.error(request, "Request not found.")
+
+    return render(request, 'registration/admin_dashboard.html', {'pending_requests': pending_requests})
+
+logging.basicConfig(level=logging.DEBUG)
 
 def register_admin(request):
     if request.method == 'POST':
         form = AdminUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()  # Save the admin user
+            email = form.cleaned_data.get('email')
+
+            # Check if the email is in the whitelist
+            if not AdminWhitelist.objects.filter(email=email).exists():
+                messages.error(request, "This email is not authorized to register as an admin.")
+                return redirect('register_admin')
+
+            # Save the admin user
+            admin_user = form.save()
+            
+            # Check if admin_user is saved
+            if admin_user:
+                logging.debug(f"Admin user created with email: {admin_user.email}")
+            else:
+                logging.error("Admin user creation failed.")
+            
+            # Create the AdminRequest entry
+            try:
+                admin_request = AdminRequest.objects.create(user=admin_user)
+                logging.debug(f"AdminRequest created for user: {admin_user.email}")
+            except Exception as e:
+                logging.error(f"Error creating AdminRequest: {str(e)}")
+            
             messages.success(request, "Admin registered successfully.")
-            return redirect('register_admin')  # Redirect to the login page
+            return redirect('register_admin')
+        else:
+            logging.error(f"Form is invalid: {form.errors}")
     else:
         form = AdminUserCreationForm()
 
     return render(request, 'registration/register_admin.html', {'form': form})
 
 def admin_dashboard(request):
-    return render(request, 'admin_dashboard.html')
-    
+    admin_requests = AdminRequest.objects.all()  # Fetch all admin requests
+    return render(request, 'registration/admin_dashboard.html', {'admin_requests': admin_requests})
+
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -83,58 +129,52 @@ def success(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)
     return render(request, 'registration/success.html', {'attendee': attendee})
 
-#time delta is not indicated
 def mark_attendance(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-
         user = authenticate(request, username=email, password=password)
         if user is not None:
-            login(request, user)
+            login(request, user)  
+            
+    if request.user.is_authenticated:
+        attendee_id = request.GET.get('attendee_id')
+        if attendee_id:
+            try:
+                attendee = Attendee.objects.get(id=attendee_id)
 
-            attendee_id = request.GET.get('attendee_id')
-            if attendee_id:
-                try:
-                    attendee = Attendee.objects.get(id=attendee_id)
-
-                    if attendee.is_present:
-                        return render(request, 'res.html', {
-                            'success': False,
-                            'message': 'Attendee already marked present!'
-                        })
-                    else:
-                        attendee.is_present = True
-                        attendee.present_time = timezone.now()
-                        attendee.save()
-
-                    # Use first_name and last_name instead of name
-                    attendee_name = f"{attendee.first_name} {attendee.last_name}"
-
-                    return render(request, 'res.html', {
-                        'success': True,
-                        'message': 'Attendance marked successfully!',
-                        'attendee_name': attendee_name  # Corrected line
-                    })
-
-                except Attendee.DoesNotExist:
+                if attendee.is_present:
                     return render(request, 'res.html', {
                         'success': False,
-                        'message': 'Attendee not found.'
+                        'message': 'Attendee already marked present!'
                     })
+                else:
+                    attendee.is_present = True
+                    #Cubao_NCR-MANILA TIME INTERVAL
+                    attendee.present_time = timezone.now() + timedelta(hours=8)
+                    attendee.save()
+                attendee_name = f"{attendee.first_name} {attendee.last_name}"
 
-            return render(request, 'res.html', {
-                'success': False,
-                'message': 'Invalid request.'
-            })
+                return render(request, 'res.html', {
+                    'success': True,
+                    'message': 'Attendance marked successfully!',
+                    'attendee_name': attendee_name
+                })
 
-        else:
-            return render(request, 'registration/mark_attendance.html', {
-                'error': 'Invalid credentials. Please try again.'
-            })
+            except Attendee.DoesNotExist:
+                return render(request, 'res.html', {
+                    'success': False,
+                    'message': 'Attendee not found.'
+                })
 
-    return render(request, 'registration/mark_attendance.html')
+        return render(request, 'res.html', {
+            'success': False,
+            'message': 'Invalid request.'
+        })
 
+    return render(request, 'registration/mark_attendance.html', {
+        'error': 'Please log in to mark attendance.'
+    })
 
 #'C:\Windows\Fonts\ArialNova-Bold.ttf' We can change this
 
@@ -142,7 +182,7 @@ def download_attendee_info(request, attendee_id):
     try:
         attendee = Attendee.objects.get(id=attendee_id)
          #Eto yung sa background. Change natin right after implementing the design 
-        background_path = os.path.join('C:/xampp/htdocs/test/QR_CodeProject1/static/img/my_qr.jpg')
+        background_path = os.path.join('C:/xampp/htdocs/test/FINAL/static/img/my_qr.jpg')
         background = Image.open(background_path)
         image_width = 600
         image_height = 800
@@ -152,11 +192,7 @@ def download_attendee_info(request, attendee_id):
         draw = ImageDraw.Draw(overlay)
 
         font_path = os.path.join('C:\Windows\Fonts\ArialNova-Bold.ttf')
-        font = ImageFont.truetype(font_path, 36)
         small_font = ImageFont.truetype(font_path, 24)
-
-        first_name = f"Name: {attendee.first_name}"
-        last_name = attendee.last_name
         department_text = f"Department: {attendee.department}"
         sub_department_text = f"Sub-Department: {attendee.sub_department}"
         
