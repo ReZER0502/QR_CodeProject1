@@ -128,7 +128,7 @@
         <h1>Registration Successful!</h1>
         <p><strong></strong> {{ attendee.first_name }} {{attendee.last_name}}</p>
         <p><strong></strong> {{ attendee.department}}</p>
-
+        
         {% if attendee.qr_code %}  
             <img src="{{ attendee.qr_code.url }}" alt="QR Code">  
         {% else %}

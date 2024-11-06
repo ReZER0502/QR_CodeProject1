@@ -12,11 +12,14 @@ import os
 from django.contrib import messages
 from .forms import RegistrationForm
 from .forms import AdminUserCreationForm
-from django.contrib.auth import authenticate,login, get_user_model
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth import authenticate,login
+#hindi sya nagamit..from django.contrib.auth.decorators import user_passes_test
 from django.conf import settings
 from .models import Attendee, AdminWhitelist, AdminRequest
 import logging
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 def approve_admin_request(request, request_id):
     if request.method == 'POST':
@@ -27,14 +30,13 @@ def approve_admin_request(request, request_id):
         return redirect('admin_dashboard')
 
 logging.basicConfig(level=logging.DEBUG)
-
 def register_admin(request):
     if request.method == 'POST':
         form = AdminUserCreationForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
 
-            # EMAIL WHITELISTING DITO. MEANING ONLY AUTHORIZED EMAILS ARE ALLOWED TO REGISTER
+            # EMAIL WHITELISTING DITO. MEANING ONLY AUTHORIZED EMAILS ARE ALLOWED TO REGISTER PAG GUSTO MAG PA ADMIN
             if not AdminWhitelist.objects.filter(email=email).exists():
                 messages.error(request, "This email is not authorized to register as an admin.")
                 return redirect('register_admin')
@@ -69,9 +71,9 @@ def register(request):
             try:
                 existing_attendee = Attendee.objects.filter(email=form.cleaned_data['email']).first()
                 if existing_attendee:
-                    print(f"Existing attendee found: {existing_attendee.id}, email: {existing_attendee.email}")
                     messages.error(request, "This email is already registered.")
                     return render(request, 'registration/register.html', {'form': form})
+                
                 attendee = Attendee.objects.create(
                     first_name=form.cleaned_data['first_name'],
                     last_name=form.cleaned_data['last_name'],
@@ -79,6 +81,8 @@ def register(request):
                     department=form.cleaned_data['department'],
                     sub_department=form.cleaned_data['sub_department'],
                 )
+                
+                # Generate QR code
                 qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
                 qrcode_img = qrcode.make(qr_data)
                 canvas = BytesIO()
@@ -87,10 +91,23 @@ def register(request):
                 qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
                 attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)
                 attendee.save()
-
-                messages.success(request, "Registration Successful!")  
+                
+                # Prepare email
+                subject = 'Your Registration QR Code'
+                html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
+                plain_message = strip_tags(html_message)
+                email = EmailMessage(
+                    subject,
+                    plain_message,
+                    to=[attendee.email],
+                )
+                email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
+                
+                email.send()
+                
+                messages.success(request, "Registration successful! QR code sent to your email.")
                 return redirect('success', attendee_id=attendee.id)
-
+            
             except Exception as e:
                 messages.error(request, "An error occurred while registering. Please try again.")
                 print(f"Error: {e}")
