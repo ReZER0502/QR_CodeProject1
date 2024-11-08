@@ -44,15 +44,38 @@
         }
         
         .register-container {
-            max-height: 70vh; /* Adjusted height */
+            max-height: 70vh;
             z-index: 1;
-            padding: 25px; /* Reduced padding */
-            width: 300px; /* Reduced width */
+            padding: 25px;
+            width: 300px;
             text-align: left;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 15px;
-            animation: fadeIn 1s ease-in-out;
+            animation: containerFadeIn 1s ease-in-out; /* Applied new fade-in animation */
             border: 4px solid rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        
+        /* Adjust the shake and fade-out animation for error messages */
+        @keyframes shake {
+            0% { transform: translate(0); }
+            25% { transform: translate(-5px, 0); }
+            50% { transform: translate(5px, 0); }
+            75% { transform: translate(-5px, 0); }
+            100% { transform: translate(0); }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        .fade-out {
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        .fade-out.hidden {
+            opacity: 0;
         }
         
         @keyframes fadeIn {
@@ -70,17 +93,29 @@
         .logo {
             display: block;
             margin: 0 auto;
-            font-size: 60px; /* Further reduced logo size */
+            font-size: 60px;
             color: black;
             text-align: center;
             border-radius: 50%;
-            padding: 8px; /* Reduced padding */
+            padding: 8px;
             background: rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s;
+            /* Removed transition to prevent hover scaling effect */
         }
         
-        .logo:hover {
-            transform: scale(1.1);
+        /* New animation for the container */
+        @keyframes containerFadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         
         .input-container {
@@ -114,6 +149,7 @@
         .qr-code {
             text-align: center;
             margin-top: 7px; /* Adjusted margin */
+            
         }
         
         input:focus, select:focus {
@@ -155,7 +191,7 @@
         }
         
         button:hover {
-            background-color: #feb47b;
+            background-color: transparent;
             transform: translateY(-3px);
         }
         

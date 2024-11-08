@@ -6,20 +6,43 @@ from django.shortcuts import get_object_or_404
 from io import BytesIO
 from datetime import timedelta
 from django.core.files.base import ContentFile
-from django.http import HttpResponse
-from PIL import Image, ImageDraw, ImageFont
-import os
+from django.http import HttpResponse, HttpResponseForbidden
+from PIL import Image
 from django.contrib import messages
 from .forms import RegistrationForm
 from .forms import AdminUserCreationForm
 from django.contrib.auth import authenticate,login
-#hindi sya nagamit..from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from .models import Attendee, AdminWhitelist, AdminRequest
 import logging
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
+from django.http import HttpResponseForbidden
+from .forms import AdminWhitelistForm
+from .models import AdminWhitelist, AdminRequest
+
+def admin_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Check if the email is in the whitelist and approved
+        try:
+            admin = AdminWhitelist.objects.get(email=email, is_approved=True)
+        except AdminWhitelist.DoesNotExist:
+            return render(request, 'registration/login.html', {'error': 'This email is not whitelisted or approved.'})
+
+        # Authenticate the user
+        user = authenticate(request, username=email, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('admin_dashboard')  # Redirect to admin dashboard
+        else:
+            return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
+
+    return render(request, 'registration/login.html')
 
 def approve_admin_request(request, request_id):
     if request.method == 'POST':
@@ -60,10 +83,35 @@ def register_admin(request):
 
     return render(request, 'registration/register_admin.html', {'form': form})
 
+@login_required
 def admin_dashboard(request):
-    admin_requests = AdminRequest.objects.all()  
-    return render(request, 'registration/admin_dashboard.html', {'admin_requests': admin_requests})
+    if AdminWhitelist.objects.filter(email=request.user.email, is_approved=True).exists():
+        # Handle the form submission for adding a whitelisted email
+        if request.method == 'POST':
+            form = AdminWhitelistForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data.get('email')
 
+                # Check if the email is already whitelisted
+                if AdminWhitelist.objects.filter(email=email).exists():
+                    form.add_error('email', 'This email is already whitelisted.')
+                else:
+                    # Automatically approve the whitelisted email
+                    AdminWhitelist.objects.create(email=email, is_approved=True)
+                    return redirect('admin_dashboard')
+        else:
+            form = AdminWhitelistForm()
+
+        # Fetch pending admin requests (this is the original logic)
+        admin_requests = AdminRequest.objects.filter(is_approved=False)
+        return render(request, 'registration/admin_dashboard.html', {
+            'admin_requests': admin_requests,
+            'form': form
+        })
+    else:
+        return HttpResponseForbidden('You do not have permission to access this page.')
+
+#register for attendees
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -73,7 +121,8 @@ def register(request):
                 if existing_attendee:
                     messages.error(request, "This email is already registered.")
                     return render(request, 'registration/register.html', {'form': form})
-                
+
+                # Create the attendee record
                 attendee = Attendee.objects.create(
                     first_name=form.cleaned_data['first_name'],
                     last_name=form.cleaned_data['last_name'],
@@ -85,14 +134,38 @@ def register(request):
                 # Generate QR code
                 qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
                 qrcode_img = qrcode.make(qr_data)
+
+                # Convert QR code to RGBA to avoid mode conflicts
+                qrcode_img = qrcode_img.convert("RGBA")
+
+                # Load the background image
+                background = Image.open('C:/xampp/htdocs/test/FINAL/static/img/my_template.jpg')
+
+                # Ensure background is also in RGBA mode
+                background = background.convert("RGBA")
+
+                # Resize the QR code to fit the background (adjust sizes as needed)
+                qrcode_img = qrcode_img.resize((700, 700))
+                background_width, background_height = background.size
+                qr_width, qr_height = qrcode_img.size
+
+                # Calculate position to center the QR code
+                position = ((background_width - qr_width) // 2, (background_height - qr_height) // 2)
+
+                # Paste the QR code onto the background image (with transparency)
+                background.paste(qrcode_img, position, qrcode_img)
+
+                # Save the final image to a BytesIO object
                 canvas = BytesIO()
-                qrcode_img.save(canvas, format='PNG')
+                background.save(canvas, format='PNG')
                 canvas.seek(0)
                 qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
+
+                # Save QR code to attendee record
                 attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)
                 attendee.save()
-                
-                # Prepare email
+
+                # Prepare and send the email with the attached QR code
                 subject = 'Your Registration QR Code'
                 html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
                 plain_message = strip_tags(html_message)
@@ -102,24 +175,20 @@ def register(request):
                     to=[attendee.email],
                 )
                 email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
-                
+
                 email.send()
-                
+
                 messages.success(request, "Registration successful! QR code sent to your email.")
                 return redirect('success', attendee_id=attendee.id)
-            
+
             except Exception as e:
                 messages.error(request, "An error occurred while registering. Please try again.")
                 print(f"Error: {e}")
                 return render(request, 'registration/register.html', {'form': form})
-
     else:
         form = RegistrationForm()
 
     return render(request, 'registration/register.html', {'form': form})
-
-def register_success(request):
-    return render(request, 'registration/regiter_success.html')
 
 def success(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)
@@ -186,48 +255,12 @@ def mark_attendance(request):
 
 #'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende kay sir ron.
 
-def download_attendee_info(request, attendee_id):
-    try:
-        attendee = Attendee.objects.get(id=attendee_id)
-         #Eto yung sa background. Change natin right after implementing the design 
-        background_path = os.path.join('C:/xampp/htdocs/test/FINAL/static/img/my_qr.jpg')
-        background = Image.open(background_path)
-        image_width = 600
-        image_height = 800
-        background = background.resize((image_width, image_height))
-        
-        overlay = Image.new('RGBA', (image_width, image_height), (255, 255, 255, 0))  
-        draw = ImageDraw.Draw(overlay)
-
-        font_path = os.path.join('C:\Windows\Fonts\ArialNova-Bold.ttf')
-        small_font = ImageFont.truetype(font_path, 24)
-        department_text = f"Department: {attendee.department}"
-        sub_department_text = f"Sub-Department: {attendee.sub_department}"
-        
-        name_position = (50, 100)
-        department_position = (50, 200)
-        sub_department_position = (50, 250)
-        
-        full_name = f"Name: {attendee.first_name} {attendee.last_name}"
-        draw.text(name_position, full_name, font=small_font, fill='black')
-        draw.text(department_position, department_text, font=small_font, fill='black')
-        draw.text(sub_department_position, sub_department_text, font=small_font, fill='black')
-        line_position = (50, 300, image_width - 50, 300)
-        draw.line(line_position, fill="gray", width=3)
-        qr_code_position = (150, 350)  
-        qr_code_image = Image.open(attendee.qr_code.path)
-        qr_code_image = qr_code_image.resize((300, 300))  
-        overlay.paste(qr_code_image, qr_code_position, qr_code_image.convert('RGBA'))
-        final_image = Image.alpha_composite(background.convert('RGBA'), overlay)
-
-        response = HttpResponse(content_type='image/png')
-        final_image = final_image.convert('RGB')  
-        final_image.save(response, 'PNG')
-        response['Content-Disposition'] = f'attachment; filename="{attendee.first_name}_{attendee.last_name}_info.png"'
-
+def download_qr(request, attendee_id):
+    attendee = get_object_or_404(Attendee, id=attendee_id)
+    if not attendee.qr_code:
+        return HttpResponse("QR code not found.", status=404)
+    qr_code_file_path = attendee.qr_code.path
+    with open(qr_code_file_path, 'rb') as f:
+        response = HttpResponse(f.read(), content_type="image/png")
+        response['Content-Disposition'] = f'attachment; filename="qr_code_{attendee.first_name}_{attendee.last_name}.png"'
         return response
-
-    except Attendee.DoesNotExist:
-        return HttpResponse("Attendee not found", status=404)
-    except Exception as e:
-        return HttpResponse(f"Error: {str(e)}", status=500)

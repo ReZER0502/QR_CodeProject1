@@ -31,15 +31,27 @@
             border-radius: 10px;
             margin-top: 50px;
         }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
     <video class="bg-video" autoplay muted loop>
-        <source src="{% static 'C:/xampp/htdocs/test/FINAL/static/img/video.mp4' %}" type="video/mp4">
+        <source src="{% static 'img/video.mp4' %}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
     <div class="container mt-5 content-container">
+        <!-- Logout Button -->
+        <form action="{% url 'logout' %}" method="post" class="logout-btn">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Log out</button>
+        </form>
+
         <h1 class="mb-4">Admin Request Approvals</h1>
 
         {% if admin_requests %}
@@ -62,10 +74,6 @@
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-success btn-sm">Approve</button>
                                     </form>
-                                    <form action="{% url 'reject_admin_request' request.id %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                                    </form>
                                 {% else %}
                                     <span class="text-success">Approved</span>
                                 {% endif %}
@@ -76,6 +84,23 @@
             </table>
         {% else %}
             <p>No pending admin requests.</p>
+        {% endif %}
+
+        <!-- Add Whitelisted Email Form -->
+        <h2 class="mt-5">Add a Whitelisted Email</h2>
+        <form method="post" action="{% url 'admin_dashboard' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email">Email to Whitelist</label>
+                {{ form.email }}
+            </div>
+            <button type="submit" class="btn btn-primary">Add to Whitelist</button>
+        </form>
+
+        {% if form.errors %}
+            <div class="alert alert-danger mt-3">
+                {{ form.errors }}
+            </div>
         {% endif %}
     </div>
 

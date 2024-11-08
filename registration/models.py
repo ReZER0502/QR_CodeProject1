@@ -6,6 +6,7 @@ from django.conf import settings
 class AdminWhitelist(models.Model):
     email = models.EmailField(unique=True)
     added_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
     
     def __str__(self):
         return self.email

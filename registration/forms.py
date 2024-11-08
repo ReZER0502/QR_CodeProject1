@@ -2,8 +2,10 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
-from .models import Attendee, AdminUser
+from .models import Attendee, AdminUser, AdminWhitelist
 
+class AddWhitelistForm(forms.Form):
+    email = forms.EmailField(label="Email to Whitelist", max_length=100)
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = Attendee  
@@ -54,7 +56,15 @@ class AdminUserCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])  # Hash the password
+        user.set_password(self.cleaned_data["password"])  # Hash 
         if commit:
             user.save()
         return user
+    
+class AdminWhitelistForm(forms.ModelForm):
+    class Meta:
+        model = AdminWhitelist
+        fields = ['email']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email to whitelist'})
+        }
