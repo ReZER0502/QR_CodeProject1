@@ -3,9 +3,33 @@ from django import forms
 from django.core.exceptions import ValidationError
 import re
 from .models import Attendee, AdminUser, AdminWhitelist
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import Attendee, AdminUser, AdminWhitelist
 
-class AddWhitelistForm(forms.Form):
-    email = forms.EmailField(label="Email to Whitelist", max_length=100)
+class AdminWhitelistForm(forms.ModelForm):
+    class Meta:
+        model = AdminWhitelist
+        fields = ['email']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email to whitelist'})
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Check if the email already exists in the whitelist
+        if AdminWhitelist.objects.filter(email=email).exists():
+            raise ValidationError("This email is already whitelisted.")
+        return email
+
+    def save(self, commit=True):
+        # Save the email into the whitelist table
+        admin_email = super().save(commit=False)
+        if commit:
+            admin_email.save()  # Save the whitelist entry
+        return admin_email
+
+
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = Attendee  
@@ -23,6 +47,7 @@ class RegistrationForm(forms.ModelForm):
             raise ValidationError('Last Name not applicable.')
         return last_name
 
+
 class AdminUserCreationForm(forms.ModelForm):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
@@ -34,10 +59,8 @@ class AdminUserCreationForm(forms.ModelForm):
     )
 
     class Meta:
-        model = AdminUser  # Use your custom AdminUser model here
+        model = AdminUser
         fields = ['email', 'first_name', 'last_name', 'password', 'confirm_password']
-
-        # Optionally add custom widgets for other fields
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
@@ -51,20 +74,11 @@ class AdminUserCreationForm(forms.ModelForm):
 
         if password and confirm_password and password != confirm_password:
             raise forms.ValidationError("Passwords do not match.")
-
         return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])  # Hash 
+        user.set_password(self.cleaned_data["password"])  # Hash password
         if commit:
             user.save()
         return user
-    
-class AdminWhitelistForm(forms.ModelForm):
-    class Meta:
-        model = AdminWhitelist
-        fields = ['email']
-        widgets = {
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Enter email to whitelist'})
-        }

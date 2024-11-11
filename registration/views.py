@@ -28,6 +28,17 @@ def admin_login(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
+        # Permanent admin bypass check
+        permanent_admin_email = "gcagbayani@natcco.coop"  # Permanent admin email
+        if email == permanent_admin_email:
+            # Authenticate directly without checking the whitelist for the permanent admin
+            user = authenticate(request, username=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('admin_dashboard')  # Redirect to admin dashboard
+            else:
+                return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
+
         # Check if the email is in the whitelist and approved
         try:
             admin = AdminWhitelist.objects.get(email=email, is_approved=True)
@@ -85,31 +96,60 @@ def register_admin(request):
 
 @login_required
 def admin_dashboard(request):
-    if AdminWhitelist.objects.filter(email=request.user.email, is_approved=True).exists():
-        # Handle the form submission for adding a whitelisted email
+    permanent_admin_email = "gcagbayani@natcco.coop"
+    
+    # Allow the permanent admin to bypass whitelist checks
+    if request.user.email == permanent_admin_email:
         if request.method == 'POST':
             form = AdminWhitelistForm(request.POST)
             if form.is_valid():
                 email = form.cleaned_data.get('email')
-
+                
                 # Check if the email is already whitelisted
                 if AdminWhitelist.objects.filter(email=email).exists():
                     form.add_error('email', 'This email is already whitelisted.')
                 else:
-                    # Automatically approve the whitelisted email
-                    AdminWhitelist.objects.create(email=email, is_approved=True)
-                    return redirect('admin_dashboard')
+                    # Allow permanent admin to add emails to the whitelist
+                    new_admin = form.save()
+                    messages.success(request, f"Email {email} has been whitelisted successfully.")
+                    return redirect('admin_dashboard')  # Redirect to prevent resubmission of form
         else:
             form = AdminWhitelistForm()
 
-        # Fetch pending admin requests (this is the original logic)
         admin_requests = AdminRequest.objects.filter(is_approved=False)
         return render(request, 'registration/admin_dashboard.html', {
             'admin_requests': admin_requests,
             'form': form
         })
+
+    # Check for regular admin users
+    elif AdminWhitelist.objects.filter(email=request.user.email, is_approved=True).exists():
+        if request.method == 'POST':
+            form = AdminWhitelistForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data.get('email')
+                if AdminWhitelist.objects.filter(email=email).exists():
+                    form.add_error('email', 'This email is already whitelisted.')
+                else:
+                    new_admin = form.save()
+                    messages.success(request, f"Email: {email} has been whitelisted successfully.")
+                    return redirect('admin_dashboard') 
+        else:
+            form = AdminWhitelistForm()
+
+        admin_requests = AdminRequest.objects.filter(is_approved=False)
+        return render(request, 'registration/admin_dashboard.html', {
+            'admin_requests': admin_requests,
+            'form': form
+        })
+    
     else:
         return HttpResponseForbidden('You do not have permission to access this page.')
+
+
+def edit_user_profile(request):
+    if request.user.username == "permanentadmin":
+        return HttpResponseForbidden("You cannot modify the permanent admin user.")
 
 #register for attendees
 def register(request):
@@ -131,7 +171,7 @@ def register(request):
                     sub_department=form.cleaned_data['sub_department'],
                 )
                 
-                # Generate QR code
+                # Generate QR code 
                 qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
                 qrcode_img = qrcode.make(qr_data)
 
@@ -195,14 +235,22 @@ def success(request, attendee_id):
     return render(request, 'registration/success.html', {'attendee': attendee})
 
 def mark_attendance(request):
+    # Handle login if a user is not logged in
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-    
+
     if request.user.is_authenticated:
+        # Check if the logged-in user is the permanent admin
+        permanent_admin_email = "gcagbayani@natcco.coop"  # Permanent admin email
+        if request.user.email == permanent_admin_email:
+            # Skip approval checks for the permanent admin
+            return handle_attendance_logic(request)
+
+        # Check if the user is an approved admin
         try:
             admin_request = AdminRequest.objects.get(user=request.user)
             if not admin_request.is_approved:
@@ -210,39 +258,7 @@ def mark_attendance(request):
                 return render(request, 'registration/mark_attendance.html', {
                     'error': 'Unauthorized admin!!!!'
                 })
-            attendee_id = request.GET.get('attendee_id')
-            if attendee_id:
-                try:
-                    attendee = Attendee.objects.get(id=attendee_id)
-
-                    if attendee.is_present:
-                        return render(request, 'res.html', {
-                            'success': False,
-                            'message': 'Attendee already marked present!'
-                        })
-                    else:
-                        attendee.is_present = True
-                        # Cubao_NCR-MANILA TIME INTERVAL
-                        attendee.present_time = timezone.now() + timedelta(hours=8)
-                        attendee.save()
-                    attendee_name = f"{attendee.first_name} {attendee.last_name}"
-
-                    return render(request, 'res.html', {
-                        'success': True,
-                        'message': 'Attendance marked successfully!',
-                        'attendee_name': attendee_name
-                    })
-
-                except Attendee.DoesNotExist:
-                    return render(request, 'res.html', {
-                        'success': False,
-                        'message': 'Attendee not found.'
-                    })
-
-            return render(request, 'res.html', {
-                'success': False,
-                'message': 'Invalid request.'
-            })
+            return handle_attendance_logic(request)
 
         except AdminRequest.DoesNotExist:
             return render(request, 'registration/mark_attendance.html', {
@@ -252,6 +268,44 @@ def mark_attendance(request):
     return render(request, 'registration/mark_attendance.html', {
         'error': 'Please log in to mark attendance.'
     })
+
+
+def handle_attendance_logic(request):
+    # Process the attendance logic
+    attendee_id = request.GET.get('attendee_id')
+    if attendee_id:
+        try:
+            attendee = Attendee.objects.get(id=attendee_id)
+
+            if attendee.is_present:
+                return render(request, 'res.html', {
+                    'success': False,
+                    'message': 'Attendee already marked present!'
+                })
+            else:
+                # Mark the attendee as present
+                attendee.is_present = True
+                attendee.present_time = timezone.now() + timedelta(hours=8)  # Adjust time zone as needed
+                attendee.save()
+            
+            attendee_name = f"{attendee.first_name} {attendee.last_name}"
+            return render(request, 'res.html', {
+                'success': True,
+                'message': 'Attendance marked successfully!',
+                'attendee_name': attendee_name
+            })
+
+        except Attendee.DoesNotExist:
+            return render(request, 'res.html', {
+                'success': False,
+                'message': 'Attendee not found.'
+            })
+
+    return render(request, 'res.html', {
+        'success': False,
+        'message': 'Invalid request.'
+    })
+
 
 #'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende kay sir ron.
 
