@@ -4,133 +4,310 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <title>Admin Dashboard</title>
     <style>
+        /* General Body and Background */
         body, html {
             height: 100%;
             margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #fff;
         }
 
-        .bg-video {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -1;
-        }
-
+        /* Main Content Container */
         .content-container {
             position: relative;
             z-index: 1;
-            background-color: rgba(255, 255, 255, 0.85);
-            padding: 20px;
+            background-color: #1f1f1f;
+            padding: 40px;
             border-radius: 10px;
-            margin-top: 50px;
+            margin-top: 30px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            max-width: 1200px;
+        }
+
+        .content-container h1 {
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        /* Section Flex Layout */
+        .section-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Section Box Styling */
+        .section-box {
+            flex: 1;
+            background-color: #2c2c2c;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #444;
+        }
+
+        .section-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Section Title */
+        .section-box h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Table Styling */
+        .table th, .table td {
+            text-align: center;
+            color: #ddd;
+        }
+
+        /* Buttons */
+        .btn {
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 5px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+            transform: scale(1.05);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            transform: scale(1.05);
+        }
+
+        /* Success and Error Alerts */
+        .alert-container {
+            display: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease, visibility 1s ease;
+            margin-top: 20px;
+        }
+
+        .alert-container.show {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Success and Error Alerts */
+        .alert-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .alert-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        /* Form Styling */
+        .form-group label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #bbb;
+        }
+
+        .form-group input {
+            border-radius: 8px;
+            border: 1px solid #444;
+            padding: 10px;
+            font-size: 14px;
+            color: #ddd;
+            background-color: #333;
+        }
+
+        /* Footer Styling */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            background-color: #1f1f1f;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        footer p {
+            color: #bbb;
+            font-size: 14px;
+        }
+
+        /* Spinner for Loading */
+        .spinner-border {
+            width: 20px;
+            height: 20px;
+            display: none;
         }
 
         .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        /* Add Animation */
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
         }
     </style>
 </head>
 <body>
-    <video class="bg-video" autoplay muted loop>
-        <source src="{% static 'img/video.mp4' %}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
 
-    <div class="container mt-5 content-container">
-        <!-- Logout Button -->
-        <form action="{% url 'logout' %}" method="post" class="logout-btn">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Log out</button>
-        </form>
+    <!-- Main Content Container -->
+    <div class="content-container fade-in">
+        <h1>Admin Dashboard</h1>
 
-        <h1 class="mb-4">Admin Request Approvals</h1>
-
-        {% if admin_requests %}
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Approve Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for request in admin_requests %}
-                        <tr>
-                            <td>{{ request.user.email }}</td>
-                            <td>{{ request.is_approved|yesno:"Approved,Not Approved" }}</td>
-                            <td>
-                                {% if not request.is_approved %}
-                                    <form action="{% url 'approve_admin_request' request.id %}" method="post" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                    </form>
-                                {% else %}
-                                    <span class="text-success">Approved</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No pending admin requests.</p>
-        {% endif %}
-
-        <!-- Add Whitelisted Email Form -->
-        <h2 class="mt-5">Add a Whitelisted Email</h2>
-        <form method="post" action="{% url 'admin_dashboard' %}">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="email">Email to Whitelist</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+        <!-- Main Section -->
+        <div class="section-container">
+            <!-- Admin Request Approvals Section -->
+            <div class="section-box">
+                <h2><i class="fas fa-user-shield"></i> Admin Request Approvals</h2>
+                {% if admin_requests %}
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Approve Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in admin_requests %}
+                                <tr>
+                                    <td>{{ request.user.email }}</td>
+                                    <td>{{ request.is_approved|yesno:"Approved,Not Approved" }}</td>
+                                    <td>
+                                        {% if not request.is_approved %}
+                                            <form action="{% url 'approve_admin_request' request.id %}" method="post" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-success btn-sm">
+                                                    Approve
+                                                    <span class="spinner-border spinner-border-sm" id="spinner-{{ request.id }}"></span>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="text-success">Approved</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No pending admin requests.</p>
+                {% endif %}
             </div>
-            <button type="submit" class="btn btn-primary">Add to Whitelist</button>
-        </form>
 
-        {% if messages %}
-            <div class="alert-container">
+            <!-- Whitelisted Email Section -->
+            <div class="section-box">
+                <h2><i class="fas fa-envelope"></i> Add a Whitelisted Email</h2>
+                <form method="post" action="{% url 'admin_dashboard' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="email">Email to Whitelist</label>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to Whitelist</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success Message Container -->
+        <div id="success-message" class="alert-container">
+            {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-success">
                         {{ message }}
                     </div>
                 {% endfor %}
-            </div>
-        {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Logout Button -->
+        <div class="logout-btn">
+            <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Log out</button>
+            </form>
+        </div>
 
         {% if form.errors %}
             <div class="alert alert-danger mt-3">
                 {{ form.errors }}
             </div>
         {% endif %}
+    </div>
 
-    <footer class="text-center mt-4">
+    <!-- Footer -->
+    <footer>
         <p>&copy; 2024 NATCCO Company</p>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Check if the success message exists
+        // Show success message fade-in and fade-out
         const successMessage = document.getElementById('success-message');
         if (successMessage) {
-          // Hide the message after 3 seconds
-          setTimeout(function() {
-            successMessage.style.display = 'none';
-          }, 3000);  // 3000 milliseconds = 3 seconds
+            successMessage.classList.add('show');
+            setTimeout(function() {
+                successMessage.classList.remove('show');  // Fade-out
+            }, 3000);
         }
-      </script>
-      
+
+        // Show spinner on button click for approval
+        const approveButtons = document.querySelectorAll('form button[type="submit"]');
+        approveButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const spinner = button.querySelector('.spinner-border');
+                spinner.style.display = 'inline-block';
+            });
+        });
+    </script>
+
 </body>
 </html>

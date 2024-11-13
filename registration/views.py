@@ -27,29 +27,24 @@ def admin_login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        #hardcoded gamit yung hashmap para di madelete...
+        permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  
 
-        # Permanent admin bypass check
-        permanent_admin_email = "gcagbayani@natcco.coop"  # Permanent admin email
-        if email == permanent_admin_email:
-            # Authenticate directly without checking the whitelist for the permanent admin
+        if email in permanent_admin_emails:
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('admin_dashboard')  # Redirect to admin dashboard
+                return redirect('admin_dashboard')  
             else:
                 return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
-
-        # Check if the email is in the whitelist and approved
         try:
             admin = AdminWhitelist.objects.get(email=email, is_approved=True)
         except AdminWhitelist.DoesNotExist:
             return render(request, 'registration/login.html', {'error': 'This email is not whitelisted or approved.'})
-
-        # Authenticate the user
         user = authenticate(request, username=email, password=password)
         if user is not None:
             login(request, user)
-            return redirect('admin_dashboard')  # Redirect to admin dashboard
+            return redirect('admin_dashboard') 
         else:
             return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
 
@@ -96,10 +91,9 @@ def register_admin(request):
 
 @login_required
 def admin_dashboard(request):
-    permanent_admin_email = "gcagbayani@natcco.coop"
-    
+    permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  
     # Allow the permanent admin to bypass whitelist checks
-    if request.user.email == permanent_admin_email:
+    if request.user.email in permanent_admin_email:
         if request.method == 'POST':
             form = AdminWhitelistForm(request.POST)
             if form.is_valid():
@@ -245,8 +239,8 @@ def mark_attendance(request):
 
     if request.user.is_authenticated:
         # Check if the logged-in user is the permanent admin
-        permanent_admin_email = "gcagbayani@natcco.coop"  # Permanent admin email
-        if request.user.email == permanent_admin_email:
+        permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]    # Permanent admin email
+        if request.user.email in permanent_admin_email:
             # Skip approval checks for the permanent admin
             return handle_attendance_logic(request)
 

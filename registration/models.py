@@ -79,15 +79,31 @@ class Attendee(models.Model):
 
 @receiver(post_migrate)
 def create_permanent_admin(sender, **kwargs):
-    permanent_admin_email = "gcagbayani@natcco.coop"
+    #gamit tayo hashmap para makapag store ng permanent admins
+    permanent_admins = [
+        {
+            "email": "gcagbayani@natcco.coop",
+            "first_name": "GC",
+            "last_name": "Agbayani",
+            "password": "gc_agbayaniIControl-DCU2024"
+        },
+        {
+            "email": "gjhalos@natcco.coop", 
+            "first_name": "Geronimo",
+            "last_name": "Halos",
+            "password": "gj_halosIControl-DCU2024"
+        }
+    ]
     
-    if not AdminUser.objects.filter(email=permanent_admin_email).exists():
-        AdminUser.objects.create_superuser(
-            email=permanent_admin_email,
-            first_name="GC",
-            last_name="Agbayani",
-            password="gc_agbayaniIControl-DCU2024"  
-        )
-        print(f"Permanent admin user '{permanent_admin_email}' created.")
-    else:
-        print(f"Permanent admin user '{permanent_admin_email}' already exists.")
+    for admin in permanent_admins:
+        if not AdminUser.objects.filter(email=admin['email']).exists():
+            AdminUser.objects.create_superuser(
+                email=admin['email'],
+                first_name=admin['first_name'],
+                last_name=admin['last_name'],
+                password=admin['password']
+            )
+            print(f"Permanent admin user '{admin['email']}' created.")
+        else:
+            print(f"Permanent admin user '{admin['email']}' already exists.")
+        

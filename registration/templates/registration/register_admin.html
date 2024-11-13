@@ -5,7 +5,7 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <title>I-Scan Admin</title>
@@ -67,14 +67,14 @@
         
         input, select {
             width: 100%;
-            padding: 12px 30px; /* Padding for both sides */
+            padding: 12px 30px;
             margin: 8px 0;
             border: 2px solid #ccc;
             border-radius: 20px;
             background: transparent;
             color: black;
             box-sizing: border-box;
-            font-size: 14px; /* Adjust font size for uniformity */
+            font-size: 14px;
             outline: none;
             transition: border-color 0.3s, background 0.3s, transform 0.3s;
         }
@@ -84,7 +84,7 @@
         }
     
         input::placeholder, select::placeholder {
-            color: rgba(0, 0, 0, 0.7) !important;
+            color: rgba(0, 0, 0, 0.7);
         }
     
         .button-container {
@@ -168,8 +168,13 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+        }
+
     </style>
-    
 </head>
 
 <body>
@@ -186,35 +191,35 @@
                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                 {{ form.first_name }}
                 {% for error in form.first_name.errors %}
-                    <div class="text-danger">{{ error }}</div>
+                    <div class="text-danger error-message">{{ error }}</div>
                 {% endfor %}
             </div>
             <div class="input-container">
                 <span class="input-group-text"><i class="fas fa-user"></i></span>
                 {{ form.last_name }}
                 {% for error in form.last_name.errors %}
-                    <div class="text-danger">{{ error }}</div>
+                    <div class="text-danger error-message">{{ error }}</div>
                 {% endfor %}
             </div>
             <div class="input-container">
                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                 {{ form.email }}
                 {% for error in form.email.errors %}
-                    <div class="text-danger">{{ error }}</div>
+                    <div class="text-danger error-message">{{ error }}</div>
                 {% endfor %}
             </div>
             <div class="input-container">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 {{ form.password }}
                 {% for error in form.password.errors %}
-                    <div class="text-danger">{{ error }}</div>
+                    <div class="text-danger error-message">{{ error }}</div>
                 {% endfor %}
             </div>
             <div class="input-container">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                 {{ form.confirm_password }}
                 {% for error in form.confirm_password.errors %}
-                    <div class="text-danger">{{ error }}</div>
+                    <div class="text-danger error-message">{{ error }}</div>
                 {% endfor %}
             </div>
             <div class="button-container">
