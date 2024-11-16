@@ -88,7 +88,7 @@ WSGI_APPLICATION = "My_FirstProject.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'qr_code',  
+        'NAME': '1st project',  
         'USER': 'root',  
         'PASSWORD': '',  
         'HOST': 'localhost',  
@@ -146,4 +146,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = 'http://10.0.0.52:8000'  #Use the domain when deployed
+BASE_URL = 'http://192.168.0.81:8000'  #Use the domain when deployed

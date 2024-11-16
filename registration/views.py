@@ -173,7 +173,7 @@ def register(request):
                 qrcode_img = qrcode_img.convert("RGBA")
 
                 # Load the background image
-                background = Image.open('C:/xampp/htdocs/test/FINAL/static/img/my_template.jpg')
+                background = Image.open('C:/xampp/htdocs/FINAL/QR_CodeProject1/static/img/my_template.jpg')
 
                 # Ensure background is also in RGBA mode
                 background = background.convert("RGBA")

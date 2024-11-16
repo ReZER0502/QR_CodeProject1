@@ -9,7 +9,7 @@
     <title>I-Register</title>
     
     <!-- QR Code Favicon -->
-    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img\logo.ico' %}" type="image/x-icon">
     
     <!-- Add Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -20,42 +20,29 @@
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
-            color: black;
+            color: lightgray; /* Changed font color to light gray */
             overflow: hidden; /* Prevent scrollbars */
             display: flex;
             justify-content: center;
             align-items: center;
+            background: url("{% static 'img/all_bg.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
         }
-        
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: -1;
-            opacity: 1;
-            transition: opacity 1s ease-in-out;
-        }
-        
-        .video-background.fade-out {
-            opacity: 0;
-        }
-        
+    
         .register-container {
             max-height: 70vh;
             z-index: 1;
             padding: 25px;
             width: 300px;
             text-align: left;
-            background: rgba(255, 255, 255, 0.2);
+            background: transparent !important; /* Ensure fully transparent background */
             border-radius: 15px;
-            animation: containerFadeIn 1s ease-in-out; /* Applied new fade-in animation */
-            border: 4px solid rgba(0, 0, 0, 0.5);
+            animation: containerFadeIn 1s ease-in-out;
+            border: none !important; /* Ensure no border */
+            box-shadow: none !important; /* Remove any shadow */
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
         }
-        
+    
         /* Adjust the shake and fade-out animation for error messages */
         @keyframes shake {
             0% { transform: translate(0); }
@@ -64,44 +51,44 @@
             75% { transform: translate(-5px, 0); }
             100% { transform: translate(0); }
         }
-        
+    
         .shake {
             animation: shake 0.5s;
         }
-        
+    
         .fade-out {
             opacity: 1;
             transition: opacity 0.5s ease;
         }
-        
+    
         .fade-out.hidden {
             opacity: 0;
         }
-        
+    
         @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(-20px);
             }
-        
+    
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
+    
         .logo {
             display: block;
             margin: 0 auto;
             font-size: 60px;
-            color: black;
+            color: white; /* White color for logo text */
             text-align: center;
             border-radius: 50%;
             padding: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            /* Removed transition to prevent hover scaling effect */
+            background: transparent; /* Set the logo background to transparent */
+            border: none; /* Remove the border from the logo */
         }
-        
+    
         /* New animation for the container */
         @keyframes containerFadeIn {
             0% {
@@ -117,99 +104,99 @@
                 transform: scale(1);
             }
         }
-        
+    
         .input-container {
             position: relative;
             margin: 8px 0; /* Reduced margin */
         }
-        
+    
         input, select {
             width: 100%;
             padding: 10px 30px; /* Reduced padding */
             margin: 6px 0;
-            border: 2px solid black;
+            border: 2px solid #333; /* Dark gray border for inputs */
             border-radius: 20px;
-            background: transparent;
-            color: black;
+            background: #444; /* Dark gray background for input fields */
+            color: white; /* White text inside input fields */
             box-sizing: border-box;
             transition: border-color 0.3s, background 0.3s, transform 0.3s;
-            font-size: 10px; /* Reduced font size */
+            font-size: 12px; /* Adjusted font size for better readability */
             outline: none;
         }
-        
+    
         input::placeholder, select {
-            color: rgba(0, 0, 0, 0.7);
+            color: rgba(255, 255, 255, 0.6); /* Light gray placeholder text */
         }
-        
+    
         select option {
-            background: white;
-            color: black;
+            background: #333; /* Dark gray background for select options */
+            color: white; /* White text color */
         }
-        
+    
         .qr-code {
             text-align: center;
             margin-top: 7px; /* Adjusted margin */
-            
         }
-        
+    
         input:focus, select:focus {
             border-color: #feb47b;
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
-        
+    
         .input-container i {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            color: black;
-            font-size: 12px; /* Reduced icon size */
+            color: white;
+            font-size: 12px; /* Adjusted icon size */
         }
-        
+    
         input:focus + i, select:focus + i {
             color: #feb47b;
         }
-        
+    
         .button-container {
             display: flex;
             justify-content: center;
         }
-        
+    
         button {
             width: 100%;
             max-width: 150px; /* Reduced button size */
-            padding: 10px;
+            padding: 12px;
             margin: 8px auto;
-            border: 2px solid black;
+            border: none;
             border-radius: 15px;
-            color: black;
+            background-color: #e50914; /* Red background for the button */
+            color: white; /* White font color */
             cursor: pointer;
-            background-color: transparent;
-            font-size: 13px; /* Reduced font size */
+            font-size: 16px;
             transition: background-color 0.3s, transform 0.3s;
         }
-        
+    
         button:hover {
-            background-color: transparent;
+            background-color: #f40612; /* Slightly darker red on hover */
             transform: translateY(-3px);
         }
-        
+    
         .admin-container {
             margin-top: 10px; /* Reduced margin */
             text-align: center;
         }
-        
+    
         .admin-container h2 {
             margin: 8px 0;
-            color: black;
-            font-size: 14px; /* Reduced font size */
+            color: lightgray; /* Light gray color for headings */
+            font-size: 14px;
         }
-        
+    
         .admin-container p {
-            font-size: 10px; /* Reduced font size */
+            font-size: 12px;
+            color: lightgray; /* Light gray color for paragraphs */
         }
-        
+    
         .message {
             margin: 20px;
             padding: 15px;
@@ -225,11 +212,11 @@
             z-index: 10; /* Ensure it appears above other elements */
             text-align: center; /* Center text */
         }
-
+    
         .fade-out {
             opacity: 0;
         }
-        
+    
         /* Mobile screens (max-width: 768px) */
         @media (max-width: 768px) {
             .register-container {
@@ -237,64 +224,61 @@
                 padding: 20px;
                 background: rgba(255, 255, 255, 0.5); /* Adjusted background transparency */
             }
-        
+    
             input, select {
                 font-size: 16px; /* Smaller text for smaller screens */
                 padding: 12px 40px 12px 35px; /* Adjust input padding: more padding for icons */
             }
-        
+    
             .logo {
                 font-size: 80px; /* Reduced logo size */
             }
-        
+    
             .input-container {
                 margin: 10px 0; /* Reduced input margins */
             }
-        
+    
             /* Adjust icon position */
             .input-container i {
                 font-size: 18px; /* Slightly smaller icon */
                 left: 10px; /* Positioned closer to the input edge */
             }
-        
+    
             button {
                 padding: 12px;
                 max-width: 150px; /* Adjusted button size */
             }
-        
-            .video-background {
-                object-fit: cover; /* Ensure video fits the screen without distortion */
-            }
+    
         }
-        
+    
         /* Very small screens like tablets and small phones (max-width: 480px) */
         @media (max-width: 480px) {
             .register-container {
                 width: 100%; /* Adjusted to fit screen */
                 padding: 15px;
             }
-        
+    
             input, select {
                 font-size: 14px; /* Smaller font size for smaller devices */
                 padding: 10px 40px 10px 30px; /* Adjust padding: more room for icons */
             }
-        
+    
             .logo {
                 font-size: 60px; /* Smaller logo */
             }
-        
+    
             /* Adjust icon position for smaller screens */
             .input-container i {
                 font-size: 16px; /* Further reduced icon size */
                 left: 8px; /* Closer to the edge */
             }
         }
-        
+    
         .error {
             color: red;
             display: none; /* Hide by default */
         }
-        
+    
         /* Shake animation */
         @keyframes shake {
             0% { transform: translate(0); }
@@ -303,11 +287,11 @@
             75% { transform: translate(-5px, 0); }
             100% { transform: translate(0); }
         }
-        
+    
         .shake {
             animation: shake 0.5s;
         }
-        
+    
         /* Fade out animation */
         .fade-out {
             opacity: 1;
@@ -316,8 +300,7 @@
         .fade-out.hidden {
             opacity: 0;
         }
-        
-    </style>
+    </style>            
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -351,11 +334,12 @@
             const departmentSelect = document.getElementById('department');
             const subDepartmentSelect = document.getElementById('sub_department');
             const departments = {
-                'IT': ['Software Development', 'Hardware Maintenance', 'Network Support'],
+                'IT': ['Software Development', 'Data Center & Network Operations', 'Database SQL'],
                 'HR': ['Recruitment', 'Employee Relations'],
                 'Finance': ['Accounting', 'Payroll'],
                 'ASG': ['Procurement', 'Gen. Services', 'HR Assistant'],
-                'ETCG': ['Stab-Fund', 'Consultancy', 'KRC']
+                'ETCG': ['Stab-Fund', 'Consultancy', 'KRC'],
+                'COOP': ['IT', 'HR', 'Finance', 'ASG', 'ETCG']
             };
             subDepartmentSelect.innerHTML = '';
             const selectedDepartment = departmentSelect.value;
@@ -368,16 +352,6 @@
                 });
             }
         }
-
-        const video = document.querySelector('.video-background');
-        video.addEventListener('ended', function () {
-            video.classList.add('fade-out');
-            setTimeout(() => {
-                video.currentTime = 0;
-                video.classList.remove('fade-out');
-                video.play();
-            }, 1000);
-        });
         
         function showMessage(message) {
             const messageBox = document.getElementById('message-box');
@@ -403,12 +377,6 @@
 </head>
 
 <body>
-    <!-- Video background -->
-    <video autoplay muted loop class="video-background">
-        <source src="{% static 'img/video.mp4' %}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-
     <div class="register-container">
         <div class="logo">
             <i class="fas fa-qrcode"></i>
@@ -450,6 +418,7 @@
                     <option value="Finance">Finance</option>
                     <option value="ASG">ASG</option>
                     <option value="ETCG">ETCG</option>
+                    <option value="COOP">COOP</option>
                 </select>
             </div>
             
@@ -484,4 +453,3 @@
 </body>
 
 </html>
-
