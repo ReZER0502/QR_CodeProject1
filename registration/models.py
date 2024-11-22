@@ -51,18 +51,9 @@ pre_delete.connect(prevent_admin_deletion, sender=AdminUser)
 class AdminWhitelist(models.Model):
     email = models.EmailField(unique=True)
     added_at = models.DateTimeField(auto_now_add=True)
-    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return self.email
-
-class AdminRequest(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    requested_at = models.DateTimeField(auto_now_add=True)
-    is_approved = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Admin Request for {self.user.email}"
 
 class Attendee(models.Model):
     first_name = models.CharField(max_length=20)

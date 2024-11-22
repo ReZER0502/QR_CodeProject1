@@ -14,49 +14,36 @@ from .forms import AdminUserCreationForm
 from django.contrib.auth import authenticate,login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from .models import Attendee, AdminWhitelist, AdminRequest
+from .models import Attendee, AdminWhitelist
 import logging
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.http import HttpResponseForbidden
 from .forms import AdminWhitelistForm
-from .models import AdminWhitelist, AdminRequest
+from django.contrib.messages import get_messages
+from django.http import JsonResponse
 
 def admin_login(request):
+    permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  # Hardcoded permanent admins
+
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        #hardcoded gamit yung hashmap para di madelete...
-        permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  
 
+        # Check if the email belongs to a permanent admin
         if email in permanent_admin_emails:
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('admin_dashboard')  
+                return redirect('admin_dashboard')  # Redirect to the admin dashboard
             else:
                 return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
-        try:
-            admin = AdminWhitelist.objects.get(email=email, is_approved=True)
-        except AdminWhitelist.DoesNotExist:
-            return render(request, 'registration/login.html', {'error': 'This email is not whitelisted or approved.'})
-        user = authenticate(request, username=email, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('admin_dashboard') 
-        else:
-            return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
+
+        # For non-permanent admins, deny access to the dashboard
+        return render(request, 'registration/login.html', {'error': 'Restricted Area!'})
 
     return render(request, 'registration/login.html')
-
-def approve_admin_request(request, request_id):
-    if request.method == 'POST':
-        admin_request = get_object_or_404(AdminRequest, id=request_id)
-        admin_request.is_approved = True
-        admin_request.save()
-        messages.success(request, f"Admin request for {admin_request.user.email} has been approved.")
-        return redirect('admin_dashboard')
 
 logging.basicConfig(level=logging.DEBUG)
 def register_admin(request):
@@ -65,20 +52,16 @@ def register_admin(request):
         if form.is_valid():
             email = form.cleaned_data.get('email')
 
-            # EMAIL WHITELISTING DITO. MEANING ONLY AUTHORIZED EMAILS ARE ALLOWED TO REGISTER PAG GUSTO MAG PA ADMIN
+            # Check whitelist
             if not AdminWhitelist.objects.filter(email=email).exists():
                 messages.error(request, "This email is not authorized to register as an admin.")
                 return redirect('register_admin')
+            
             admin_user = form.save()
             if admin_user:
                 logging.debug(f"Admin user created with email: {admin_user.email}")
             else:
                 logging.error("Admin user creation failed.")
-            try:
-                admin_request = AdminRequest.objects.create(user=admin_user)
-                logging.debug(f"AdminRequest created for user: {admin_user.email}")
-            except Exception as e:
-                logging.error(f"Error creating AdminRequest: {str(e)}")
             
             messages.success(request, "Admin registered successfully.")
             return redirect('register_admin')
@@ -87,58 +70,47 @@ def register_admin(request):
     else:
         form = AdminUserCreationForm()
 
-    return render(request, 'registration/register_admin.html', {'form': form})
+    # Get all messages (errors/success) to pass them to the template
+    storage = get_messages(request)
+    messages_list = [msg.message for msg in storage]
+
+    return render(request, 'registration/register_admin.html', {
+        'form': form,
+        'messages': messages_list
+    })
+
+# Define permanent admin emails as a constant
+PERMANENT_ADMIN_EMAILS = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
 
 @login_required
 def admin_dashboard(request):
-    permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  
-    # Allow the permanent admin to bypass whitelist checks
-    if request.user.email in permanent_admin_email:
-        if request.method == 'POST':
-            form = AdminWhitelistForm(request.POST)
-            if form.is_valid():
-                email = form.cleaned_data.get('email')
-                
-                # Check if the email is already whitelisted
-                if AdminWhitelist.objects.filter(email=email).exists():
-                    form.add_error('email', 'This email is already whitelisted.')
-                else:
-                    # Allow permanent admin to add emails to the whitelist
-                    new_admin = form.save()
-                    messages.success(request, f"Email {email} has been whitelisted successfully.")
-                    return redirect('admin_dashboard')  # Redirect to prevent resubmission of form
-        else:
-            form = AdminWhitelistForm()
-
-        admin_requests = AdminRequest.objects.filter(is_approved=False)
-        return render(request, 'registration/admin_dashboard.html', {
-            'admin_requests': admin_requests,
-            'form': form
-        })
-
-    # Check for regular admin users
-    elif AdminWhitelist.objects.filter(email=request.user.email, is_approved=True).exists():
-        if request.method == 'POST':
-            form = AdminWhitelistForm(request.POST)
-            if form.is_valid():
-                email = form.cleaned_data.get('email')
-                if AdminWhitelist.objects.filter(email=email).exists():
-                    form.add_error('email', 'This email is already whitelisted.')
-                else:
-                    new_admin = form.save()
-                    messages.success(request, f"Email: {email} has been whitelisted successfully.")
-                    return redirect('admin_dashboard') 
-        else:
-            form = AdminWhitelistForm()
-
-        admin_requests = AdminRequest.objects.filter(is_approved=False)
-        return render(request, 'registration/admin_dashboard.html', {
-            'admin_requests': admin_requests,
-            'form': form
-        })
-    
-    else:
+    # Restrict access to permanent admins only
+    if request.user.email not in PERMANENT_ADMIN_EMAILS:
         return HttpResponseForbidden('You do not have permission to access this page.')
+
+    # Handle form submission for adding local admins
+    if request.method == 'POST':
+        form = AdminWhitelistForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get('email')
+
+            # Add email to the whitelist if not already present
+            _, created = AdminWhitelist.objects.get_or_create(email=email)
+            if created:
+                messages.success(request, f"{email} has been whitelisted.")
+                return redirect('admin_dashboard')  # Prevent resubmission on refresh
+            else:
+                form.add_error('email', 'This email is already whitelisted.')
+    else:
+        form = AdminWhitelistForm()
+
+    # Fetch all whitelisted emails to display in the dashboard
+    whitelisted_emails = AdminWhitelist.objects.all()
+
+    return render(request, 'registration/admin_dashboard.html', {
+        'form': form,
+        'whitelisted_emails': whitelisted_emails,
+    })
 
 
 def edit_user_profile(request):
@@ -239,25 +211,20 @@ def mark_attendance(request):
 
     if request.user.is_authenticated:
         # Check if the logged-in user is the permanent admin
-        permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]    # Permanent admin email
+        permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
         if request.user.email in permanent_admin_email:
-            # Skip approval checks for the permanent admin
+            # Skip whitelist checks for the permanent admin
             return handle_attendance_logic(request)
 
-        # Check if the user is an approved admin
-        try:
-            admin_request = AdminRequest.objects.get(user=request.user)
-            if not admin_request.is_approved:
-                messages.error(request, "Unauthorized admin!!!!")
-                return render(request, 'registration/mark_attendance.html', {
-                    'error': 'Unauthorized admin!!!!'
-                })
+        # Check if the user is in the whitelist
+        if AdminWhitelist.objects.filter(email=request.user.email).exists():
             return handle_attendance_logic(request)
 
-        except AdminRequest.DoesNotExist:
-            return render(request, 'registration/mark_attendance.html', {
-                'error': 'You need to register as an admin first.'
-            })
+        # If not whitelisted, show an error message
+        messages.error(request, "You are not authorized to mark attendance.")
+        return render(request, 'registration/mark_attendance.html', {
+            'error': 'You are not authorized to mark attendance.'
+        })
 
     return render(request, 'registration/mark_attendance.html', {
         'error': 'Please log in to mark attendance.'

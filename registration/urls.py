@@ -10,7 +10,6 @@ urlpatterns = [
     path('download/<int:attendee_id>/', views.download_qr, name='download_qr'),
     path('admin/register/',views.register_admin, name='register_admin'),
     path('admin/dashboard/',views.admin_dashboard, name='admin_dashboard'),
-    path('admin/approve/<int:request_id>/', views.approve_admin_request, name='approve_admin_request'),
     path('admin/login/', views.admin_login, name='admin_login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='admin_login'), name='logout'),
 ]

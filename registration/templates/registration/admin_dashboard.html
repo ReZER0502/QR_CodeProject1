@@ -9,288 +9,1361 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <title>Admin Dashboard</title>
     <style>
-        /* General Body and Background */
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #fff;
+        @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+        :root {
+            --c-gray-900: #000000;
+            --c-gray-800: #1f1f1f;
+            --c-gray-700: #2e2e2e;
+            --c-gray-600: #313131;
+            --c-gray-500: #969593;
+            --c-gray-400: #a6a6a6;
+            --c-gray-300: #bdbbb7;
+            --c-gray-200: #f1f1f1;
+            --c-gray-100: #ffffff;
+
+            --c-green-500: #45ffbc;
+            --c-olive-500: #e3ffa8;
+
+            --c-white: var(--c-gray-100);
+
+            --c-text-primary: var(--c-gray-100);
+            --c-text-secondary: var(--c-gray-200);
+            --c-text-tertiary: var(--c-gray-500);
         }
 
-        /* Main Content Container */
-        .content-container {
-            position: relative;
-            z-index: 1;
-            background-color: #1f1f1f;
-            padding: 40px;
-            border-radius: 10px;
-            margin-top: 30px;
+        body {
+            line-height: 1.5;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            background-color: var(--c-gray-900);
+            color: var(--c-text-primary);
+            display: flex;
+            padding-top: 3vw;
+            padding-bottom: 3vw;
+            justify-content: center;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        button,
+        select,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .responsive-wrapper {
+            width: 90%;
+            max-width: 1600px;
             margin-left: auto;
             margin-right: auto;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            max-width: 1200px;
         }
 
-        .content-container h1 {
-            text-align: center;
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 30px;
-            color: #fff;
+        .app {
+            min-height: 80vh;
+            width: 95%;
+            max-width: 1600px;
+            background-color: var(--c-gray-900);
+            padding: 2vw 4vw 6vw;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Section Flex Layout */
-        .section-container {
+        .app-header {
+            display: grid;
+            grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
+                    max-content,
+                    400px
+                );
+            column-gap: 4rem;
+            align-items: flex-end;
+            @media (max-width: 1200px) {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--c-gray-600);
+            }
+        }
+
+        .app-header-navigation {
+            @media (max-width: 1200px) {
+                display: none;
+            }
+        }
+
+        .app-header-actions {
+            display: flex;
+            align-items: center;
+            @media (max-width: 1200px) {
+                display: none;
+            }
+        }
+
+        .app-header-actions-buttons {
+            display: flex;
+            border-left: 1px solid var(--c-gray-600);
+            margin-left: 2rem;
+            padding-left: 2rem;
+
+            & > * + * {
+                margin-left: 1rem;
+            }
+        }
+
+        .app-header-mobile {
+            display: none;
+            @media (max-width: 1200px) {
+                display: flex;
+            }
+        }
+
+        .app-body {
+            height: 100%;
+            display: grid;
+            grid-template-columns: minmax(min-content, 175px) minmax(max-content, 1fr) minmax(
+                    min-content,
+                    400px
+                );
+
+            column-gap: 4rem;
+            padding-top: 2.5rem;
+
+            @media (max-width: 1200px) {
+                grid-template-columns: 1fr;
+                & > * {
+                    margin-bottom: 3.5rem;
+                }
+            }
+        }
+
+        .app-body-navigation {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            @media (max-width: 1200px) {
+                display: none;
+            }
+        }
+
+        .app-body-sidebar {
+            
+        }        
+
+        .footer {
+            margin-top: auto;
+            h1 {
+                font-size: 1.5rem;
+                line-height: 1.125;
+                display: flex;
+                align-items: flex-start;
+                small {
+                    font-size: 0.5em;
+                    margin-left: 0.25em;
+                }
+            }
+
+            div {
+                border-top: 1px solid var(--c-gray-600);
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                font-size: 0.75rem;
+                color: var(--c-text-tertiary);
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding-bottom: 1rem;
+            padding-top: 1rem;
+            border-bottom: 1px solid var(--c-gray-600);
+            @media (max-width: 1200px) {
+                border-bottom: 0;
+            }
+        }
+
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 0.25;
+            margin-left: 0.75rem;
+            span:first-child {
+                color: var(--c-text-primary);
+            }
+            span:last-child {
+                color: var(--c-text-tertiary);
+            }
+        }
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            color: var(--c-text-tertiary);
+            a {
+                display: flex;
+                align-items: center;
+                text-decoration: none;
+                transition: 0.25s ease;
+
+                * {
+                    transition: 0.25s ease;
+                }
+
+                i {
+                    margin-right: 0.75rem;
+                    font-size: 1.25em;
+                    flex-shrink: 0;
+                }
+
+                & + a {
+                    margin-top: 1.25rem;
+                }
+
+                &:hover,
+                &:focus {
+                    transform: translateX(4px);
+                    color: var(--c-text-primary);
+                }
+            }
+        }
+
+        .tabs {
             display: flex;
             justify-content: space-between;
-            gap: 30px;
-            flex-wrap: wrap;
+            color: var(--c-text-tertiary);
+            border-bottom: 1px solid var(--c-gray-600);
+
+            a {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+                text-decoration: none;
+                border-top: 2px solid transparent;
+                display: inline-flex;
+                transition: 0.25s ease;
+                &.active,
+                &:hover,
+                &:focus {
+                    color: var(--c-text-primary);
+                    border-color: var(--c-text-primary);
+                }
+            }
         }
 
-        /* Section Box Styling */
-        .section-box {
-            flex: 1;
-            background-color: #2c2c2c;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            padding: 30px;
-            margin: 20px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid #444;
+        .user-profile {
+            display: flex;
+            align-items: center;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            color: var(--c-text-tertiary);
+            transition: 0.25s ease;
+
+            &:hover,
+            &:focus {
+                color: var(--c-text-primary);
+                span:last-child {
+                    box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
+                }
+            }
+
+            span:first-child {
+                display: flex;
+                font-size: 1.125rem;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid var(--c-gray-600);
+                font-weight: 300;
+            }
+
+            span:last-child {
+                transition: 0.25s ease;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 42px;
+                height: 42px;
+                border-radius: 50%;
+                overflow: hidden;
+                margin-left: 1.5rem;
+                flex-shrink: 0;
+            }
         }
 
-        .section-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        .icon-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 0;
+            background-color: transparent;
+            border: 1px solid var(--c-gray-500);
+            color: var(--c-text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.25s ease;
+            flex-shrink: 0;
+            &.large {
+                width: 42px;
+                height: 42px;
+                font-size: 1.25em;
+            }
+
+            i {
+                transition: 0.25s ease;
+            }
+
+            &:hover,
+            &:focus {
+                background-color: var(--c-gray-600);
+                box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
+            }
         }
 
-        /* Section Title */
-        .section-box h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #fff;
-            font-weight: 600;
+        .tiles-container {
+            position: relative;
+            overflow: hidden; /* Prevent the container from resizing */
         }
 
-        /* Table Styling */
-        .table th, .table td {
-            text-align: center;
-            color: #ddd;
+        .tiles-wrapper {
+            position: relative;
+            width: 100%;
+            overflow-x: auto; /* Allows horizontal scrolling */
+        }
+        
+        .arrow-button {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: var(--c-light-gray); /* Reference the variable here */
+            cursor: pointer;
+            z-index: 10;
+            position: relative; /* Position them normally in the layout flow */
+            margin: 10px; /* Add some spacing */
+        }
+        
+        /* Define the light gray variable globally in your CSS, e.g., in the :root */
+        :root {
+            --c-light-gray: #d3d3d3; /* Define the light gray color */
+        }
+        
+        /* Adjust arrow positioning */
+        .left-arrow {
+            margin-left: 150px; /* Push it to the left */
+        }
+        
+        .right-arrow {
+            margin-right: 150px; /* Push it to the right */
+        }
+        
+        
+        /* Align arrows and tiles together */
+        .arrows-container {
+            display: flex; /* Create a horizontal layout */
+            justify-content: space-between; /* Space the arrows apart */
+            align-items: center;
+            margin-top: 10px; /* Add spacing above */
         }
 
-        /* Buttons */
-        .btn {
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            padding: 10px 20px;
-            border-radius: 5px;
+        
+
+        .tiles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            column-gap: 1rem;
+            row-gap: 1rem;
+            margin-top: 1.25rem;
+            @media (max-width: 700px) {
+                grid-template-columns: repeat(1, 1fr);
+            }
         }
 
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #004085;
-            transform: scale(1.05);
-        }
-
-        .btn-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background-color: #c82333;
-            border-color: #bd2130;
-            transform: scale(1.05);
-        }
-
-        /* Success and Error Alerts */
-        .alert-container {
-            display: none;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 1s ease, visibility 1s ease;
-            margin-top: 20px;
-        }
-
-        .alert-container.show {
-            display: block;
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Success and Error Alerts */
-        .alert-success {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-
-        .alert-danger {
-            background-color: #dc3545;
-            border-color: #dc3545;
-        }
-
-        /* Form Styling */
-        .form-group label {
-            font-size: 16px;
-            font-weight: 600;
-            color: #bbb;
-        }
-
-        .form-group input {
+        .tile {
+            padding: 1rem;
             border-radius: 8px;
-            border: 1px solid #444;
-            padding: 10px;
-            font-size: 14px;
-            color: #ddd;
-            background-color: #333;
+            background-color: var(--c-olive-500);
+            color: var(--c-gray-900);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: 0.25s ease;
+        
+            &:hover {
+                transform: translateY(-5px);
+            }
+        
+            &:focus-within {
+                box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-olive-500);
+            }
+        
+            &:nth-child(2) {
+                background-color: var(--c-green-500);
+                &:focus-within {
+                    box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-green-500);
+                }
+            }
+            &:nth-child(3) {
+                background-color: var(--c-gray-300);
+                &:focus-within {
+                    box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-gray-300);
+                }
+            }
+        
+            a {
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-weight: 600;
+        
+                .icon-button {
+                    color: inherit;
+                    border-color: inherit;
+                    &:hover,
+                    &:focus {
+                        background-color: transparent;
+                        i {
+                            transform: none;
+                        }
+                    }
+                }
+        
+                &:focus {
+                    box-shadow: none;
+                }
+        
+                &:after {
+                    content: "";
+                    display: block;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                }
+            }
+        }
+        
+
+        .tile-header {
+            display: flex;
+            align-items: center;
+            
+            i {
+                font-size: 1rem;  /* Adjusted icon size */
+            }
+            
+            h3 {
+                display: flex;
+                flex-direction: column;
+                line-height: 1.375;
+                margin-left: 0.5rem;
+                
+                /* Target the first span (email) */
+                span:first-child {
+                    font-weight: 600;
+                    font-size: 1.1rem;  /* Slightly larger font size for email */
+                }
+        
+                /* Target the second span (group) */
+                span:last-child {
+                    font-size: 0.875rem;  /* Smaller font size for the group */
+                    font-weight: 200;
+                }
+            }
+        }        
+              
+        .service-section > h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
-        /* Footer Styling */
-        footer {
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 40px;
-            background-color: #1f1f1f;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+        /* Service Section Header */
+        .service-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            /* Add some spacing between header elements */
+            & > * + * {
+                margin-left: 1.25rem;
+            }
+
+            /* Hide header elements for smaller screens, but maintain layout */
+            @media (max-width: 1000px) {
+                display: none;
+            }
         }
 
-        footer p {
-            color: #bbb;
-            font-size: 14px;
+
+        /* Prevent tiles from shifting with the header */
+        .tiles-container {
+            position: relative;
+            z-index: 1; /* Ensure tiles are not covered by hidden sections */
         }
 
-        /* Spinner for Loading */
-        .spinner-border {
-            width: 20px;
-            height: 20px;
+        /* Prevent movement of tiles by ensuring consistency in layout */
+        .tiles-wrapper {
+            display: flex;
+            flex-direction: column; /* Stack tiles and arrows vertically */
+            align-items: center; /* Center-align the content */
+        }
+
+        /* Prevent floating items from affecting other elements */
+        .tiles-container,
+        .tiles-wrapper,
+        .tile {
+            box-sizing: border-box; /* Ensures padding and margin are included in size */
+        }
+
+        /* Set fixed height and width for tiles if necessary */
+        .tile {
+            width: 200px;  /* Fixed width */
+            height: 200px; /* Fixed height */
+            padding: 0.5rem;
+            margin: 0;  /* Prevent shifting from outside margins */
+            background-color: var(--c-olive-500);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: 0.25s ease;
+        }
+
+        .flat-button {
+            border-radius: 6px;
+            background-color: var(--c-gray-700);
+            padding: 0.5em 1.5em;
+            border: 0;
+            color: var(--c-text-secondary);
+            transition: 0.25s ease;
+            cursor: pointer;
+            &:hover,
+            &:focus {
+                background-color: var(--c-gray-600);
+            }
+        }
+
+        .mobile-only {
             display: none;
-        }
-
-        .logout-btn {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        /* Add Animation */
-        .fade-in {
-            animation: fadeIn 1s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-            }
-            100% {
-                opacity: 1;
+            @media (max-width: 1000px) {
+                display: inline-flex;
             }
         }
+
+        .transfer-section {
+            margin-top: 2.5rem;
+        }
+
+        .transfer-section-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--c-gray-600);
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .payments {
+            display: flex;
+            flex-direction: column;
+            margin-top: 1.5rem;
+        }
+
+        .payment {
+            display: flex;
+            align-items: center;
+            & + * {
+                margin-top: 1rem;
+            }
+        }
+
+        .card {
+            width: 125px;
+            padding: 0.375rem;
+            aspect-ratio: 3 / 2;
+            flex-shrink: 0;
+            border-radius: 6px;
+            color: var(--c-gray-800);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            &.green {
+                background-color: var(--c-green-500);
+            }
+
+            &.olive {
+                background-color: var(--c-olive-500);
+            }
+
+            &.gray {
+                background-color: var(--c-gray-300);
+            }
+
+            span:last-child {
+                align-self: flex-end;
+            }
+        }
+
+        .payment-details {
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            margin-left: 1.5rem;
+            h3 {
+                font-size: 1rem;
+                color: var(--c-text-tertiary);
+            }
+
+            div {
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+                border-top: 1px solid var(--c-gray-600);
+                border-bottom: 1px solid var(--c-gray-600);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex: 1;
+
+                span {
+                    font-size: 1.5rem;
+                }
+            }
+        }
+
+        .filter-options {
+            margin-left: 1.25rem;
+            padding-left: 1.25rem;
+            border-left: 1px solid var(--c-gray-600);
+            display: flex;
+            align-items: center;
+            flex: 1 1 auto;
+
+            p {
+                & + * {
+                    margin-left: auto;
+                    margin-right: 0.75rem;
+                }
+                color: var(--c-text-tertiary);
+                font-size: 0.875rem;
+                @media (max-width: 1000px) {
+                    display: none;
+                }
+            }
+        }
+
+        .transfers {
+            display: flex;
+            flex-direction: column;
+            margin-top: 1.5rem;
+        }
+
+        .transfer {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: 0.875rem;
+            @media (max-width: 1000px) {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+            & + * {
+                margin-top: 2rem;
+            }
+        }
+
+        .transfer-logo {
+            background-color: none;
+            border-radius: 4px;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            img {
+                width: 45%;
+            }
+        }
+
+        .transfer-details {
+            margin-left: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex: 1;
+            @media (max-width: 1000px) {
+                flex-wrap: wrap;
+                margin-left: 0;
+                margin-top: 1rem;
+            }
+            div {
+                width: calc(100% / 3 - 1rem);
+                @media (max-width: 1000px) {
+                    width: 100%;
+                }
+                & + div {
+                    margin-left: 1rem;
+                    @media (max-width: 1000px) {
+                        margin-left: 0;
+                        margin-top: 1rem;
+                    }
+                }
+            }
+
+            dd {
+                color: var(--c-text-tertiary);
+                margin-top: 2px;
+            }
+        }
+
+        .transfer-number {
+            margin-left: 2rem;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+            width: 15%;
+            display: flex;
+            justify-content: flex-end;
+            @media (max-width: 1000px) {
+                margin-left: 0;
+                margin-top: 1.25rem;
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        .payment-section {
+            & > h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .payment-section-header {
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+            p {
+                color: var(--c-text-tertiary);
+                font-size: 0.875rem;
+            }
+
+            div {
+                padding-left: 1rem;
+                margin-left: auto;
+                display: flex;
+                align-items: center;
+                & > * + * {
+                    margin-left: 0.5rem;
+                }
+            }
+        }
+
+        .card-button {
+            display: flex;
+            width: 50px;
+            height: 34px;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: transparent;
+            transition: 0.25s ease;
+            border-radius: 4px;
+            border: 2px solid var(--c-gray-600);
+            color: var(--c-text-primary);
+            cursor: pointer;
+            &.mastercard svg {
+                max-height: 15px;
+            }
+
+            &:focus,
+            &:hover,
+            &.active {
+                color: var(--c-gray-800);
+                background-color: var(--c-white);
+                border-color: var(--c-white);
+            }
+        }
+
+        .faq {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            p {
+                color: var(--c-text-tertiary);
+                font-size: 0.875rem;
+            }
+
+            div {
+                margin-top: 0.75rem;
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+                border-top: 1px solid var(--c-gray-600);
+                border-bottom: 1px solid var(--c-gray-600);
+                font-size: 0.875rem;
+                display: flex;
+                align-items: center;
+
+                label {
+                    padding-right: 1rem;
+                    margin-right: 1rem;
+                    border-right: 1px solid var(--c-gray-600);
+                }
+
+                input {
+                    border: 0;
+                    background-color: transparent;
+                    padding: 0.25em 0;
+                    width: 100%;
+                }
+            }
+        }
+
+        .payment-section-footer {
+            display: flex;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+
+        .save-button {
+            border: 1px solid currentColor;
+            color: var(--c-text-tertiary);
+            border-radius: 6px;
+            padding: 0.75em 2.5em;
+            background-color: transparent;
+            transition: 0.25s ease;
+            cursor: pointer;
+            &:focus,
+            &:hover {
+                color: var(--c-white);
+            }
+        }
+
+        .settings-button {
+            display: flex;
+            align-items: center;
+            color: var(--c-text-tertiary);
+            background-color: transparent;
+            border: 0;
+            padding: 0;
+            margin-left: 1.5rem;
+            cursor: pointer;
+            transition: 0.25s ease;
+            i {
+                margin-right: 0.5rem;
+            }
+            &:focus,
+            &:hover {
+                color: var(--c-white);
+            }
+        }
+
+        input,
+        select,
+        a,
+        textarea,
+        button {
+            &:focus {
+                outline: 0;
+                box-shadow: 0 0 0 2px var(--c-gray-800), 0 0 0 4px var(--c-gray-300);
+            }
+        }
+
+        /* Style for the search field container */
+        .search-field {
+            display: flex;  /* Enable flexbox for horizontal alignment */
+            flex-grow: 1;
+            position: relative;
+            align-items: center;  /* Align items vertically in the center */
+        }
+
+        /* Style for the input field */
+        .search-field input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 0;
+            border-bottom: 1px solid var(--c-gray-600);  /* Border stays as is */
+            background-color: transparent;  /* Transparent background */
+            outline: none;  /* Remove the default outline when focused */
+        }
+
+        /* Prevent default focus border and background */
+        .search-field input:focus,
+        .search-field input:active {
+            background-color: transparent;  /* Keep the background transparent */
+            border-color: var(--c-gray-600);  /* Keep the border color the same */
+            box-shadow: none;  /* Remove any box-shadow if applied by browser */
+        }
+
+        
+        .btn.btn-primary {
+            background-color: transparent;  /* Remove background color */
+            border: none;  /* Remove border */
+            color: var(--c-text-primary);  /* Text color, adjust based on your theme */
+            text-decoration: none;  /* Remove underline (it's not needed for icons) */
+            padding: 0.5em 1.5em;  /* Adjust padding */
+            cursor: pointer;  /* Cursor pointer on hover */
+            transition: color 0.25s ease;  /* Smooth color transition */
+            margin-left: 10px;  /* Space between the search field and button */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Icon styling */
+        .btn.btn-primary i {
+            font-size: 1.5em;  /* Adjust icon size */
+        }
+
+        /* Hover effect for button */
+        .btn.btn-primary:hover,
+        .btn.btn-primary:focus {
+            color: var(--c-accent);  /* Change color on hover, adjust based on your theme */
+        }
+
+        
+        /* Align the button to the right of the search field */
+        .search-field button {
+            display: inline-block;
+            margin-left: 10px;  /* Space between the input field and the button */
+        }
+        
+        /* Style for the success and error messages */
+        .message-container {
+            margin-left: 10px;  /* Spacing between the button and the message */
+            display: flex;
+            align-items: center;
+        }
+
+        /* Style for the message box */
+        .message {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;  /* Add some spacing from the button */
+        }
+
+        /* Success message style */
+        .message.success {
+            background-color: #d4edda;  /* Light green background */
+            color: #155724;  /* Dark green text */
+            border: 1px solid #c3e6cb;  /* Green border */
+        }
+
+        /* Error message style */
+        .message.error {
+            background-color: #f8d7da;  /* Light red background */
+            color: #721c24;  /* Dark red text */
+            border: 1px solid #f5c6cb;  /* Red border */
+        }
+
+        /* Optional: Style for the error messages under the form (if needed) */
+        .error-messages ul {
+            padding: 0;
+            list-style-type: none;
+        }
+
+        .error-messages li {
+            color: #721c24;  /* Red color for error messages */
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+
+
     </style>
 </head>
 <body>
 
-    <!-- Main Content Container -->
-    <div class="content-container fade-in">
-        <h1>Admin Dashboard</h1>
-
-        <!-- Main Section -->
-        <div class="section-container">
-            <!-- Admin Request Approvals Section -->
-            <div class="section-box">
-                <h2><i class="fas fa-user-shield"></i> Admin Request Approvals</h2>
-                {% if admin_requests %}
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Email</th>
-                                <th>Approve Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for request in admin_requests %}
-                                <tr>
-                                    <td>{{ request.user.email }}</td>
-                                    <td>{{ request.is_approved|yesno:"Approved,Not Approved" }}</td>
-                                    <td>
-                                        {% if not request.is_approved %}
-                                            <form action="{% url 'approve_admin_request' request.id %}" method="post" style="display:inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-success btn-sm">
-                                                    Approve
-                                                    <span class="spinner-border spinner-border-sm" id="spinner-{{ request.id }}"></span>
-                                                </button>
-                                            </form>
-                                        {% else %}
-                                            <span class="text-success">Approved</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>No pending admin requests.</p>
-                {% endif %}
+    <div class="app">
+        <header class="app-header">
+            <div class="app-header-logo">
+                <div class="logo">
+                    <span class="logo-icon">
+                        <img src="{% static 'img/logo.ico' %}" alt="Logo" />
+                    </span>
+                    <h1 class="logo-title">
+                        <span>NATCCO</span>
+                    </h1>
+                </div>
             </div>
+            <div class="app-header-navigation">
+                <div class="tabs">
+                    <a href="#">
+                        Overview
+                    </a>
+                    <a href="#" class="active">
+                        Whitelist
+                    </a>
 
-            <!-- Whitelisted Email Section -->
-            <div class="section-box">
-                <h2><i class="fas fa-envelope"></i> Add a Whitelisted Email</h2>
-                <form method="post" action="{% url 'admin_dashboard' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="email">Email to Whitelist</label>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+                    <a href="#">
+                        Accounts
+                    </a>
+
+                    <a href="#">
+                        Attendance 
+                    </a>
+                </div>
+            </div>
+            <div class="app-header-actions">
+                <button class="user-profile">
+                    <span>{{ user.first_name }} {{ user.last_name }}</span>
+                    <span>
+                        {% if profile_picture %}
+                            <img src="{{ profile_picture }}" alt="Admin Profile Picture" />
+                        {% else %}
+                            <img src="C:/xampp/htdocs/FINAL/QR_CodeProject1/media/profile_pictures/test_image.jpeg" alt="Default Profile Picture" />
+                        {% endif %}
+                    </span>                    
+                </button>
+            
+                <div class="app-header-actions-buttons">
+                    <!-- Upload Profile Picture Form -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <!-- Hidden file input for profile picture upload -->
+                        <input type="file" name="picture" id="profile-picture-upload" style="display: none;" onchange="this.form.submit();">
+            
+                        <!-- Button to trigger the file input -->
+                        <button type="button" class="icon-button large" onclick="document.getElementById('profile-picture-upload').click();">
+                            <i class="fas fa-camera"></i> 
+                        </button>
+                    </form>
+            
+                    <!-- Logout Form (Button for logout) -->
+                    <form action="{% url 'logout' %}" method="post" class="icon-button-form">
+                        {% csrf_token %}
+                        <button type="submit" class="icon-button large btn-logout">
+                            <i class="fas fa-power-off"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="app-header-mobile">
+                <button class="icon-button large">
+                    <i class="ph-list"></i>
+                </button>
+            </div>
+    
+        </header>
+        <div class="app-body">
+            <div class="app-body-navigation">
+                <nav class="navigation">
+                    <a href="#">
+                        <i class="fas fa-bars"></i> 
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-calendar-check"></i> 
+                        <span>Schedules</span>
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-calendar-day"></i> 
+                        <span>Events</span>
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-file-alt"></i> 
+                        <span>Templates</span>
+                    </a>
+                </nav>                
+                <footer class="footer">
+                    <h1>ITG DATA CENTER<small>©</small></h1>
+                    <div>
+                        NATCCO NETWORK<br />
+                        All Rights Reserved 2024
                     </div>
-                    <button type="submit" class="btn btn-primary">Add to Whitelist</button>
-                </form>
+                </footer>
             </div>
-        </div>
+            <div class="app-body-main-content">
+                <section class="service-section">
+                    <h2>Whitelisted Emails</h2>
 
-        <!-- Success Message Container -->
-        <div id="success-message" class="alert-container">
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-success">
-                        {{ message }}
+                    <!-- Form to Add Whitelisted Emails -->
+                    <div class="service-section-header">
+                        <form method="post" action="{% url 'admin_dashboard' %}">
+                            {% csrf_token %}
+                            <div class="search-field">
+                                <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+                                <button type="submit" class="icon-button">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+            
+                                <!-- Message Container beside the Button -->
+                                <div class="message-container">
+                                    {% if messages %}
+                                        <div class="message {{ messages.0.tags }}">
+                                            {% for message in messages %}
+                                                <p>{{ message }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+            
+                        {% if whitelist_form.errors %}
+                            <div class="error-messages">
+                                <ul>
+                                    {% for field in whitelist_form %}
+                                        {% for error in field.errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                     </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-
-        <!-- Logout Button -->
-        <div class="logout-btn">
-            <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Log out</button>
-            </form>
-        </div>
-
-        {% if form.errors %}
-            <div class="alert alert-danger mt-3">
-                {{ form.errors }}
+            
+                    <!-- Mobile Toggle Button -->
+                    <div class="mobile-only">
+                        <button class="flat-button">
+                            Toggle search
+                        </button>
+                    </div>
+            
+                    <!-- Tiles to Display Whitelisted Emails -->
+                    <div class="tiles-container">
+            
+                        <div class="tiles-wrapper">
+                            <div class="tiles" id="tiles">
+                                {% for entry in whitelisted_emails %}
+                                    <article class="tile">
+                                        <div class="tile-header">
+                                            <i class="ph-lightning-light"></i>
+                                            <h3>
+                                                <span>{{ entry.email }}</span>
+                                            </h3>
+                                        </div>
+                                    </article>
+                                {% empty %}
+                                    <p>No emails have been whitelisted yet.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+            
+                        <div class="arrows-container">
+                            <button class="arrow-button left-arrow icon-button" onclick="changePage(-1)">
+                                <i class="fas fa-arrow-left"></i> <!-- Left arrow icon -->
+                            </button>
+                    
+                            <button class="arrow-button right-arrow icon-button" onclick="changePage(1)">
+                                <i class="fas fa-arrow-right"></i> <!-- Right arrow icon -->
+                            </button>
+                        </div>
+                    </div>
+                
+                    <!-- Footer -->
+                 
+                </section>                
+                <section class="transfer-section">
+                    <div class="transfer-section-header">
+                        <h2>Latest Events</h2>
+                        <div class="filter-options">
+                            <p>Filter selected:Dates</p>
+                            <button class="icon-button">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <button class="icon-button">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="transfers">
+                        <div class="transfer">
+                            <div class="transfer-logo">
+                                <img src="{% static 'img/logo.ico' %}" alt="Logo" />
+                            </div>
+                            <dl class="transfer-details">
+                                <div>
+                                    <dt>GAD Event</dt>
+                                    <dd>GAD</dd>
+                                </div>
+                                <div>
+                                    <dt>4012</dt>
+                                    <dd>Number of Attendees</dd>
+                                </div>
+                                <div>
+                                    <dt>28 Oct. 2024</dt>
+                                    <dd>Event Date</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </section>
             </div>
-        {% endif %}
+            <div class="app-body-sidebar">
+                <section class="payment-section">
+                    <h2>Live Event Monitoring</h2>
+                    <div class="payment-section-header">
+                        <p>Live Monitoring of event</p>
+                        <div>
+                            <button class="card-button prom-dress">
+                                <!-- Prom Dress Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="2500" height="2500" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M12 0C9.79 0 8 1.79 8 4C8 5.74 8.93 7.3 10.11 8.15L10 15C10 16.1 10.9 17 12 17C13.1 17 14 16.1 14 15V8.15C15.07 7.3 16 5.74 16 4C16 1.79 14.21 0 12 0ZM12 2C13.1 2 14 2.9 14 4C14 4.87 13.38 5.6 12.5 5.85C12.22 5.98 12 6.27 12 6.5V9H10V6.5C10 6.27 9.78 5.98 9.5 5.85C8.62 5.6 8 4.87 8 4C8 2.9 8.9 2 10 2C11.1 2 12 2.9 12 2ZM10 17H14V20H10V17ZM12 15C11.45 15 11 14.55 11 14V9H13V14C13 14.55 12.55 15 12 15Z"/>
+                                </svg>
+                            </button>
+                            
+                            <button class="card-button prom-balloon active">
+                                <!-- Prom Balloon Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="2500" height="2500" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M12 0C9.79 0 8 1.79 8 4C8 5.74 8.93 7.3 10.11 8.15L10 15C10 16.1 10.9 17 12 17C13.1 17 14 16.1 14 15V8.15C15.07 7.3 16 5.74 16 4C16 1.79 14.21 0 12 0ZM12 2C13.1 2 14 2.9 14 4C14 4.87 13.38 5.6 12.5 5.85C12.22 5.98 12 6.27 12 6.5V9H10V6.5C10 6.27 9.78 5.98 9.5 5.85C8.62 5.6 8 4.87 8 4C8 2.9 8.9 2 10 2C11.1 2 12 2.9 12 2ZM10 17H14V20H10V17ZM12 15C11.45 15 11 14.55 11 14V9H13V14C13 14.55 12.55 15 12 15Z"/>
+                                </svg>
+                            </button>
+                            
+                        </div>
+                    </div>
+                    <div class="payments">
+                        <div class="payment">
+                            <div class="card green">
+                                <span>01/22</span>
+                                <span>
+                                    •••• 4012
+                                </span>
+                            </div>
+                            <div class="payment-details">
+                                <h3>Event 1</h3>
+                                <div>
+                                    <span>2,110</span>
+                                    <button class="icon-button">
+                                        <i class="ph-caret-right-bold"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="payment">
+                            <div class="card olive">
+                                <span>12/23</span>
+                                <span>
+                                    •••• 2228
+                                </span>
+                            </div>
+                            <div class="payment-details">
+                                <h3>Event 2</h3>
+                                <div>
+                                    <span>5,621</span>
+                                    <button class="icon-button">
+                                        <i class="ph-caret-right-bold"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="payment">
+                            <div class="card gray">
+                                <span>03/22</span>
+                                <span>
+                                    •••• 5214
+                                </span>
+                            </div>
+                            <div class="payment-details">
+                                <h3>Event 3</h3>
+                                <div>
+                                    <span>3,473</span>
+                                    <button class="icon-button">
+                                        <i class="ph-caret-right-bold"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="faq">
+                        <p>Most frequently asked questions</p>
+                        <div>
+                            <label>Question</label>
+                            <input type="text" placeholder="Type here">
+                        </div>
+                    </div>
+                    <div class="payment-section-footer">
+                        <button class="save-button">
+                            Save
+                        </button>
+                        <button class="settings-button">
+                            <i class="ph-gear"></i>
+                            <span>More settings</span>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div>
 
     <!-- Footer -->
-    <footer>
-        <p>&copy; 2024 NATCCO Company</p>
-    </footer>
-
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Show success message fade-in and fade-out
+        let currentPage = 0;
+        const tilesContainer = document.getElementById("tiles");
+        const tileCount = document.querySelectorAll(".tile").length;
+        const tilesWrapper = document.querySelector(".tiles-wrapper");
+
+        function changePage(direction) {
+            currentPage += direction;
+
+            // Ensure the page wraps around (circular behavior)
+            if (currentPage < 0) {
+                currentPage = tileCount - 1; // Go to last page
+            } else if (currentPage >= tileCount) {
+                currentPage = 0; // Go to first page
+            }
+
+            // Apply circular rotation for smooth animation
+            const angle = -currentPage * 360 / tileCount; // Calculate rotation angle
+            tilesWrapper.style.transform = `rotate(${angle}deg)`;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const tiles = document.querySelectorAll(".tile");
+            const tilesPerPage = 3;
+            let currentPage = 0;
+        
+            const updateTilesVisibility = () => {
+                tiles.forEach((tile, index) => {
+                    const start = currentPage * tilesPerPage;
+                    const end = start + tilesPerPage;
+                    tile.style.display = index >= start && index < end ? "block" : "none";
+                });
+            };
+        
+            window.changePage = (direction) => {
+                const maxPage = Math.ceil(tiles.length / tilesPerPage) - 1;
+                currentPage = Math.max(0, Math.min(maxPage, currentPage + direction));
+                updateTilesVisibility();
+            };
+        
+            // Initialize the first page
+            updateTilesVisibility();
+        });
+        
         const successMessage = document.getElementById('success-message');
         if (successMessage) {
             successMessage.classList.add('show');
@@ -298,15 +1371,6 @@
                 successMessage.classList.remove('show');  // Fade-out
             }, 3000);
         }
-
-        // Show spinner on button click for approval
-        const approveButtons = document.querySelectorAll('form button[type="submit"]');
-        approveButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const spinner = button.querySelector('.spinner-border');
-                spinner.style.display = 'inline-block';
-            });
-        });
     </script>
 
 </body>

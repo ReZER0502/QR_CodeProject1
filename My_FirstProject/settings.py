@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-luj&v0_#m=o4whr1yh-o%#1fp$o=zf0p4*rr7*&@1y(tr#3e2^"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','*']
+ALLOWED_HOSTS = ['registration.natcco.coop'] #['127.0.0.1', 'localhost','*']
 
 # Application definition
 AUTH_USER_MODEL = "registration.AdminUser"
@@ -88,7 +88,7 @@ WSGI_APPLICATION = "My_FirstProject.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': '1st project',  
+        'NAME': 'test_project',  
         'USER': 'root',  
         'PASSWORD': '',  
         'HOST': 'localhost',  
@@ -146,4 +146,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = 'http://192.168.0.81:8000'  #Use the domain when deployed
+BASE_URL = 'http://10.100.1.70:8000'  #'http://10.0.0.52:8000'

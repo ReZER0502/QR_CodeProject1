@@ -9,87 +9,37 @@
     <title>I-Register</title>
     
     <!-- QR Code Favicon -->
-    <link rel="icon" href="{% static 'img\logo.ico' %}" type="image/x-icon">
+    <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon">
     
     <!-- Add Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
+        /* General Styling */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
-            color: lightgray; /* Changed font color to light gray */
-            overflow: hidden; /* Prevent scrollbars */
+            color: lightgray;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             background: url("{% static 'img/all_bg.jpg' %}") no-repeat center center fixed;
             background-size: cover;
         }
-    
+
         .register-container {
             max-height: 70vh;
-            z-index: 1;
             padding: 25px;
             width: 300px;
             text-align: left;
-            background: transparent !important; /* Ensure fully transparent background */
             border-radius: 15px;
             animation: containerFadeIn 1s ease-in-out;
-            border: none !important; /* Ensure no border */
-            box-shadow: none !important; /* Remove any shadow */
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
         }
-    
-        /* Adjust the shake and fade-out animation for error messages */
-        @keyframes shake {
-            0% { transform: translate(0); }
-            25% { transform: translate(-5px, 0); }
-            50% { transform: translate(5px, 0); }
-            75% { transform: translate(-5px, 0); }
-            100% { transform: translate(0); }
-        }
-    
-        .shake {
-            animation: shake 0.5s;
-        }
-    
-        .fade-out {
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-    
-        .fade-out.hidden {
-            opacity: 0;
-        }
-    
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-    
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    
-        .logo {
-            display: block;
-            margin: 0 auto;
-            font-size: 60px;
-            color: white; /* White color for logo text */
-            text-align: center;
-            border-radius: 50%;
-            padding: 8px;
-            background: transparent; /* Set the logo background to transparent */
-            border: none; /* Remove the border from the logo */
-        }
-    
-        /* New animation for the container */
+
         @keyframes containerFadeIn {
             0% {
                 opacity: 0;
@@ -104,229 +54,143 @@
                 transform: scale(1);
             }
         }
-    
+
+        .logo {
+            display: block;
+            margin: 0 auto;
+            font-size: 60px;
+            color: white;
+            text-align: center;
+        }
+
         .input-container {
             position: relative;
-            margin: 8px 0; /* Reduced margin */
+            margin: 8px 0;
         }
-    
+
         input, select {
             width: 100%;
-            padding: 10px 30px; /* Reduced padding */
+            padding: 10px 30px;
             margin: 6px 0;
-            border: 2px solid #333; /* Dark gray border for inputs */
+            border: 2px solid #333;
             border-radius: 20px;
-            background: #444; /* Dark gray background for input fields */
-            color: white; /* White text inside input fields */
+            background: #444;
+            color: white;
             box-sizing: border-box;
             transition: border-color 0.3s, background 0.3s, transform 0.3s;
-            font-size: 12px; /* Adjusted font size for better readability */
+            font-size: 12px;
             outline: none;
         }
-    
+
         input::placeholder, select {
-            color: rgba(255, 255, 255, 0.6); /* Light gray placeholder text */
+            color: rgba(255, 255, 255, 0.6);
         }
-    
+
         select option {
-            background: #333; /* Dark gray background for select options */
-            color: white; /* White text color */
+            background: #333;
+            color: white;
         }
-    
-        .qr-code {
-            text-align: center;
-            margin-top: 7px; /* Adjusted margin */
-        }
-    
+
         input:focus, select:focus {
             border-color: #feb47b;
             background: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
-    
+
         .input-container i {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
             color: white;
-            font-size: 12px; /* Adjusted icon size */
+            font-size: 12px;
         }
-    
+
         input:focus + i, select:focus + i {
             color: #feb47b;
         }
-    
-        .button-container {
-            display: flex;
-            justify-content: center;
-        }
-    
-        button {
-            width: 100%;
-            max-width: 150px; /* Reduced button size */
-            padding: 12px;
-            margin: 8px auto;
-            border: none;
-            border-radius: 15px;
-            background-color: #e50914; /* Red background for the button */
-            color: white; /* White font color */
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-    
-        button:hover {
-            background-color: #f40612; /* Slightly darker red on hover */
-            transform: translateY(-3px);
-        }
-    
-        .admin-container {
-            margin-top: 10px; /* Reduced margin */
-            text-align: center;
-        }
-    
-        .admin-container h2 {
-            margin: 8px 0;
-            color: lightgray; /* Light gray color for headings */
-            font-size: 14px;
-        }
-    
-        .admin-container p {
-            font-size: 12px;
-            color: lightgray; /* Light gray color for paragraphs */
-        }
-    
-        .message {
-            margin: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            color: white;
-            background-color: #d9534f; /* Red for error */
-            display: none; /* Initially hidden */
-            transition: opacity 0.5s ease-out;
-            position: absolute; /* Positioning for centering */
-            top: 50%; /* Center vertically */
-            left: 50%; /* Center horizontally */
-            transform: translate(-50%, -50%); /* Adjust for element size */
-            z-index: 10; /* Ensure it appears above other elements */
-            text-align: center; /* Center text */
-        }
-    
-        .fade-out {
-            opacity: 0;
-        }
-    
-        /* Mobile screens (max-width: 768px) */
-        @media (max-width: 768px) {
-            .register-container {
-                width: 50%; /* Adjusted width for smaller screens */
-                padding: 20px;
-                background: rgba(255, 255, 255, 0.5); /* Adjusted background transparency */
-            }
-    
-            input, select {
-                font-size: 16px; /* Smaller text for smaller screens */
-                padding: 12px 40px 12px 35px; /* Adjust input padding: more padding for icons */
-            }
-    
-            .logo {
-                font-size: 80px; /* Reduced logo size */
-            }
-    
-            .input-container {
-                margin: 10px 0; /* Reduced input margins */
-            }
-    
-            /* Adjust icon position */
-            .input-container i {
-                font-size: 18px; /* Slightly smaller icon */
-                left: 10px; /* Positioned closer to the input edge */
-            }
-    
-            button {
-                padding: 12px;
-                max-width: 150px; /* Adjusted button size */
-            }
-    
-        }
-    
-        /* Very small screens like tablets and small phones (max-width: 480px) */
-        @media (max-width: 480px) {
-            .register-container {
-                width: 100%; /* Adjusted to fit screen */
-                padding: 15px;
-            }
-    
-            input, select {
-                font-size: 14px; /* Smaller font size for smaller devices */
-                padding: 10px 40px 10px 30px; /* Adjust padding: more room for icons */
-            }
-    
-            .logo {
-                font-size: 60px; /* Smaller logo */
-            }
-    
-            /* Adjust icon position for smaller screens */
-            .input-container i {
-                font-size: 16px; /* Further reduced icon size */
-                left: 8px; /* Closer to the edge */
-            }
-        }
-    
+
         .error {
+            display: none;
             color: red;
-            display: none; /* Hide by default */
+            margin-top: 5px;
+            font-size: 12px;
         }
-    
-        /* Shake animation */
+
+        .error.show {
+            display: block;
+        }
+
         @keyframes shake {
-            0% { transform: translate(0); }
-            25% { transform: translate(-5px, 0); }
-            50% { transform: translate(5px, 0); }
-            75% { transform: translate(-5px, 0); }
-            100% { transform: translate(0); }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
         }
-    
+
         .shake {
             animation: shake 0.5s;
         }
-    
-        /* Fade out animation */
+
         .fade-out {
             opacity: 1;
             transition: opacity 0.5s ease;
         }
+
         .fade-out.hidden {
             opacity: 0;
         }
-    </style>            
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            width: 100%;
+            max-width: 150px;
+            padding: 12px;
+            margin: 8px auto;
+            border: none;
+            border-radius: 15px;
+            background-color: #e50914;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button:hover {
+            background-color: #f40612;
+            transform: translateY(-3px);
+        }
+    </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('.registration-form');
-        
-            // Show error messages if they exist
-            const errorElements = form.querySelectorAll('.error');
-            errorElements.forEach(error => {
-                if (error.innerText) {
-                    // Add shake effect to the form
+            const inputs = form.querySelectorAll('input, select');
+
+            // Show errors and add animations
+            form.querySelectorAll('.error').forEach(error => {
+                if (error.innerText.trim()) {
                     form.classList.add('shake');
-        
-                    // Show the error message
-                    error.style.display = 'inline';
-                    
-                    // Fade out the error message after 2 seconds
+                    error.classList.add('show');
                     setTimeout(() => {
-                        form.classList.remove('shake'); // Remove shake class
-                        error.classList.add('fade-out'); // Add fade-out class
-                        // Hide the error message after fade out
-                        setTimeout(() => {
-                            error.style.display = 'none'; // Hide the error message
-                            error.classList.remove('fade-out'); // Remove fade-out class
-                        }, 500); // Match with fade-out duration
-                    }, 2000); // Show for 2 seconds
+                        error.classList.add('fade-out');
+                        setTimeout(() => error.classList.remove('show', 'fade-out', 'shake'), 500);
+                    }, 3000);
                 }
+            });
+
+            // Clear errors on input
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const error = input.closest('.input-container').querySelector('.error');
+                    if (error) {
+                        error.classList.remove('show', 'shake', 'fade-out');
+                    }
+                });
             });
         });
 
@@ -341,10 +205,11 @@
                 'ETCG': ['Stab-Fund', 'Consultancy', 'KRC'],
                 'COOP': ['IT', 'HR', 'Finance', 'ASG', 'ETCG']
             };
-            subDepartmentSelect.innerHTML = '';
+
+            subDepartmentSelect.innerHTML = '<option value="">Select Sub-Department</option>';
             const selectedDepartment = departmentSelect.value;
-            if (selectedDepartment && departments[selectedDepartment]) {
-                departments[selectedDepartment].forEach(function (subDept) {
+            if (departments[selectedDepartment]) {
+                departments[selectedDepartment].forEach(subDept => {
                     const option = document.createElement('option');
                     option.value = subDept;
                     option.textContent = subDept;
@@ -352,27 +217,6 @@
                 });
             }
         }
-        
-        function showMessage(message) {
-            const messageBox = document.getElementById('message-box');
-            const messageText = document.getElementById('message-text');
-            messageText.textContent = message; 
-            messageBox.style.display = 'block';
-        }
-
-        window.onload = function() {
-            var messageDiv = document.getElementById("message");
-            if (messageDiv.innerHTML.trim() !== "") {
-                messageDiv.style.display = "block";
-                setTimeout(function() {
-                    messageDiv.classList.add("fade-out");
-                    setTimeout(function() {
-                        messageDiv.style.display = "none"; 
-                    }, 500); 
-                }, 3000); 
-            }
-        };
-        
     </script>
 </head>
 
@@ -382,33 +226,33 @@
             <i class="fas fa-qrcode"></i>
         </div>
 
-        <form method="POST" action="{% url 'register' %}">
+        <form method="POST" action="{% url 'register' %}" class="registration-form">
             {% csrf_token %}
-            
+
             <div class="input-container">
                 <i class="fas fa-user-alt"></i>
                 <input type="text" name="first_name" placeholder="First Name" required>
                 {% if form.first_name.errors %}
-                    <span class="error">{{ form.first_name.errors|striptags }}</span>
+                <span class="error">{{ form.first_name.errors|striptags }}</span>
                 {% endif %}
             </div>
-            
+
             <div class="input-container">
                 <i class="fas fa-users"></i>
                 <input type="text" name="last_name" placeholder="Last Name" required>
                 {% if form.last_name.errors %}
-                    <span class="error">{{ form.last_name.errors|striptags }}</span>
+                <span class="error">{{ form.last_name.errors|striptags }}</span>
                 {% endif %}
             </div>
-            
+
             <div class="input-container">
                 <i class="fas fa-at"></i>
                 <input type="email" name="email" placeholder="Email" required>
                 {% if form.email.errors %}
-                    <span class="error">{{ form.email.errors|striptags }}</span>
+                <span class="error">{{ form.email.errors|striptags }}</span>
                 {% endif %}
             </div>
-            
+
             <div class="input-container">
                 <i class="fas fa-building"></i>
                 <select id="department" name="department" onchange="updateSubDepartment()" required>
@@ -421,35 +265,32 @@
                     <option value="COOP">COOP</option>
                 </select>
             </div>
-            
+
             <div class="input-container">
                 <i class="fas fa-sitemap"></i>
                 <select id="sub_department" name="sub_department" required>
                     <option value="">Select Sub-Department</option>
                 </select>
             </div>
-        
+
+            {% if form.non_field_errors %}
+            <div class="error">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="button-container">
                 <button type="submit">Register</button>
             </div>
         </form>
-        
-        <div class="admin-container">
-            <h2>Attendee Registration</h2>
-            <p>Please have your Administrator scan your QR code.</p> 
-        </div>
 
-        <div class="message" id="message">
-            {% if messages %}
-                {% for message in messages %}
-                    <div>{{ message }}</div>
-                {% endfor %}
-            {% endif %}
+        <div class="admin-container" style="text-align: center; margin-top: 20px;">
+            <h2 style ="margin-bottom: 3px;">Attendee Registration</h2>
+            <p style="font-size: 0.8rem; color: lightgray; margin-top: 0;">Please have your Administrator scan your QR code.</p>
         </div>
-
     </div>
-    
-
 </body>
 
 </html>
