@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'False'
 
-ALLOWED_HOSTS = ['registration.natcco.coop', '10.0.0.52', '10.100.1.70'] #['127.0.0.1', 'localhost','*']
+ALLOWED_HOSTS = ['registration.natcco.coop', '10.0.0.52', '10.100.1.70', 'qr-registration.onrender.com' ] #['127.0.0.1', 'localhost','*']
 
 # Application definition
 AUTH_USER_MODEL = "registration.AdminUser"
@@ -141,7 +141,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-USE_L1ON = True
+USE_L10N = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
