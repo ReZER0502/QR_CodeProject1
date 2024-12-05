@@ -39,7 +39,7 @@ class AdminUser(AbstractBaseUser, PermissionsMixin):
 
 # Signal to prevent permanent admin deletion
 def prevent_admin_deletion(sender, instance, **kwargs):
-    permanent_admin_email = "gcagbayani@natcco.coop"
+    permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
     
     if instance.email == permanent_admin_email:
         raise Exception("The permanent admin user cannot be deleted.")

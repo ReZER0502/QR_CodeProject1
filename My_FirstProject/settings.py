@@ -19,13 +19,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-luj&v0_#m=o4whr1yh-o%#1fp$o=zf0p4*rr7*&@1y(tr#3e2^"
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['registration.natcco.coop'] #['127.0.0.1', 'localhost','*']
+ALLOWED_HOSTS = ['registration.natcco.coop', '10.0.0.52', '10.100.1.70'] #['127.0.0.1', 'localhost','*']
 
 # Application definition
 AUTH_USER_MODEL = "registration.AdminUser"
@@ -41,7 +40,7 @@ INSTALLED_APPS = [
     "widget_tweaks"
 ]
 
-# Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail.
+# Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail (diko sure haha)
 # Yung nakasaad na gmail jan ay yan mismo yung magsesend sa email nung nag register
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail SMTP
@@ -60,6 +59,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    SECURE_PROXY_SSL_HEADER = None  # Disable the proxy SSL header in development
+    SECURE_SSL_REDIRECT = False  # Don't force HTTPS in development
+else:
+    SECURE_SSL_REDIRECT = True  # Enable HTTPS redirect in production
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 ROOT_URLCONF = "My_FirstProject.urls"
 
@@ -139,11 +146,13 @@ USE_L1ON = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-import os
+
 # Static files settings
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # This is for your development static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # This is for collected static files
 
-BASE_URL = 'http://10.100.1.70:8000'  #'http://10.0.0.52:8000'
+
+BASE_URL = 'http://10.100.1.70:8000'  #'http://10.100.1.70:8000'

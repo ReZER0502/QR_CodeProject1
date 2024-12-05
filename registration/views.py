@@ -145,7 +145,7 @@ def register(request):
                 qrcode_img = qrcode_img.convert("RGBA")
 
                 # Load the background image
-                background = Image.open('C:/xampp/htdocs/FINAL/QR_CodeProject1/static/img/my_template.jpg')
+                background = Image.open('C:/xampp/htdocs/TEST/static/img/my_template.jpg')
 
                 # Ensure background is also in RGBA mode
                 background = background.convert("RGBA")
@@ -246,7 +246,7 @@ def handle_attendance_logic(request):
             else:
                 # Mark the attendee as present
                 attendee.is_present = True
-                attendee.present_time = timezone.now() + timedelta(hours=8)  # Adjust time zone as needed
+                attendee.present_time = timezone.now() + timedelta(hours=8)  #Cubao Manila Timezone
                 attendee.save()
             
             attendee_name = f"{attendee.first_name} {attendee.last_name}"
