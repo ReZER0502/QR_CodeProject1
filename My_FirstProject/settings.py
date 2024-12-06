@@ -58,6 +58,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 if DEBUG:
@@ -150,9 +151,10 @@ USE_L10N = True
 # Static files settings
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # This is for your development static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # This is for collected static files
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # folder na mag sa-save yung qr
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # para sa dev static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # para sa command collect static files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 BASE_URL = 'http://10.100.1.70:8000'  #'http://10.100.1.70:8000'
