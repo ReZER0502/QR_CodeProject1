@@ -96,13 +96,14 @@ WSGI_APPLICATION = "My_FirstProject.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': 'qr_db',  # Your DB name
+        'USER': 'qr_db_3a1g_user',  # Your DB user
+        'PASSWORD': 'iX6n7qzQKh4m9HZ13RSuHlnOuWqIkY4T',  # Your DB password
+        'HOST': 'dpg-ct975l1opnds73e4p6eg-a',  # Your DB host
+        'PORT': '5432',
     }
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
