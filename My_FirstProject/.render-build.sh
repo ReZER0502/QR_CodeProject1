@@ -1,7 +1,9 @@
-
+#!/bin/bash
+# Install dependencies
 pip install -r requirements.txt
 
+# Apply migrations
 python manage.py migrate
-python manage.py collectstatic --noinput
 
-chmod +x .render-build.sh
+# Collect static files
+python manage.py collectstatic --noinput
