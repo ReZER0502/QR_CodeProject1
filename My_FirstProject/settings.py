@@ -96,8 +96,8 @@ WSGI_APPLICATION = "My_FirstProject.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'qr_db',  # Your DB name
-        'USER': 'qr_db_3a1g_user',  # Your DB user
+        'NAME': 'qr_db_irtq',  # Your DB name
+        'USER': 'qr_db',  # Your DB user
         'PASSWORD': 'iX6n7qzQKh4m9HZ13RSuHlnOuWqIkY4T',  # Your DB password
         'HOST': 'dpg-ct975l1opnds73e4p6eg-a',  # Your DB host
         'PORT': '5432',
