@@ -4,7 +4,6 @@ from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import post_migrate, pre_delete
 
-# Custom user manager for AdminUser
 class AdminUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         if not email:
