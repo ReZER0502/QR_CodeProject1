@@ -159,6 +159,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Set the session expiry time in seconds (e.g., 2 hours)
 SESSION_COOKIE_AGE = 3600  # 2 hours (7200 seconds)
 
+# settings.py
+SESSION_COOKIE_DOMAIN = ".onrender.com"  # Use the appropriate domain
+
 # Ensure that the session persists even if the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
