@@ -22,7 +22,7 @@ from django.utils.html import strip_tags
 from django.http import HttpResponseForbidden
 from .forms import AdminWhitelistForm
 from django.contrib.messages import get_messages
-from django.http import JsonResponse
+import os
 
 def admin_login(request):
     permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  # Hardcoded permanent admins
@@ -144,9 +144,9 @@ def register(request):
                 # Convert QR code to RGBA to avoid mode conflicts
                 qrcode_img = qrcode_img.convert("RGBA")
 
-                # Load the background image
-                background = Image.open('C:/xampp/htdocs/TEST/static/img/my_template.jpg')
-
+                background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'my_template.jpg')
+                background = Image.open(background_path)
+            
                 # Ensure background is also in RGBA mode
                 background = background.convert("RGBA")
 
