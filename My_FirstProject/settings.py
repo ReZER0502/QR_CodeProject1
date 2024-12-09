@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "widget_tweaks"
 ]
 
-# Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail (diko sure haha)
+# Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail 
 # Yung nakasaad na gmail jan ay yan mismo yung magsesend sa email nung nag register
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail SMTP
@@ -190,5 +190,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # para sa dev static file
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # para sa command collect static files
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-BASE_URL = 'http://10.100.1.70:8000'  #'http://10.100.1.70:8000'
+BASE_URL = "https://qr-registration.onrender.com" #'http://10.100.1.70:8000'
