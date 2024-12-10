@@ -1056,13 +1056,12 @@
                 <button class="user-profile">
                     <span>{{ user.first_name }} {{ user.last_name }}</span>
                     <span>
-                        {% if profile_picture %}
-                            <img src="{{ profile_picture }}" alt="Admin Profile Picture" />
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="{{ user.first_name }}'s Profile Picture" />
                         {% else %}
-                            <img src="C:/xampp/htdocs/FINAL/QR_CodeProject1/media/profile_pictures/test_image.jpeg" alt="Default Profile Picture" />
-                            <!-- Change to dynamic (naka localhost parin sya) -->
+                            <img src="{% static 'profile_pictures/default_profile.png' %}" alt="Default Profile Picture" />
                         {% endif %}
-                    </span>                    
+                    </span>
                 </button>
             
                 <div class="app-header-actions-buttons">
