@@ -24,6 +24,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'False'
 
+LOGIN_URL = 'accounts/login/'
+LOGIN_REDIRECT_URL = '/registration/admin/dashboard/'
+
 ALLOWED_HOSTS = ['registration.natcco.coop', '10.0.0.52', '10.100.1.70', 'qr-registration.onrender.com' ] #['127.0.0.1', 'localhost','*']
 
 # Application definition
