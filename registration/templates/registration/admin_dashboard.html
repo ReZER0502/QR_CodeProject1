@@ -994,8 +994,30 @@
             font-size: 0.875rem;
             margin-top: 0.5rem;
         }
-
-
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end; /* Aligns content to the right */
+            margin-bottom: 15px; /* Adds space below the button */
+            margin-top: -38px;
+        }
+        
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+        
+        .icon-button i {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .icon-button:hover i {
+            color: #007bff; /* Optional: Change color on hover */
+        }
+        
 
     </style>
 </head>
@@ -1015,22 +1037,21 @@
             </div>
             <div class="app-header-navigation">
                 <div class="tabs">
-                    <a href="#">
+                    <a href="#" id="overview-tab" class="tab-link" onclick="showTab('overview-content')">
                         Overview
                     </a>
-                    <a href="#" class="active">
+                    <a href="#" id="whitelist-tab" class="tab-link active" onclick="showTab('whitelist-content')">
                         Whitelist
                     </a>
-
-                    <a href="#">
+                    <a href="#" id="accounts-tab" class="tab-link" onclick="showTab('accounts-content')">
                         Accounts
                     </a>
-
-                    <a href="#">
-                        Attendance 
+                    <a href="#" id="attendance-tab" class="tab-link" onclick="showTab('attendance-content')">
+                        Attendance
                     </a>
                 </div>
             </div>
+
             <div class="app-header-actions">
                 <button class="user-profile">
                     <span>{{ user.first_name }} {{ user.last_name }}</span>
@@ -1039,6 +1060,7 @@
                             <img src="{{ profile_picture }}" alt="Admin Profile Picture" />
                         {% else %}
                             <img src="C:/xampp/htdocs/FINAL/QR_CodeProject1/media/profile_pictures/test_image.jpeg" alt="Default Profile Picture" />
+                            <!-- Change to dynamic (naka localhost parin sya) -->
                         {% endif %}
                     </span>                    
                 </button>
@@ -1101,73 +1123,66 @@
                     </div>
                 </footer>
             </div>
-            <div class="app-body-main-content">
-                <section class="service-section">
-                    <h2>Whitelisted Emails</h2>
 
-                    <!-- Form to Add Whitelisted Emails -->
-                    <div class="service-section-header">
-                        <form method="post" action="{% url 'admin_dashboard' %}">
-                            {% csrf_token %}
-                            <div class="search-field">
-                                <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
-                                <button type="submit" class="icon-button">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-            
-                                <!-- Message Container beside the Button -->
-                                <div class="message-container">
-                                    {% if messages %}
-                                        <div class="message {{ messages.0.tags }}">
-                                            {% for message in messages %}
-                                                <p>{{ message }}</p>
+            <div class="app-body-main-content">
+
+                <div id="whitelist-content" class="tab-content" style="display: block;">
+                    <section class="service-section">
+                        <h2>Whitelisted Emails</h2>
+                
+                        <!-- Form to Add Whitelisted Emails -->
+                        <div class="service-section-header">
+                            <form method="post" action="{% url 'admin_dashboard' %}">
+                                {% csrf_token %}
+                                <div class="search-field">
+                                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
+                                    <button type="submit" class="icon-button">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <div class="message-container">
+                                        {% if messages %}
+                                            <div class="message {{ messages.0.tags }}">
+                                                {% for message in messages %}
+                                                    <p>{{ message }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </form>
+                        
+                            {% if whitelist_form.errors %}
+                                <div class="error-messages">
+                                    <ul>
+                                        {% for field in whitelist_form %}
+                                            {% for error in field.errors %}
+                                                <li>{{ error }}</li>
                                             {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="tiles-container">
+                            <div class="tiles-wrapper">
+                                <div class="tiles" id="tiles">
+                                    {% for entry in whitelisted_emails %}
+                                        <article class="tile">
+                                            <div class="tile-header">
+                                                <i class="ph-lightning-light"></i>
+                                                <h3>
+                                                    <span>{{ entry.email }}</span>
+                                                </h3>
+                                            </div>
+                                        </article>
+                                    {% empty %}
+                                        <p>No emails have been whitelisted yet.</p>
+                                    {% endfor %}
                                 </div>
                             </div>
-                        </form>
-            
-                        {% if whitelist_form.errors %}
-                            <div class="error-messages">
-                                <ul>
-                                    {% for field in whitelist_form %}
-                                        {% for error in field.errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                    </div>
-            
-                    <!-- Mobile Toggle Button -->
-                    <div class="mobile-only">
-                        <button class="flat-button">
-                            Toggle search
-                        </button>
-                    </div>
-            
-                    <!-- Tiles to Display Whitelisted Emails -->
-                    <div class="tiles-container">
-            
-                        <div class="tiles-wrapper">
-                            <div class="tiles" id="tiles">
-                                {% for entry in whitelisted_emails %}
-                                    <article class="tile">
-                                        <div class="tile-header">
-                                            <i class="ph-lightning-light"></i>
-                                            <h3>
-                                                <span>{{ entry.email }}</span>
-                                            </h3>
-                                        </div>
-                                    </article>
-                                {% empty %}
-                                    <p>No emails have been whitelisted yet.</p>
-                                {% endfor %}
-                            </div>
                         </div>
-            
+
                         <div class="arrows-container">
                             <button class="arrow-button left-arrow icon-button" onclick="changePage(-1)">
                                 <i class="fas fa-arrow-left"></i> <!-- Left arrow icon -->
@@ -1177,11 +1192,57 @@
                                 <i class="fas fa-arrow-right"></i> <!-- Right arrow icon -->
                             </button>
                         </div>
-                    </div>
+                        <!-- Additional Content for Whitelist goes here -->
+                    </section>
+                </div>
                 
-                    <!-- Footer -->
-                 
-                </section>                
+                <!-- Content for Attendees -->
+                <div id="attendance-content" class="tab-content" style="display: none;">
+                    <h2>Attendees</h2>
+                    <!-- Filter and Download Buttons -->
+                    <div class="action-buttons">
+                        <!-- Download CSV Button -->
+                        <form method="get" action="{% url 'download_attendees' %}" style="display: inline;">
+                            <button class="icon-button" type="submit" title="Download Attendees">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        </form>
+                    </div>
+                    <!-- Attendees List -->
+                    {% if attendees %}
+                        <ul class="attendee-list">
+                            {% for attendee in attendees %}
+                                <li class="attendee-item">
+                                    <span class="attendee-name">{{ attendee.first_name }} {{ attendee.last_name }}</span>
+                                    <span class="attendee-status {% if attendee.is_present %}present{% else %}absent{% endif %}">
+                                        {% if attendee.is_present %}
+                                            - Present
+                                        {% else %}
+                                            - Absent
+                                        {% endif %}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="no-attendees-message">
+                            <p>No registered attendees</p>
+                        </div>
+                    {% endif %}
+                </div>                
+                            
+                <!-- Content for Accounts -->
+                <div id="accounts-content" class="tab-content" style="display: none;">
+                    <h2>Accounts</h2>
+                    <!-- Your accounts content here -->
+                </div>
+                
+                <!-- Content for Overview -->
+                <div id="overview-content" class="tab-content" style="display: none;">
+                    <h2>Overview</h2>
+                    <!-- Your overview content here -->
+                </div>
+                          
                 <section class="transfer-section">
                     <div class="transfer-section-header">
                         <h2>Latest Events</h2>
@@ -1218,6 +1279,7 @@
                     </div>
                 </section>
             </div>
+
             <div class="app-body-sidebar">
                 <section class="payment-section">
                     <h2>Live Event Monitoring</h2>
@@ -1371,6 +1433,51 @@
                 successMessage.classList.remove('show');  // Fade-out
             }, 3000);
         }
+
+        function showTab(tabId) {
+            // Hide all tab content divs
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => {
+                tab.style.display = 'none';
+            });
+    
+            // Remove 'active' class from all tab links
+            const allTabLinks = document.querySelectorAll('.tab-link');
+            allTabLinks.forEach(tabLink => {
+                tabLink.classList.remove('active');
+            });
+    
+            // Show the selected tab
+            document.getElementById(tabId).style.display = 'block';
+    
+            // Add 'active' class to the clicked tab
+            const activeTab = document.querySelector(`a[onclick="showTab('${tabId}')"]`);
+            activeTab.classList.add('active');
+        }
+
+        function fetchAttendees() {
+            fetch("{% url 'get_attendees_status' %}")
+                .then(response => response.json())
+                .then(data => {
+                    let attendeeList = document.querySelector('.attendee-list');
+                    attendeeList.innerHTML = ''; // Clear existing list
+        
+                    data.attendees.forEach(attendee => {
+                        const li = document.createElement('li');
+                        li.classList.add('attendee-item');
+                        li.innerHTML = `
+                            <span class="attendee-name">${attendee.first_name} ${attendee.last_name}</span>
+                            <span class="attendee-status ${attendee.is_present.toLowerCase()}">
+                                ${attendee.is_present}
+                            </span>
+                        `;
+                        attendeeList.appendChild(li);
+                    });
+                });
+        }
+        
+        setInterval(fetchAttendees, 5000);  
+
     </script>
 
 </body>

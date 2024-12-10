@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.utils import timezone
 import qrcode
-from .models import Attendee
 from django.shortcuts import get_object_or_404
 from io import BytesIO
 from datetime import timedelta
@@ -19,10 +18,24 @@ import logging
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from django.http import HttpResponseForbidden
 from .forms import AdminWhitelistForm
 from django.contrib.messages import get_messages
 import os
+import csv
+from django.http import HttpResponseRedirect
+from django.http import JsonResponse
+
+#Live monitoring function para di na kailangan refresh
+@login_required
+def get_attendees_status(request):
+    attendees = Attendee.objects.all()
+    data = [{
+        'first_name': attendee.first_name,
+        'last_name': attendee.last_name,
+        'is_present': 'Present' if attendee.is_present else 'Absent'
+    } for attendee in attendees]
+
+    return JsonResponse({'attendees': data})
 
 def admin_login(request):
     permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  # Hardcoded permanent admins
@@ -106,11 +119,39 @@ def admin_dashboard(request):
 
     # Fetch all whitelisted emails to display in the dashboard
     whitelisted_emails = AdminWhitelist.objects.all()
+    attendees = Attendee.objects.all()
 
     return render(request, 'registration/admin_dashboard.html', {
         'form': form,
         'whitelisted_emails': whitelisted_emails,
+        'attendees': attendees,
     })
+    
+@login_required
+def download_attendees_csv(request):
+    # Restrict to permanent admins or users with the necessary permissions
+    if request.user.email not in PERMANENT_ADMIN_EMAILS:
+        return HttpResponseForbidden("You do not have permission to perform this action.")
+
+    # Create the HttpResponse object with the appropriate CSV header
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="attendees.csv"'
+
+    writer = csv.writer(response)
+    # Write the header row
+    writer.writerow(['First Name', 'Last Name', 'Email', 'Status'])
+
+    # Query all attendees and write their data
+    attendees = Attendee.objects.all()
+    for attendee in attendees:
+        writer.writerow([
+            attendee.first_name,
+            attendee.last_name,
+            attendee.email,
+            'Present' if attendee.is_present else 'Absent'
+        ])
+
+    return response
 
 
 def edit_user_profile(request):
@@ -184,7 +225,6 @@ def register(request):
 
                 email.send()
 
-                messages.success(request, "Registration successful! QR code sent to your email.")
                 return redirect('success', attendee_id=attendee.id)
 
             except Exception as e:
