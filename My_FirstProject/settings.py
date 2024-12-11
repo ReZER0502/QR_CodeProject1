@@ -19,15 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = "django-insecure-luj&v0_#m=o4whr1yh-o%#1fp$o=zf0p4*rr7*&@1y(tr#3e2^"
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'False'
+DEBUG = True
 
-LOGIN_URL = 'accounts/login/'
-LOGIN_REDIRECT_URL = 'admin_dashboard'
-
-ALLOWED_HOSTS = ['registration.natcco.coop', '10.0.0.52', '10.100.1.70', 'qr-registration.onrender.com' ] #['127.0.0.1', 'localhost','*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','*']
 
 # Application definition
 AUTH_USER_MODEL = "registration.AdminUser"
@@ -43,15 +41,15 @@ INSTALLED_APPS = [
     "widget_tweaks"
 ]
 
-# Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail 
+# Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail.
 # Yung nakasaad na gmail jan ay yan mismo yung magsesend sa email nung nag register
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail SMTP
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'eyecontroldc01@gmail.com' #qr test send 
-EMAIL_HOST_PASSWORD = 'uftt resc kgzn ymrx' #generated app password. hindi yung literal na password ng iyong account
-DEFAULT_FROM_EMAIL = 'eyecontroldc01@gmail.com'
+EMAIL_HOST_USER = 'melleattack0502@gmail.com' #qr test send 
+EMAIL_HOST_PASSWORD = 'dgva xsbv lyyn askt' #generated app password. hindi yung literal na password ng iyong account
+DEFAULT_FROM_EMAIL = 'mellettack0502@gmail.com'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,16 +59,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
-
-if DEBUG:
-    SECURE_PROXY_SSL_HEADER = None  # Disable the proxy SSL header in development
-    SECURE_SSL_REDIRECT = False  # Don't force HTTPS in development
-else:
-    SECURE_SSL_REDIRECT = True  # Enable HTTPS redirect in production
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 
 ROOT_URLCONF = "My_FirstProject.urls"
 
@@ -92,52 +81,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "My_FirstProject.wsgi.application"
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django_debug.log'),  # Log file location
-            'formatter': 'verbose',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file', 'console'],  # Writes logs to file and console
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'qr_db_irtq',  # Your DB name
-        'USER': 'qr_db',  # Your DB user
-        'PASSWORD': 'iX6n7qzQKh4m9HZ13RSuHlnOuWqIkY4T',  # Your DB password
-        'HOST': 'dpg-ct975l1opnds73e4p6eg-a',  # Your DB host
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'test_project',  
+        'USER': 'root',  
+        'PASSWORD': '',  
+        'HOST': 'localhost',  
+        'PORT': '3306',  
     }
 }
 
@@ -162,9 +117,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Set the session expiry time in seconds (e.g., 2 hours)
 SESSION_COOKIE_AGE = 3600  # 2 hours (7200 seconds)
 
-# settings.py
-SESSION_COOKIE_DOMAIN = ".onrender.com"  # Use the appropriate domain
-
 # Ensure that the session persists even if the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
@@ -182,18 +134,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-USE_L10N = True
+USE_L1ON = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-
+import os
 # Static files settings
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # folder na mag sa-save yung qr
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # para sa dev static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # para sa command collect static files
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = "https://qr-registration.onrender.com" #'http://10.100.1.70:8000'
+BASE_URL = 'http://10.0.0.52:8000'  #Use the domain when deployed
