@@ -995,12 +995,14 @@
             margin-top: 0.5rem;
         }
         
-        .action-buttons {
+        .action-buttons-container {
             display: flex;
-            justify-content: flex-end; /* Aligns content to the right */
-            margin-bottom: 15px; /* Adds space below the button */
-            margin-top: -38px;
+            gap: 10px; /* Adds space between the buttons */
+            align-items: center; /* Aligns buttons vertically at the center */
+            justify-content: flex-end; /* Align buttons to the left */
+            margin-bottom: 10px;
         }
+        
         
         .icon-button {
             background: none;
@@ -1018,6 +1020,31 @@
             color: #007bff; /* Optional: Change color on hover */
         }
         
+                
+        /* Style for the container that holds the name and the status circle */
+        .attendee-name-container {
+            display: flex;
+            align-items: center; /* Align the name and circle vertically */
+        }
+
+        /* Style for the status circle */
+        .status-indicator {
+            width: 15px;      /* Circle size */
+            height: 15px;     /* Circle size */
+            border-radius: 50%; /* Make it round */
+            margin-left: 8px; /* Space between text and circle */
+        }
+
+        /* Green for Present */
+        .present {
+            background-color: green;
+        }
+
+        /* Red for Absent */
+        .absent {
+            background-color: red;
+        }
+
 
     </style>
 </head>
@@ -1199,14 +1226,23 @@
                 <div id="attendance-content" class="tab-content" style="display: none;">
                     <h2>Attendees</h2>
                     <!-- Filter and Download Buttons -->
-                    <div class="action-buttons">
+                    <div class="action-buttons-container">
                         <!-- Download CSV Button -->
                         <form method="get" action="{% url 'download_attendees' %}" style="display: inline;">
                             <button class="icon-button" type="submit" title="Download Attendees">
                                 <i class="fas fa-download"></i>
                             </button>
                         </form>
+
+                        <!-- Reset Attendance Button -->
+                        <form method="POST" action="{% url 'reset_attendance' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button class="icon-button" type="submit" title="Reset Attendance">
+                                <i class="fas fa-sync-alt"></i>  <!-- Using sync icon to represent reset -->
+                            </button>
+                        </form>
                     </div>
+                                    
                     <!-- Attendees List -->
                     {% if attendees %}
                         <ul class="attendee-list">
@@ -1215,9 +1251,9 @@
                                     <span class="attendee-name">{{ attendee.first_name }} {{ attendee.last_name }}</span>
                                     <span class="attendee-status {% if attendee.is_present %}present{% else %}absent{% endif %}">
                                         {% if attendee.is_present %}
-                                            - Present
+                                            <div class="status-indicator present"></div>
                                         {% else %}
-                                            - Absent
+                                            <div class="status-indicator absent"></div> 
                                         {% endif %}
                                     </span>
                                 </li>
@@ -1465,15 +1501,15 @@
                         const li = document.createElement('li');
                         li.classList.add('attendee-item');
                         li.innerHTML = `
-                            <span class="attendee-name">${attendee.first_name} ${attendee.last_name}</span>
-                            <span class="attendee-status ${attendee.is_present.toLowerCase()}">
-                                ${attendee.is_present}
+                            <span class="attendee-name-container">
+                                <span class="attendee-name">${attendee.first_name} ${attendee.last_name}</span>
+                                <div class="status-indicator ${attendee.is_present ? 'present' : 'absent'}"></div>
                             </span>
                         `;
                         attendeeList.appendChild(li);
                     });
                 });
-        }
+        }        
         
         setInterval(fetchAttendees, 5000);  
 

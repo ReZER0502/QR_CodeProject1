@@ -24,7 +24,19 @@ import os
 import csv
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
+from .models import Attendee
 
+def reset_attendance(request):
+    if request.method == 'POST':
+        # Update all attendees to reset their attendance
+        Attendee.objects.update(is_present=False, present_time=None)
+        
+        # Display success message
+        messages.success(request, "Attendance has been reset for all attendees.")
+        
+        # Redirect back to the admin dashboard (or wherever appropriate)
+        return redirect('admin_dashboard') 
+    
 #Live monitoring function para di na kailangan refresh
 @login_required
 def get_attendees_status(request):
@@ -32,10 +44,11 @@ def get_attendees_status(request):
     data = [{
         'first_name': attendee.first_name,
         'last_name': attendee.last_name,
-        'is_present': 'Present' if attendee.is_present else 'Absent'
+        'is_present': attendee.is_present  # True/False value
     } for attendee in attendees]
 
     return JsonResponse({'attendees': data})
+
 
 def admin_login(request):
     permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  # Hardcoded permanent admins

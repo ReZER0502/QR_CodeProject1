@@ -36,6 +36,7 @@ class AdminUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 
+
 # Signal to prevent permanent admin deletion
 def prevent_admin_deletion(sender, instance, **kwargs):
     permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
