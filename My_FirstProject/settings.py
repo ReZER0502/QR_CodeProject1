@@ -32,19 +32,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "registration",
-    "widget_tweaks",
-    "cloudinary",
-    "cloudinary_storage"
+    "widget_tweaks"
 ]
-
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MedicalCloudinaryStorage'
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'den0pbvox',
-    'API_KEY': '426942519111445',
-    'API_SECRET': '7fb60NXOsJRHPzfxsVZZ4qI4FOw'
-}
-
-MEDIA_URL = f'https://res.cloudinary.com/{CLOUDINARY_STORAGE["den0pbvox"]}/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
