@@ -39,7 +39,7 @@ INSTALLED_APPS = [
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MedicalCloudinaryStorage'
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'den0pbvox',
+    'CLOUD_NAME': ' den0pbvox',
     'API_KEY': '426942519111445',
     'API_SECRET': '7fb60NXOsJRHPzfxsVZZ4qI4FOw'
 }
