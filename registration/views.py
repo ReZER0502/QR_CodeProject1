@@ -222,7 +222,7 @@ def register(request):
                 qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
 
                 # Save QR code to attendee record
-                attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file)
+                attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
                 attendee.save()
 
                 # Prepare and send the email with the attached QR code
