@@ -71,7 +71,6 @@
             margin-left: auto;
             margin-right: auto;
         }
-ff
         .app {
             min-height: 80vh;
             width: 95%;
@@ -221,73 +220,138 @@ ff
             flex-direction: column;
             align-items: flex-start;
             color: var(--c-text-tertiary);
+        
             a {
+                position: relative; /* For underline */
                 display: flex;
                 align-items: center;
                 text-decoration: none;
-                transition: 0.25s ease;
-
-                * {
-                    transition: 0.25s ease;
-                }
-
+                background: none !important; /* Remove any background */
+                border: none !important; /* Remove any borders */
+                box-shadow: none !important; /* Remove any shadow */
+                padding: 0 !important; /* Reset padding */
+                outline: none; /* Remove outline (if caused by focus state) */
+                transition: color 0.25s ease, transform 0.25s ease;
+        
                 i {
                     margin-right: 0.75rem;
                     font-size: 1.25em;
                     flex-shrink: 0;
                 }
-
+        
                 & + a {
-                    margin-top: 1.25rem;
+                    margin-top: 1.25rem; /* Space between links */
                 }
-
+        
                 &:hover,
                 &:focus {
-                    transform: translateX(4px);
-                    color: var(--c-text-primary);
+                    transform: translateX(4px); /* Move slightly right */
+                    color: #87CEEB; /* Change hover text color to Sky Blue */
+                }
+        
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px; /* Space below the text */
+                    left: 0;
+                    width: 0;
+                    height: 2px;
+                    background-color: #87CEEB; /* Underline color for Sky Blue */
+                    transition: width 0.3s ease;
+                }
+        
+                &:hover::after,
+                &:focus::after {
+                    width: 100%; /* Full underline on hover */
+                }
+        
+                &.active {
+                    color: #87CEEB; /* Active link text color for Sky Blue */
+                }
+        
+                &.active::after {
+                    width: 100%; /* Full underline for active link */
                 }
             }
         }
-
+        
         .tabs {
             display: flex;
             justify-content: space-between;
             color: var(--c-text-tertiary);
-            border-bottom: 1px solid var(--c-gray-600);
-
+            border-bottom: 1px solid var(--c-gray-600); /* Keep the bottom border for tab separation */
+            
             a {
-                padding-top: 1rem;
-                padding-bottom: 1rem;
+                padding: 1rem 0; /* Adjust padding for no extra space */
                 text-decoration: none;
-                border-top: 2px solid transparent;
+                border: none; /* Remove any border (top/bottom) */
                 display: inline-flex;
-                transition: 0.25s ease;
+                position: relative; /* For positioning the underline */
+                background: transparent !important; /* Ensure no background is applied */
+                box-shadow: none !important; /* Remove any shadow if it's adding a box effect */
+                transition: color 0.25s ease;
+        
                 &.active,
                 &:hover,
                 &:focus {
-                    color: var(--c-text-primary);
-                    border-color: var(--c-text-primary);
+                    color: #87CEEB; /* Sky Blue color on active, hover, or focus */
+                }
+        
+                /* Underline effect */
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px; /* Position the underline just below the text */
+                    left: 0;
+                    width: 0;
+                    height: 2px;
+                    background-color: #87CEEB; /* Sky Blue color */
+                    transition: width 0.3s ease; /* Smooth animation */
+                }
+        
+                /* Trigger underline animation on hover/focus/active */
+                &:hover::after,
+                &:focus::after,
+                &.active::after {
+                    width: 100%; /* Full underline on hover/focus/active */
                 }
             }
         }
-
+        
         .user-profile {
             display: flex;
             align-items: center;
             border: 0;
-            background: transparent;
+            background: transparent !important;
             cursor: pointer;
             color: var(--c-text-tertiary);
             transition: 0.25s ease;
-
+            position: relative; /* For positioning the underline */
+        
+            /* Remove the default outline and box shadow */
+            &:focus,
+            &:hover {
+                outline: none;
+                box-shadow: none;
+            }
+        
             &:hover,
             &:focus {
-                color: var(--c-text-primary);
-                span:last-child {
-                    box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary);
+                color: #87CEEB; /* Light Sky Blue color when hovering/focusing */
+        
+                /* Underline effect on hover/focus */
+                span:first-child::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0; /* Position it just below the text */
+                    left: 50%; /* Start at the center */
+                    width: 0;
+                    height: 2px;
+                    background-color: #87CEEB; /* Light Sky Blue color */
+                    transition: width 0.3s ease, left 0.3s ease; /* Smooth transition for width and position */
                 }
             }
-
+        
             span:first-child {
                 display: flex;
                 font-size: 1.125rem;
@@ -295,8 +359,9 @@ ff
                 padding-bottom: 1rem;
                 border-bottom: 1px solid var(--c-gray-600);
                 font-weight: 300;
+                position: relative; /* For positioning the underline */
             }
-
+        
             span:last-child {
                 transition: 0.25s ease;
                 display: flex;
@@ -308,9 +373,17 @@ ff
                 overflow: hidden;
                 margin-left: 1.5rem;
                 flex-shrink: 0;
+                box-shadow: none !important; /* Ensure no shadow when hovered */
+            }
+        
+            /* Triggering the animation */
+            &:hover span:first-child::after,
+            &:focus span:first-child::after {
+                width: 100%; /* Full underline width */
+                left: 0; /* Move underline to the left (to expand equally from center) */
             }
         }
-
+        
         .icon-button {
             width: 32px;
             height: 32px;
@@ -1124,23 +1197,23 @@ ff
         <div class="app-body">
             <div class="app-body-navigation">
                 <nav class="navigation">
-                    <a href="#">
-                        <i class="fas fa-bars"></i> 
+                    <a href="#" id="dashboard-sidebar" class="tab-link active" onclick="showTab('dashboard')">
+                        <i class="fas fa-bars"></i>
                         <span>Dashboard</span>
                     </a>
-                    <a href="#">
-                        <i class="fas fa-calendar-check"></i> 
+                    <a href="#" id="schedules-sidebar" class="tab-link" onclick="showTab('schedules')">
+                        <i class="fas fa-calendar-check"></i>
                         <span>Schedules</span>
                     </a>
-                    <a href="#">
-                        <i class="fas fa-calendar-day"></i> 
+                    <a href="#" id="events-sidebar" class="tab-link" onclick="showTab('events')">
+                        <i class="fas fa-calendar-day"></i>
                         <span>Events</span>
                     </a>
-                    <a href="#">
-                        <i class="fas fa-file-alt"></i> 
+                    <a href="#" id="templates-sidebar" class="tab-link" onclick="showTab('templates')">
+                        <i class="fas fa-file-alt"></i>
                         <span>Templates</span>
                     </a>
-                </nav>                
+                </nav>               
                 <footer class="footer">
                     <h1>ITG DATA CENTER<small>©</small></h1>
                     <div>
@@ -1151,6 +1224,23 @@ ff
             </div>
 
             <div class="app-body-main-content">
+
+                <div id="dashboard" class="tab-content" style="display: block;">
+                    <h2>Dashboard Panel</h2>
+                    <p>You are currently viewing the Dashboard.</p>
+                </div>
+                <div id="schedules" class="tab-content" style="display: none;">
+                    <h2>Schedules Panel</h2>
+                    <p>You are currently viewing the Schedules.</p>
+                </div>
+                <div id="events" class="tab-content" style="display: none;">
+                    <h2>Events Panel</h2>
+                    <p>You are currently viewing the Events.</p>
+                </div>
+                <div id="templates" class="tab-content" style="display: none;">
+                    <h2>Templates Panel</h2>
+                    <p>You are currently viewing the Templates.</p>
+                </div>
 
                 <div id="whitelist-content" class="tab-content" style="display: block;">
                     <section class="service-section">
@@ -1512,6 +1602,50 @@ ff
         }        
         
         setInterval(fetchAttendees, 5000);  
+
+        function showTab(tabId) {
+            // Hide all tab-content panels
+            const allTabs = document.querySelectorAll('.tab-content');
+            allTabs.forEach(tab => {
+                tab.style.display = 'none';
+            });
+        
+            // Show the selected panel
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.style.display = 'block';
+            }
+        
+            // Remove active class from all sidebar links
+            const sidebarLinks = document.querySelectorAll('.navigation .tab-link');
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+        
+            // Add active class to the clicked sidebar link
+            const activeSidebarLink = document.querySelector(`.navigation .tab-link[onclick="showTab('${tabId}')"]`);
+            if (activeSidebarLink) {
+                activeSidebarLink.classList.add('active');
+            }
+        
+            // Remove active class from all header tabs
+            const headerTabs = document.querySelectorAll('.app-header-navigation .tab-link');
+            headerTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+        
+            // Add active class to the corresponding header tab
+            const activeHeaderTab = document.querySelector(`.app-header-navigation .tab-link[onclick="showTab('${tabId}')"]`);
+            if (activeHeaderTab) {
+                activeHeaderTab.classList.add('active');
+            }
+        }
+        
+        // Initialize default view
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('dashboard');
+        });
+        
 
     </script>
 
