@@ -151,16 +151,19 @@ def download_attendees_csv(request):
     response['Content-Disposition'] = 'attachment; filename="attendees.csv"'
 
     writer = csv.writer(response)
-    # Write the header row
-    writer.writerow(['First Name', 'Last Name', 'Email', 'Status'])
+    # Write the header row, including 'Present Time'
+    writer.writerow(['First Name', 'Last Name', 'Email', 'Present Time', 'Status'])
 
     # Query all attendees and write their data
     attendees = Attendee.objects.all()
     for attendee in attendees:
+        # Format the 'present_time' before writing it to the CSV
+        present_time = attendee.present_time.strftime('%Y-%m-%d %H:%M:%S') if attendee.present_time else 'N/A'
         writer.writerow([
             attendee.first_name,
             attendee.last_name,
             attendee.email,
+            present_time,
             'Present' if attendee.is_present else 'Absent'
         ])
 

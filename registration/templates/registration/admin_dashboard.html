@@ -325,7 +325,7 @@
             background: transparent !important;
             cursor: pointer;
             color: var(--c-text-tertiary);
-            transition: 0.25s ease;
+            transition: color 0.25s ease;
             position: relative; /* For positioning the underline */
         
             /* Remove the default outline and box shadow */
@@ -338,20 +338,9 @@
             &:hover,
             &:focus {
                 color: #87CEEB; /* Light Sky Blue color when hovering/focusing */
-        
-                /* Underline effect on hover/focus */
-                span:first-child::after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0; /* Position it just below the text */
-                    left: 50%; /* Start at the center */
-                    width: 0;
-                    height: 2px;
-                    background-color: #87CEEB; /* Light Sky Blue color */
-                    transition: width 0.3s ease, left 0.3s ease; /* Smooth transition for width and position */
-                }
             }
         
+            /* Underline animation */
             span:first-child {
                 display: flex;
                 font-size: 1.125rem;
@@ -359,7 +348,28 @@
                 padding-bottom: 1rem;
                 border-bottom: 1px solid var(--c-gray-600);
                 font-weight: 300;
-                position: relative; /* For positioning the underline */
+                position: relative; /* Required for the underline animation */
+        
+                /* Create the underline with ::after */
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -2px; /* Position the underline just below the text */
+                    left: 50%; /* Start the underline at the center */
+                    width: 0; /* No underline initially */
+                    height: 2px; /* Thickness of the underline */
+                    background-color: #87CEEB; /* Light Sky Blue underline color */
+                    transform: translateX(-50%); /* Center the underline */
+                    transition: width 0.3s ease, transform 0.3s ease; /* Smooth animation for width and position */
+                }
+        
+                /* Expand the underline on hover/focus */
+                &:hover::after,
+                &:focus::after {
+                    width: 100%; /* Full width underline */
+                    left: 0; /* Reset position */
+                    transform: translateX(0); /* Remove translation */
+                }
             }
         
             span:last-child {
@@ -374,13 +384,6 @@
                 margin-left: 1.5rem;
                 flex-shrink: 0;
                 box-shadow: none !important; /* Ensure no shadow when hovered */
-            }
-        
-            /* Triggering the animation */
-            &:hover span:first-child::after,
-            &:focus span:first-child::after {
-                width: 100%; /* Full underline width */
-                left: 0; /* Move underline to the left (to expand equally from center) */
             }
         }
         
@@ -512,19 +515,7 @@
                 align-items: center;
                 justify-content: space-between;
                 font-weight: 600;
-        
-                .icon-button {
-                    color: inherit;
-                    border-color: inherit;
-                    &:hover,
-                    &:focus {
-                        background-color: transparent;
-                        i {
-                            transform: none;
-                        }
-                    }
-                }
-        
+           
                 &:focus {
                     box-shadow: none;
                 }
@@ -1087,38 +1078,79 @@
         .icon-button i {
             font-size: 16px;
             color: #333;
+          
         }
         
         .icon-button:hover i {
             color: #007bff; /* Optional: Change color on hover */
         }
         
-                
-        /* Style for the container that holds the name and the status circle */
         .attendee-name-container {
             display: flex;
             align-items: center; /* Align the name and circle vertically */
         }
 
-        /* Style for the status circle */
         .status-indicator {
-            width: 15px;      /* Circle size */
-            height: 15px;     /* Circle size */
-            border-radius: 50%; /* Make it round */
-            margin-left: 8px; /* Space between text and circle */
+            width: 15px;            /* Circle size */
+            height: 15px;           /* Circle size */
+            border-radius: 50%;     /* Always render as a circle */
+            margin-left: 8px;       /* Space between text and circle */
+            display: inline-block;  /* Inline behavior for alignment */
+            background-color: transparent; /* Transparent before AJAX renders */
+            transition: background-color 0.3s ease, opacity 0.3s ease; /* Smooth transition for visibility and color */
+            opacity: 0; /* Initially hidden */
         }
 
         /* Green for Present */
         .present {
             background-color: green;
+            opacity: 1;
         }
 
         /* Red for Absent */
         .absent {
             background-color: red;
+            opacity: 1;
         }
 
-
+        .custom-icon-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%; /* Circle shape */
+            border: none;
+            background-color: transparent; /* Transparent background */
+            color: var(--c-text-primary); /* Default icon color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.25s ease;
+            flex-shrink: 0;
+            padding: 0; /* Remove default padding */
+        }
+        
+        .custom-icon-button.large {
+            width: 42px;
+            height: 42px;
+            font-size: 1.25em; /* Larger button for large class */
+        }
+        
+        .custom-icon-button i {
+            font-size: 16px;
+            color: #333; /* Default icon color */
+            transition: color 0.25s ease; /* Transition for icon color */
+        }
+        
+        .custom-icon-button:hover,
+        .custom-icon-button:focus {
+            background-color: var(--c-gray-600); /* Hover background */
+            box-shadow: 0 0 0 4px var(--c-gray-800), 0 0 0 5px var(--c-text-tertiary); /* Hover shadow */
+        }
+        
+        .custom-icon-button:hover i {
+            color: #007bff; /* Icon color on hover */
+        }  
+        
     </style>
 </head>
 <body>
@@ -1252,7 +1284,7 @@
                                 {% csrf_token %}
                                 <div class="search-field">
                                     <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
-                                    <button type="submit" class="icon-button">
+                                    <button type="submit" class="custom-icon-button">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                     <div class="message-container">
@@ -1335,25 +1367,22 @@
                                     
                     <!-- Attendees List -->
                     {% if attendees %}
-                        <ul class="attendee-list">
-                            {% for attendee in attendees %}
-                                <li class="attendee-item">
-                                    <span class="attendee-name">{{ attendee.first_name }} {{ attendee.last_name }}</span>
-                                    <span class="attendee-status {% if attendee.is_present %}present{% else %}absent{% endif %}">
-                                        {% if attendee.is_present %}
-                                            <div class="status-indicator present"></div>
-                                        {% else %}
-                                            <div class="status-indicator absent"></div> 
-                                        {% endif %}
-                                    </span>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                    <ul class="attendee-list">
+                        {% for attendee in attendees %}
+                        <li class="attendee-item" data-email="{{ attendee.email }}">
+                            <span class="attendee-name-container">
+                                <span class="attendee-name">{{ attendee.first_name }} {{ attendee.last_name }}</span>
+                                <div class="status-indicator {% if attendee.is_present %}present{% else %}absent{% endif %}"></div>
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
                     {% else %}
-                        <div class="no-attendees-message">
-                            <p>No registered attendees</p>
-                        </div>
+                    <div class="no-attendees-message">
+                        <p>No registered attendees</p>
+                    </div>
                     {% endif %}
+
                 </div>                
                             
                 <!-- Content for Accounts -->
@@ -1409,7 +1438,7 @@
                 <section class="payment-section">
                     <h2>Live Event Monitoring</h2>
                     <div class="payment-section-header">
-                        <p>Live Monitoring of event</p>
+                        
                         <div>
                             <button class="card-button prom-dress">
                                 <!-- Prom Dress Icon -->
@@ -1601,8 +1630,8 @@
                 });
         }        
         
-        setInterval(fetchAttendees, 5000);  
-
+        setInterval(fetchAttendees, 5000);          
+        
         function showTab(tabId) {
             // Hide all tab-content panels
             const allTabs = document.querySelectorAll('.tab-content');
