@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.utils import timezone
 import qrcode
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from io import BytesIO
 from datetime import timedelta
@@ -8,8 +9,7 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponse, HttpResponseForbidden
 from PIL import Image
 from django.contrib import messages
-from .forms import RegistrationForm
-from .forms import AdminUserCreationForm
+from .forms import RegistrationForm, AdminUserCreationForm, AdminWhitelistForm
 from django.contrib.auth import authenticate,login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -18,24 +18,17 @@ import logging
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from .forms import AdminWhitelistForm
 from django.contrib.messages import get_messages
 import os
 import csv
-from django.http import HttpResponseRedirect
 from django.http import JsonResponse
-from .models import Attendee
 
 def reset_attendance(request):
     if request.method == 'POST':
-        # Update all attendees to reset their attendance
         Attendee.objects.update(is_present=False, present_time=None)
-        
-        # Display success message
-        messages.success(request, "Attendance has been reset for all attendees.")
-        
-        # Redirect back to the admin dashboard (or wherever appropriate)
-        return redirect('admin_dashboard') 
+        return JsonResponse({"success": True, "message": "Attendance has been reset for all attendees."})
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
+ 
     
 #Live monitoring function para di na kailangan refresh
 @login_required
@@ -77,8 +70,6 @@ def register_admin(request):
         form = AdminUserCreationForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data.get('email')
-
-            # Check whitelist
             if not AdminWhitelist.objects.filter(email=email).exists():
                 messages.error(request, "This email is not authorized to register as an admin.")
                 return redirect('register_admin')
@@ -96,7 +87,6 @@ def register_admin(request):
     else:
         form = AdminUserCreationForm()
 
-    # Get all messages (errors/success) to pass them to the template
     storage = get_messages(request)
     messages_list = [msg.message for msg in storage]
 
@@ -105,14 +95,16 @@ def register_admin(request):
         'messages': messages_list
     })
 
-# Define permanent admin emails as a constant
-PERMANENT_ADMIN_EMAILS = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
 
+PERMANENT_ADMIN_EMAILS = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
 @login_required
 def admin_dashboard(request):
     # Restrict access to permanent admins only
     if request.user.email not in PERMANENT_ADMIN_EMAILS:
         return HttpResponseForbidden('You do not have permission to access this page.')
+
+    # Initialize form variable for GET request
+    form = AdminWhitelistForm()
 
     # Handle form submission for adding local admins
     if request.method == 'POST':
@@ -123,12 +115,20 @@ def admin_dashboard(request):
             # Add email to the whitelist if not already present
             _, created = AdminWhitelist.objects.get_or_create(email=email)
             if created:
-                messages.success(request, f"{email} has been whitelisted.")
-                return redirect('admin_dashboard')  # Prevent resubmission on refresh
+                return JsonResponse({
+                    'status': 'success',
+                    'message': f"{email} has been whitelisted."
+                })
             else:
-                form.add_error('email', 'This email is already whitelisted.')
-    else:
-        form = AdminWhitelistForm()
+                return JsonResponse({
+                    'status': 'error',
+                    'errors': ['This email is already whitelisted.']
+                })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'errors': [error for error in form.errors.values()]
+            })
 
     # Fetch all whitelisted emails to display in the dashboard
     whitelisted_emails = AdminWhitelist.objects.all()
@@ -174,7 +174,6 @@ def edit_user_profile(request):
     if request.user.username == "permanentadmin":
         return HttpResponseForbidden("You cannot modify the permanent admin user.")
 
-#register for attendees
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -252,6 +251,7 @@ def register(request):
 
     return render(request, 'registration/register.html', {'form': form})
 
+
 def success(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)
     return render(request, 'registration/success.html', {'attendee': attendee})
@@ -286,7 +286,6 @@ def mark_attendance(request):
         'error': 'Please log in to mark attendance.'
     })
 
-
 def handle_attendance_logic(request):
     # Process the attendance logic
     attendee_id = request.GET.get('attendee_id')
@@ -294,23 +293,32 @@ def handle_attendance_logic(request):
         try:
             attendee = Attendee.objects.get(id=attendee_id)
 
-            if attendee.is_present:
+            # Ensure the admin (scanner) is assigned to the same event as the attendee
+            if attendee.event and request.user.assigned_events.filter(id=attendee.event.id).exists():
+                # The admin is authorized to scan for this event
+                if attendee.is_present:
+                    return render(request, 'res.html', {
+                        'success': False,
+                        'message': 'Attendee already marked present!'
+                    })
+                else:
+                    # Mark the attendee as present
+                    attendee.is_present = True
+                    attendee.present_time = timezone.now() + timedelta(hours=8)  # Cubao Manila Timezone
+                    attendee.save()
+
+                attendee_name = f"{attendee.first_name} {attendee.last_name}"
                 return render(request, 'res.html', {
-                    'success': False,
-                    'message': 'Attendee already marked present!'
+                    'success': True,
+                    'message': 'Attendance marked successfully!',
+                    'attendee_name': attendee_name
                 })
             else:
-                # Mark the attendee as present
-                attendee.is_present = True
-                attendee.present_time = timezone.now() + timedelta(hours=8)  #Cubao Manila Timezone
-                attendee.save()
-            
-            attendee_name = f"{attendee.first_name} {attendee.last_name}"
-            return render(request, 'res.html', {
-                'success': True,
-                'message': 'Attendance marked successfully!',
-                'attendee_name': attendee_name
-            })
+                # The admin is not authorized to scan this attendee's event
+                return render(request, 'res.html', {
+                    'success': False,
+                    'message': 'You are not authorized to scan this attendee for this event.'
+                })
 
         except Attendee.DoesNotExist:
             return render(request, 'res.html', {

@@ -273,6 +273,16 @@
                 </select>
             </div>
 
+            <div class="input-container">
+                <i class="fas fa-calendar-alt"></i>
+                <select id="event" name="event" required>
+                    <option value="">Select Event</option>
+                    {% for event in events %}
+                    <option value="{{ event.id }}">{{ event.name_of_event }} ({{ event.event_date }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
             {% if form.non_field_errors %}
             <div class="error">
                 {% for error in form.non_field_errors %}

@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Set the session expiry time in seconds (e.g., 2 hours)
-SESSION_COOKIE_AGE = 3600  # 2 hours (7200 seconds)
+SESSION_COOKIE_AGE = 3600 # 2 hours (7200 seconds) 3600
 
 # Ensure that the session persists even if the browser is closed
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
@@ -146,4 +146,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = 'http://10.0.0.52:8000'  #Use the domain when deployed
+BASE_URL = 'http://10.0.0.52:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000
