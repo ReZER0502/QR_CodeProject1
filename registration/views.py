@@ -22,6 +22,26 @@ from django.contrib.messages import get_messages
 import os
 import csv
 from django.http import JsonResponse
+from .models import Event
+from .forms import EventForm
+
+def event_list(request):
+    if request.method == 'POST':  # Handle form submission
+        form = EventForm(request.POST)
+        form.user = request.user  # Pass the logged-in user to the form
+        if form.is_valid():
+            event = form.save()  # Save the event to the database
+            # After saving, redirect to the same page to show the new event
+            return redirect('event_list')  # Redirect to avoid re-submission on refresh
+        else:
+            # If form is invalid, return the same page with error messages
+            return render(request, 'registration/admin_dashboard.html', {'form': form})
+
+    else:
+        # Handle GET request to display events
+        events = Event.objects.all()
+        form = EventForm()  # Create an empty form
+        return render(request, 'registration/admin_dashboard.html', {'events': events, 'form': form})
 
 def reset_attendance(request):
     if request.method == 'POST':
@@ -169,30 +189,25 @@ def download_attendees_csv(request):
 
     return response
 
-
 def edit_user_profile(request):
     if request.user.username == "permanentadmin":
         return HttpResponseForbidden("You cannot modify the permanent admin user.")
 
 def register(request):
+    events = Event.objects.all()  # Fetch all events from the Event model
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             try:
+                # Check if the email is already registered
                 existing_attendee = Attendee.objects.filter(email=form.cleaned_data['email']).first()
                 if existing_attendee:
                     messages.error(request, "This email is already registered.")
-                    return render(request, 'registration/register.html', {'form': form})
+                    return render(request, 'registration/register.html', {'form': form, 'events': events})  # Pass events to context
 
-                # Create the attendee record
-                attendee = Attendee.objects.create(
-                    first_name=form.cleaned_data['first_name'],
-                    last_name=form.cleaned_data['last_name'],
-                    email=form.cleaned_data['email'],
-                    department=form.cleaned_data['department'],
-                    sub_department=form.cleaned_data['sub_department'],
-                )
-                
+                # Create the attendee and associate the event object correctly
+                attendee = form.save()  # Save the form directly; it already handles the event ForeignKey.
+
                 # Generate QR code 
                 qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
                 qrcode_img = qrcode.make(qr_data)
@@ -245,12 +260,11 @@ def register(request):
             except Exception as e:
                 messages.error(request, "An error occurred while registering. Please try again.")
                 print(f"Error: {e}")
-                return render(request, 'registration/register.html', {'form': form})
+                return render(request, 'registration/register.html', {'form': form, 'events': events})  # Pass events to context
     else:
         form = RegistrationForm()
 
-    return render(request, 'registration/register.html', {'form': form})
-
+    return render(request, 'registration/register.html', {'form': form, 'events': events})
 
 def success(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)
@@ -293,32 +307,23 @@ def handle_attendance_logic(request):
         try:
             attendee = Attendee.objects.get(id=attendee_id)
 
-            # Ensure the admin (scanner) is assigned to the same event as the attendee
-            if attendee.event and request.user.assigned_events.filter(id=attendee.event.id).exists():
-                # The admin is authorized to scan for this event
-                if attendee.is_present:
-                    return render(request, 'res.html', {
-                        'success': False,
-                        'message': 'Attendee already marked present!'
-                    })
-                else:
-                    # Mark the attendee as present
-                    attendee.is_present = True
-                    attendee.present_time = timezone.now() + timedelta(hours=8)  # Cubao Manila Timezone
-                    attendee.save()
-
-                attendee_name = f"{attendee.first_name} {attendee.last_name}"
-                return render(request, 'res.html', {
-                    'success': True,
-                    'message': 'Attendance marked successfully!',
-                    'attendee_name': attendee_name
-                })
-            else:
-                # The admin is not authorized to scan this attendee's event
+            if attendee.is_present:
                 return render(request, 'res.html', {
                     'success': False,
-                    'message': 'You are not authorized to scan this attendee for this event.'
+                    'message': 'Attendee already marked present!'
                 })
+            else:
+                # Mark the attendee as present
+                attendee.is_present = True
+                attendee.present_time = timezone.now() + timedelta(hours=8)  # Adjust time zone as needed
+                attendee.save()
+            
+            attendee_name = f"{attendee.first_name} {attendee.last_name}"
+            return render(request, 'res.html', {
+                'success': True,
+                'message': 'Attendance marked successfully!',
+                'attendee_name': attendee_name
+            })
 
         except Attendee.DoesNotExist:
             return render(request, 'res.html', {

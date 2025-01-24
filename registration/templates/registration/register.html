@@ -278,10 +278,13 @@
                 <select id="event" name="event" required>
                     <option value="">Select Event</option>
                     {% for event in events %}
-                    <option value="{{ event.id }}">{{ event.name_of_event }} ({{ event.event_date }})</option>
+                    <option value="{{ event.id }}" {% if form.event.value == event.id %}selected{% endif %}>
+                        {{ event.name }} ({{ event.date }})
+                    </option>
                     {% endfor %}
                 </select>
             </div>
+            
 
             {% if form.non_field_errors %}
             <div class="error">

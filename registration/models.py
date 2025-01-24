@@ -1,9 +1,20 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin, User
 from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import post_migrate, pre_delete
 
+class Event(models.Model):
+    name = models.CharField(max_length=255)
+    facilitator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,  # Reference AUTH_USER_MODEL instead of User
+        on_delete=models.CASCADE
+    )
+    date = models.DateField()
+    attendees_count = models.IntegerField()
+
+    def __str__(self):
+        return self.name
 class AdminUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         if not email:
@@ -64,9 +75,12 @@ class Attendee(models.Model):
     present_time = models.DateTimeField(null=True, blank=True)
     sub_department = models.CharField(max_length=100, blank=True, null=True)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, default=1)  # ForeignKey to Event
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+
 
 @receiver(post_migrate)
 def create_permanent_admin(sender, **kwargs):

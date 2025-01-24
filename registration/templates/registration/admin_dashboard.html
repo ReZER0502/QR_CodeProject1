@@ -1558,44 +1558,82 @@
                     <p>You are currently viewing the Schedules.</p>
                 </div>
 
-                <div id="events" class="tab-content" style="display: none;">
+                <div id="events" class="tab-content">
                     <section class="transfer-section">
                         <div class="transfer-section-header">
                             <h2>Latest Events</h2>
                             <div class="filter-options">
-                                <p>Filter selected:Dates</p>
-                                <button class="icon-button">
-                                    <i class="fas fa-filter"></i>
-                                </button>
-                                <button class="icon-button">
+                                <p>Filter selected: Dates</p>
+                                <button class="icon-button" data-bs-toggle="modal" data-bs-target="#eventModal">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="transfers">
+                            {% for event in events %}
                             <div class="transfer">
                                 <div class="transfer-logo">
                                     <img src="{% static 'img/logo.ico' %}" alt="Logo" />
                                 </div>
                                 <dl class="transfer-details">
                                     <div>
-                                        <dt>GAD Event</dt>
-                                        <dd>GAD</dd>
+                                        <dt>{{ event.name }}</dt>
+                                        <dd>{{ event.facilitator.username }}</dd>
                                     </div>
                                     <div>
-                                        <dt>4012</dt>
+                                        <dt>{{ event.attendees_count }}</dt>
                                         <dd>Number of Attendees</dd>
                                     </div>
                                     <div>
-                                        <dt>28 Oct. 2024</dt>
+                                        <dt>{{ event.date }}</dt>
                                         <dd>Event Date</dd>
                                     </div>
                                 </dl>
                             </div>
+                            {% endfor %}
                         </div>
                     </section>
-                </div>              
-
+                </div>                
+                
+                <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="eventModalLabel">Create New Event</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="eventForm" method="POST" action="{% url 'event_list' %}">
+                                    {% csrf_token %}
+                                    
+                                    <div>
+                                        <label for="{{ form.name.id_for_label }}">Event Name:</label>
+                                        {{ form.name }}  <!-- Using the form field rendered by Django -->
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="{{ form.facilitator.id_for_label }}">Facilitator:</label>
+                                        {{ form.facilitator }}  <!-- Using the form field rendered by Django -->
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="{{ form.date.id_for_label }}">Event Date:</label>
+                                        {{ form.date }}  <!-- Using the form field rendered by Django -->
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="{{ form.attendees_count.id_for_label }}">Attendees Count:</label>
+                                        {{ form.attendees_count }}  <!-- Using the form field rendered by Django -->
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">Create Event</button>
+                                </form>                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                               
+                                            
                 <div id="templates" class="tab-content" style="display: none;">
                     <h2>Templates Panel</h2>
                     <p>You are currently viewing the Templates.</p>
@@ -1605,7 +1643,7 @@
                     <section class="service-section">
                         <h2>Whitelisted Emails</h2>
                         <div class="service-section-header">
-                            <form method="post" action="{% url 'admin_dashboard' %}">
+                            <form id="whitelistForm" method="post" action="{% url 'admin_dashboard' %}">
                                 {% csrf_token %}
                                 <div class="search-field">
                                     <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
@@ -1909,27 +1947,26 @@
         const tilesContainer = document.getElementById("tiles");
         const tileCount = document.querySelectorAll(".tile").length;
         const tilesWrapper = document.querySelector(".tiles-wrapper");
-
+    
         function changePage(direction) {
             currentPage += direction;
-
+    
             // Ensure the page wraps around (circular behavior)
             if (currentPage < 0) {
                 currentPage = tileCount - 1; // Go to last page
             } else if (currentPage >= tileCount) {
                 currentPage = 0; // Go to first page
             }
-
+    
             // Apply circular rotation for smooth animation
             const angle = -currentPage * 360 / tileCount; // Calculate rotation angle
             tilesWrapper.style.transform = `rotate(${angle}deg)`;
         }
-
+    
         document.addEventListener("DOMContentLoaded", () => {
             const tiles = document.querySelectorAll(".tile");
             const tilesPerPage = 3;
-            let currentPage = 0;
-        
+            
             const updateTilesVisibility = () => {
                 tiles.forEach((tile, index) => {
                     const start = currentPage * tilesPerPage;
@@ -1937,17 +1974,18 @@
                     tile.style.display = index >= start && index < end ? "block" : "none";
                 });
             };
-        
+            
             window.changePage = (direction) => {
                 const maxPage = Math.ceil(tiles.length / tilesPerPage) - 1;
                 currentPage = Math.max(0, Math.min(maxPage, currentPage + direction));
                 updateTilesVisibility();
             };
-        
+            
             // Initialize the first page
             updateTilesVisibility();
         });
-        
+    
+        // Show success message for certain actions
         const successMessage = document.getElementById('success-message');
         if (successMessage) {
             successMessage.classList.add('show');
@@ -1955,100 +1993,57 @@
                 successMessage.classList.remove('show');  // Fade-out
             }, 3000);
         }
-
-        function showTab(tabId) {
-            // Hide all tab content divs
-            const allTabs = document.querySelectorAll('.tab-content');
-            allTabs.forEach(tab => {
-                tab.style.display = 'none';
-            });
     
-            // Remove 'active' class from all tab links
-            const allTabLinks = document.querySelectorAll('.tab-link');
-            allTabLinks.forEach(tabLink => {
-                tabLink.classList.remove('active');
-            });
-    
-            // Show the selected tab
-            document.getElementById(tabId).style.display = 'block';
-    
-            // Add 'active' class to the clicked tab
-            const activeTab = document.querySelector(`a[onclick="showTab('${tabId}')"]`);
-            activeTab.classList.add('active');
-        }
-
-        function fetchAttendees() {
-            fetch("{% url 'get_attendees_status' %}")
-                .then(response => response.json())
-                .then(data => {
-                    let attendeeList = document.querySelector('.attendee-list');
-                    attendeeList.innerHTML = ''; // Clear existing list
-        
-                    data.attendees.forEach(attendee => {
-                        const li = document.createElement('li');
-                        li.classList.add('attendee-item');
-                        li.innerHTML = `
-                            <span class="attendee-name-container">
-                                <span class="attendee-name">${attendee.first_name} ${attendee.last_name}</span>
-                                <div class="status-indicator ${attendee.is_present ? 'present' : 'absent'}"></div>
-                            </span>
-                        `;
-                        attendeeList.appendChild(li);
-                    });
-                });
-        }        
-        
-        setInterval(fetchAttendees, 5000);          
-        
+        // Function to handle tab switching
         function showTab(tabId) {
             // Hide all tab-content panels
             const allTabs = document.querySelectorAll('.tab-content');
             allTabs.forEach(tab => {
                 tab.style.display = 'none';
             });
-        
+    
             // Show the selected panel
             const targetTab = document.getElementById(tabId);
             if (targetTab) {
                 targetTab.style.display = 'block';
             }
-        
+    
             // Remove active class from all sidebar links
             const sidebarLinks = document.querySelectorAll('.navigation .tab-link');
             sidebarLinks.forEach(link => {
                 link.classList.remove('active');
             });
-        
+    
             // Add active class to the clicked sidebar link
             const activeSidebarLink = document.querySelector(`.navigation .tab-link[onclick="showTab('${tabId}')"]`);
             if (activeSidebarLink) {
                 activeSidebarLink.classList.add('active');
             }
-        
+    
             // Remove active class from all header tabs
             const headerTabs = document.querySelectorAll('.app-header-navigation .tab-link');
             headerTabs.forEach(tab => {
                 tab.classList.remove('active');
             });
-        
+    
             // Add active class to the corresponding header tab
             const activeHeaderTab = document.querySelector(`.app-header-navigation .tab-link[onclick="showTab('${tabId}')"]`);
             if (activeHeaderTab) {
                 activeHeaderTab.classList.add('active');
             }
         }
-        
+    
         // Initialize default view
         document.addEventListener('DOMContentLoaded', () => {
             showTab('dashboard');
         });
-
+    
+        // Function to update time continuously
         function changeTime() {
-            // Get the current time
             var hour = moment().format("HH");
             var minute = moment().format("mm");
             var second = moment().format("ss");
-        
+    
             // Update the digits
             document.getElementById("hour-1").setAttribute("class", "num-" + hour.substr(0, 1));
             document.getElementById("hour-2").setAttribute("class", "num-" + hour.substr(1, 1));
@@ -2056,21 +2051,22 @@
             document.getElementById("minute-2").setAttribute("class", "num-" + minute.substr(1, 1));
             document.getElementById("second-1").setAttribute("class", "num-" + second.substr(0, 1));
             document.getElementById("second-2").setAttribute("class", "num-" + second.substr(1, 1));
-        
+    
             // Call the function again after 1 second
             setTimeout(changeTime, 1000);
         }
-        
+    
         // Initialize the clock
         changeTime();
-        
+    
+        // Reset attendance handler
         document.getElementById('resetAttendanceButton').addEventListener('click', function (event) {
             event.preventDefault();  // Prevent the form from submitting the traditional way
-        
+    
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
             const notification = document.getElementById('notification');
             const body = document.body; // Access the body element
-        
+    
             fetch("{% url 'reset_attendance' %}", {
                 method: "POST",
                 headers: {
@@ -2086,7 +2082,7 @@
                     notification.classList.remove('hidden');
                     notification.classList.add('visible');
                     body.classList.add('blur-background'); // Add blur to background
-        
+    
                     setTimeout(() => {
                         notification.classList.remove('visible');
                         notification.classList.add('hidden');
@@ -2098,76 +2094,86 @@
             })
             .catch(error => console.error("Error:", error));
         });
-
+    
+        // Handling whitelist form submission via AJAX
         document.addEventListener("DOMContentLoaded", function () {
-            // Select all elements with the 'fade-out' class
-            const fadeOutElements = document.querySelectorAll(".fade-out");
+            const whitelistForm = document.getElementById('whitelistForm'); // Now matches the form in the HTML
+            if (whitelistForm) {
+                const whitelistSuccessMessageDiv = document.getElementById('whitelistSuccessMessage');
+                const whitelistErrorMessageDiv = document.getElementById('whitelistErrorMessages');
         
-            fadeOutElements.forEach(element => {
-                // Set timeout to hide the message after 3 seconds
-                setTimeout(() => {
-                    element.classList.add("hidden"); // Add 'hidden' class to trigger CSS fade-out
-                }, 3000); // 3000 ms = 3 seconds
-            });
-        });
+                whitelistForm.addEventListener('submit', function (event) {
+                    event.preventDefault();  // Prevent the default form submission
+                    const formData = new FormData(whitelistForm);
         
-        document.addEventListener("DOMContentLoaded", function () {
-    const whitelistForm = document.getElementById('whitelistForm');
-    const whitelistSuccessMessageDiv = document.getElementById('whitelistSuccessMessage');
-    const whitelistErrorMessageDiv = document.getElementById('whitelistErrorMessages');
-
-    // Handle form submission via AJAX
-    whitelistForm.addEventListener('submit', function (event) {
-        event.preventDefault();  // Prevent the default form submission
-
-        const formData = new FormData(whitelistForm);
+                    fetch(whitelistForm.action, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (whitelistErrorMessageDiv) whitelistErrorMessageDiv.style.display = 'none';
         
-        fetch(whitelistForm.action, {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Hide any existing error messages
-            whitelistErrorMessageDiv.style.display = 'none';
-
-            if (data.status === 'success') {
-                // Show success message
-                whitelistSuccessMessageDiv.querySelector('ul').innerHTML = `<li>${data.message}</li>`;
-                whitelistSuccessMessageDiv.style.display = 'block';
-
-                // Optionally update the UI to reflect the new whitelisted email
-                const newEmail = data.message.split(' ')[0];  // Extract email from message
-                const newEntryHtml = `<article class="tile">
-                                        <div class="tile-header">
-                                            <i class="ph-lightning-light"></i>
-                                            <h3>
-                                                <span>${newEmail}</span>
-                                            </h3>
-                                        </div>
-                                      </article>`;
-                const tilesContainer = document.getElementById('tiles');
-                tilesContainer.innerHTML += newEntryHtml;
-
-                // Hide the success message after 3 seconds
-                setTimeout(() => {
-                    whitelistSuccessMessageDiv.style.display = 'none';
-                }, 3000);
-            } else {
-                // Show error messages
-                let errorMessages = data.errors.map(error => `<li>${error}</li>`).join('');
-                whitelistErrorMessageDiv.querySelector('ul').innerHTML = errorMessages;
-                whitelistErrorMessageDiv.style.display = 'block';
+                        if (data.status === 'success') {
+                            if (whitelistSuccessMessageDiv) {
+                                whitelistSuccessMessageDiv.querySelector('ul').innerHTML = `<li>${data.message}</li>`;
+                                whitelistSuccessMessageDiv.style.display = 'block';
+                            }
+        
+                            const newEmail = data.message.split(' ')[0]; // Extract email
+                            const newEntryHtml = `
+                                <article class="tile">
+                                    <div class="tile-header">
+                                        <i class="ph-lightning-light"></i>
+                                        <h3><span>${newEmail}</span></h3>
+                                    </div>
+                                </article>`;
+                            const tilesContainer = document.getElementById('tiles'); // Ensure this matches the HTML
+                            if (tilesContainer) tilesContainer.innerHTML += newEntryHtml;
+        
+                            setTimeout(() => {
+                                if (whitelistSuccessMessageDiv) whitelistSuccessMessageDiv.style.display = 'none';
+                            }, 3000);
+                        } else {
+                            let errorMessages = data.errors.map(error => `<li>${error}</li>`).join('');
+                            if (whitelistErrorMessageDiv) {
+                                whitelistErrorMessageDiv.querySelector('ul').innerHTML = errorMessages;
+                                whitelistErrorMessageDiv.style.display = 'block';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting the form:', error);
+                    });
+                });
             }
-        })
-        .catch(error => {
-            console.error('Error submitting the form:', error);
-        });
-    });
-});
+        });        
         
+        function fetchAttendees() {
+            fetch("{% url 'get_attendees_status' %}")
+                .then(response => response.json())
+                .then(data => {
+                    let attendeeList = document.querySelector('.attendee-list');
+                    attendeeList.innerHTML = ''; 
         
-    </script>
+                    data.attendees.forEach(attendee => {
+                        const li = document.createElement('li');
+                        li.classList.add('attendee-item');
+                        li.innerHTML = `
+                            <span class="attendee-name-container">
+                                <span class="attendee-name">${attendee.first_name} ${attendee.last_name}</span>
+                                <div class="status-indicator ${attendee.is_present ? 'present' : 'absent'}"></div>
+                            </span>
+                        `;
+                        attendeeList.appendChild(li);
+                    });
+                });
+        }        
+        
+        setInterval(fetchAttendees, 5000);
+    
+        
+    </script>    
 
 </body>
 </html>

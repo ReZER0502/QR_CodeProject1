@@ -2,10 +2,23 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
-from .models import Attendee, AdminUser, AdminWhitelist
+from .models import Attendee, AdminUser, AdminWhitelist, Event
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Attendee, AdminUser, AdminWhitelist
+
+class EventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        fields = ['name', 'facilitator', 'date', 'attendees_count']
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+        }
+
+    def save(self, *args, **kwargs):
+        # Automatically assign the facilitator to the current logged-in user
+        if not self.instance.facilitator:
+            self.instance.facilitator = self.user  # This will be passed from the view
+        return super().save(*args, **kwargs)
 
 class AdminWhitelistForm(forms.ModelForm):
     class Meta:
@@ -33,7 +46,8 @@ class AdminWhitelistForm(forms.ModelForm):
 class RegistrationForm(forms.ModelForm):
     class Meta:
         model = Attendee  
-        fields = ['first_name', 'last_name', 'email', 'department', 'sub_department']
+        fields = ['first_name', 'last_name', 'email', 'department', 'sub_department', 'event']
+    event = forms.ModelChoiceField(queryset=Event.objects.all(), required=True, label="Event", empty_label="Select Event")
 
     def clean_first_name(self):
         first_name = self.cleaned_data.get('first_name')
