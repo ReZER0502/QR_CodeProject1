@@ -6,46 +6,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Result</title>
     <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon" />
-    
     <style>
-      body, html {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        font-family: Arial, sans-serif;
-        color: lightgray; /* Changed font color to light gray */
-        overflow: hidden; /* Prevent scrollbars */
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: url("{% static 'img/all_bg.jpg' %}") no-repeat center center fixed;
-        background-size: cover;
-         }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            color: #333; /* Dark gray text for readability */
+            overflow: hidden; /* Prevent scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f9f9f9; /* Light gray background for a clean theme */
+        }
+    
         .container {
-            position: relative;  /* Create a stacking context */
-            max-width: 600px;  /* Limit the width for better readability */
-            margin: auto;  /* Center the container */
+            position: relative;
+            max-width: 400px; /* Limit width for better responsiveness */
+            width: 90%; /* Allow scaling on smaller devices */
             padding: 20px;
-            background-color: rgba(0, 0, 0, 0.0);  /* Semi-transparent background */
-            border-radius: 10px;  /* Rounded corners */
-            text-align: center;  /* Center text inside the container */
+            background-color: #ffffff; /* Solid white background for the container */
+            border-radius: 15px; /* Rounded corners */
+            text-align: center;
             display: flex;
             flex-direction: column;
-            justify-content: center;  /* Center content vertically */
-            align-items: center;  /* Center content horizontally */
-            height: 100%;  /* Fill the height of the parent */
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
         }
+    
         .success {
-            color: green;
-            font-size: 24px;
-            margin-bottom: 20px;  /* Space below the success message */
+            color: #28a745; /* Green text for success messages */
+            font-size: 20px;
+            margin-bottom: 15px;
         }
+    
         .error {
-            color: red;
-            font-size: 24px;
-            margin-bottom: 20px;  /* Space below the error message */
+            color: #dc3545; /* Red text for error messages */
+            font-size: 20px;
+            margin-bottom: 15px;
         }
-    </style>
+    
+        /* Mobile Responsiveness */
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px; /* Adjust padding for smaller devices */
+                border-radius: 10px; /* Slightly less rounded corners for compact devices */
+            }
+    
+            .success, .error {
+                font-size: 16px; /* Adjust font size for better fit on smaller screens */
+            }
+        }
+    </style>    
+
 </head>
 <body>
 

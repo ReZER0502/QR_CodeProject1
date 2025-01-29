@@ -7,12 +7,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I-Register</title>
-    
+
     <!-- QR Code Favicon -->
     <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon">
-    
-    <!-- Add Font Awesome -->
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- tsParticles Library -->
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
 
     <style>
         /* General Styling */
@@ -21,206 +24,202 @@
             padding: 0;
             height: 100%;
             font-family: Arial, sans-serif;
-            color: lightgray;
-            overflow: hidden;
+            color: #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: url("{% static 'img/all_bg.jpg' %}") no-repeat center center fixed;
-            background-size: cover;
+            background: #f8f9fa;
+            overflow: hidden; /* Prevent scrollbars for particles */
         }
-
+        
+        /* Registration Container */
         .register-container {
-            max-height: 70vh;
-            padding: 25px;
-            width: 300px;
-            text-align: left;
+            z-index: 10;
+            max-height: 85vh;
+            padding: 30px;
+            width: 350px;
+            background: #ffffff;
             border-radius: 15px;
-            animation: containerFadeIn 1s ease-in-out;
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            animation: fadeIn 1s ease-in-out;
         }
-
-        @keyframes containerFadeIn {
+        
+        /* Fade-In Animation */
+        @keyframes fadeIn {
             0% {
                 opacity: 0;
-                transform: scale(0.9);
-            }
-            50% {
-                opacity: 0.5;
-                transform: scale(1.05);
+                transform: scale(0.95);
             }
             100% {
                 opacity: 1;
                 transform: scale(1);
             }
         }
-
+        
+        /* Logo Styling */
         .logo {
             display: block;
             margin: 0 auto;
             font-size: 60px;
-            color: white;
+            color: #007bff;
             text-align: center;
         }
-
+        
+        /* Input Styling */
         .input-container {
             position: relative;
             margin: 8px 0;
         }
-
+        
         input, select {
             width: 100%;
-            padding: 10px 30px;
-            margin: 6px 0;
-            border: 2px solid #333;
-            border-radius: 20px;
-            background: #444;
-            color: white;
-            box-sizing: border-box;
-            transition: border-color 0.3s, background 0.3s, transform 0.3s;
-            font-size: 12px;
+            padding: 12px 16px 12px 40px; /* Add extra padding on the left (40px) */
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 14px;
             outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
-
-        input::placeholder, select {
-            color: rgba(255, 255, 255, 0.6);
+        
+        input::placeholder {
+            color: #adb5bd;
+            text-indent: 8px;
         }
-
+        
         select option {
-            background: #333;
-            color: white;
+            background: #fff;
+            color: #333;
+            font-size: 14px;
+            padding-left: 10px;
         }
-
+        
         input:focus, select:focus {
-            border-color: #feb47b;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-2px);
+            border-color: #007bff;
+            box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
         }
-
+        
         .input-container i {
             position: absolute;
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            color: white;
-            font-size: 12px;
+            color: #6c757d;
+            font-size: 14px;
         }
-
-        input:focus + i, select:focus + i {
-            color: #feb47b;
-        }
-
+        
+        /* Error Message */
         .error {
             display: none;
-            color: red;
+            color: #dc3545;
             margin-top: 5px;
             font-size: 12px;
         }
-
+        
         .error.show {
             display: block;
         }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-        }
-
-        .shake {
-            animation: shake 0.5s;
-        }
-
-        .fade-out {
-            opacity: 1;
-            transition: opacity 0.5s ease;
-        }
-
-        .fade-out.hidden {
-            opacity: 0;
-        }
-
+        
+        /* Button Styling */
         .button-container {
             display: flex;
             justify-content: center;
         }
-
+        
         button {
             width: 100%;
-            max-width: 150px;
+            max-width: 200px;
             padding: 12px;
             margin: 8px auto;
             border: none;
-            border-radius: 15px;
-            background-color: #e50914;
-            color: white;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #ffffff;
             cursor: pointer;
             font-size: 16px;
+            font-weight: bold;
             transition: background-color 0.3s, transform 0.3s;
         }
-
+        
         button:hover {
-            background-color: #f40612;
-            transform: translateY(-3px);
+            background-color: #0056b3;
+            transform: translateY(-2px);
         }
-    </style>
+        
+        /* Admin Info */
+        .admin-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .admin-container h2 {
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .admin-container p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0;
+        }
+        
+        /* 📌 Mobile Responsive Styles */
+        @media screen and (max-width: 600px) {
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #e9ecef; /* Softer background for mobile */
+                height: 100vh; /* Ensures full height on mobile */
+            }
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('.registration-form');
-            const inputs = form.querySelectorAll('input, select');
+            /* Remove all possible shadows and box effects */
+            .register-container {
+                width: 90%;
+                max-width: 280px;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: none !important; 
+                filter: none !important; 
+                -webkit-box-shadow: none !important; 
+                -moz-box-shadow: none !important;
+            }
 
-            // Show errors and add animations
-            form.querySelectorAll('.error').forEach(error => {
-                if (error.innerText.trim()) {
-                    form.classList.add('shake');
-                    error.classList.add('show');
-                    setTimeout(() => {
-                        error.classList.add('fade-out');
-                        setTimeout(() => error.classList.remove('show', 'fade-out', 'shake'), 500);
-                    }, 3000);
-                }
-            });
+            .logo {
+                font-size: 50px;
+            }
 
-            // Clear errors on input
-            inputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    const error = input.closest('.input-container').querySelector('.error');
-                    if (error) {
-                        error.classList.remove('show', 'shake', 'fade-out');
-                    }
-                });
-            });
-        });
+            input, select {
+                padding: padding: 12px 16px 12px 40px; 
+                font-size: 13px;
+            }
 
-        function updateSubDepartment() {
-            const departmentSelect = document.getElementById('department');
-            const subDepartmentSelect = document.getElementById('sub_department');
-            const departments = {
-                'IT': ['Software Development', 'Data Center & Network Operations', 'Database SQL'],
-                'HR': ['Recruitment', 'Employee Relations'],
-                'Finance': ['Accounting', 'Payroll'],
-                'ASG': ['Procurement', 'Gen. Services', 'HR Assistant'],
-                'ETCG': ['Stab-Fund', 'Consultancy', 'KRC'],
-                'COOP': ['IT', 'HR', 'Finance', 'ASG', 'ETCG']
-            };
+            input::placeholder{
+                text-indent: 8px;
+            }
 
-            subDepartmentSelect.innerHTML = '<option value="">Select Sub-Department</option>';
-            const selectedDepartment = departmentSelect.value;
-            if (departments[selectedDepartment]) {
-                departments[selectedDepartment].forEach(subDept => {
-                    const option = document.createElement('option');
-                    option.value = subDept;
-                    option.textContent = subDept;
-                    subDepartmentSelect.appendChild(option);
-                });
+            button {
+                font-size: 14px;
+                padding: 9px;
+            }
+
+            .admin-container {
+                margin-top: 15px;
+            }
+
+            .admin-container p {
+                font-size: 0.8rem;
             }
         }
-    </script>
+
+    </style>
 </head>
 
 <body>
+    <!-- Particles Container -->
+    <div id="particles-js"></div>
+
     <div class="register-container">
         <div class="logo">
             <i class="fas fa-qrcode"></i>
@@ -284,7 +283,6 @@
                     {% endfor %}
                 </select>
             </div>
-            
 
             {% if form.non_field_errors %}
             <div class="error">
@@ -299,11 +297,122 @@
             </div>
         </form>
 
-        <div class="admin-container" style="text-align: center; margin-top: 20px;">
-            <h2 style ="margin-bottom: 3px;">Attendee Registration</h2>
-            <p style="font-size: 0.8rem; color: lightgray; margin-top: 0;">Please have your Administrator scan your QR code.</p>
+        <div class="admin-container">
+            <h2>Attendee Registration</h2>
+            <p>Please have your Administrator scan your QR code.</p>
         </div>
     </div>
+
+    <script>
+        // Initialize tsParticles
+        tsParticles.load("particles-js", {
+            particles: {
+                number: {
+                    value: 100,
+                    density: { enable: true, value_area: 800 }
+                },
+                color: { value: "#00008B" }, // Gold color
+                shape: {
+                    type: "circle",
+                    stroke: { width: 0, color: "#000000" }
+                },
+                opacity: {
+                    value: 0.5,
+                    random: false,
+                    anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false }
+                },
+                size: {
+                    value: 5,
+                    random: true,
+                    anim: { enable: false, speed: 40, size_min: 0.1, sync: false }
+                },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#00008B",
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 3,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out",
+                    bounce: false,
+                    attract: { enable: false, rotateX: 600, rotateY: 1200 }
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                },
+                modes: {
+                    grab: { distance: 400, line_linked: { opacity: 1 } },
+                    bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 },
+                    repulse: { distance: 200, duration: 0.4 },
+                    push: { particles_nb: 4 },
+                    remove: { particles_nb: 2 }
+                }
+            },
+            retina_detect: true
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.registration-form');
+            const inputs = form.querySelectorAll('input, select');
+
+            // Show errors and add animations
+            form.querySelectorAll('.error').forEach(error => {
+                if (error.innerText.trim()) {
+                    form.classList.add('shake');
+                    error.classList.add('show');
+                    setTimeout(() => {
+                        error.classList.add('fade-out');
+                        setTimeout(() => error.classList.remove('show', 'fade-out', 'shake'), 500);
+                    }, 3000);
+                }
+            });
+
+            // Clear errors on input
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const error = input.closest('.input-container').querySelector('.error');
+                    if (error) {
+                        error.classList.remove('show', 'shake', 'fade-out');
+                    }
+                });
+            });
+        });
+
+        function updateSubDepartment() {
+            const departmentSelect = document.getElementById('department');
+            const subDepartmentSelect = document.getElementById('sub_department');
+            const departments = {
+                'IT': ['Software Development', 'Data Center & Network Operations', 'Database SQL'],
+                'HR': ['Recruitment', 'Employee Relations'],
+                'Finance': ['Accounting', 'Payroll'],
+                'ASG': ['Procurement', 'Gen. Services', 'HR Assistant'],
+                'ETCG': ['Stab-Fund', 'Consultancy', 'KRC'],
+                'COOP': ['IT', 'HR', 'Finance', 'ASG', 'ETCG']
+            };
+
+            subDepartmentSelect.innerHTML = '<option value="">Select Sub-Department</option>';
+            const selectedDepartment = departmentSelect.value;
+            if (departments[selectedDepartment]) {
+                departments[selectedDepartment].forEach(subDept => {
+                    const option = document.createElement('option');
+                    option.value = subDept;
+                    option.textContent = subDept;
+                    subDepartmentSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
 </body>
 
 </html>

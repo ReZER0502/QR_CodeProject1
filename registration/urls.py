@@ -14,5 +14,5 @@ urlpatterns = [
     path('download-attendees/', views.download_attendees_csv, name='download_attendees'),
     path('get-attendees-status/', views.get_attendees_status, name='get_attendees_status'),
     path('admin/reset_attendance/', views.reset_attendance, name='reset_attendance'),
-    path('event_list/', views.event_list, name='event_list'),
+    path('update-attendee-count/', views.update_attendee_count, name='update_attendee_count'),
 ]

@@ -6,15 +6,12 @@ from django.db.models.signals import post_migrate, pre_delete
 
 class Event(models.Model):
     name = models.CharField(max_length=255)
-    facilitator = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # Reference AUTH_USER_MODEL instead of User
-        on_delete=models.CASCADE
-    )
     date = models.DateField()
     attendees_count = models.IntegerField()
 
     def __str__(self):
         return self.name
+
 class AdminUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         if not email:

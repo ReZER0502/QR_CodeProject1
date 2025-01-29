@@ -9,16 +9,13 @@ from django.core.exceptions import ValidationError
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['name', 'facilitator', 'date', 'attendees_count']
+        fields = ['name', 'date', 'attendees_count']  # No facilitator field
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter event name'}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'attendees_count': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter attendees count'}),
         }
 
-    def save(self, *args, **kwargs):
-        # Automatically assign the facilitator to the current logged-in user
-        if not self.instance.facilitator:
-            self.instance.facilitator = self.user  # This will be passed from the view
-        return super().save(*args, **kwargs)
 
 class AdminWhitelistForm(forms.ModelForm):
     class Meta:
@@ -48,6 +45,12 @@ class RegistrationForm(forms.ModelForm):
         model = Attendee  
         fields = ['first_name', 'last_name', 'email', 'department', 'sub_department', 'event']
     event = forms.ModelChoiceField(queryset=Event.objects.all(), required=True, label="Event", empty_label="Select Event")
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if not email.endswith('@natcco.coop'):
+            raise ValidationError("Only @natcco.coop emails are allowed.")
+        return email
 
     def clean_first_name(self):
         first_name = self.cleaned_data.get('first_name')

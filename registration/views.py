@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.utils import timezone
 import qrcode
-from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from io import BytesIO
 from datetime import timedelta
@@ -24,24 +23,7 @@ import csv
 from django.http import JsonResponse
 from .models import Event
 from .forms import EventForm
-
-def event_list(request):
-    if request.method == 'POST':  # Handle form submission
-        form = EventForm(request.POST)
-        form.user = request.user  # Pass the logged-in user to the form
-        if form.is_valid():
-            event = form.save()  # Save the event to the database
-            # After saving, redirect to the same page to show the new event
-            return redirect('event_list')  # Redirect to avoid re-submission on refresh
-        else:
-            # If form is invalid, return the same page with error messages
-            return render(request, 'registration/admin_dashboard.html', {'form': form})
-
-    else:
-        # Handle GET request to display events
-        events = Event.objects.all()
-        form = EventForm()  # Create an empty form
-        return render(request, 'registration/admin_dashboard.html', {'events': events, 'form': form})
+from django.utils.timezone import now
 
 def reset_attendance(request):
     if request.method == 'POST':
@@ -116,50 +98,51 @@ def register_admin(request):
     })
 
 
+
 PERMANENT_ADMIN_EMAILS = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
+
 @login_required
 def admin_dashboard(request):
-    # Restrict access to permanent admins only
     if request.user.email not in PERMANENT_ADMIN_EMAILS:
         return HttpResponseForbidden('You do not have permission to access this page.')
 
-    # Initialize form variable for GET request
     form = AdminWhitelistForm()
+    event_form = EventForm()
 
-    # Handle form submission for adding local admins
     if request.method == 'POST':
-        form = AdminWhitelistForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get('email')
-
-            # Add email to the whitelist if not already present
-            _, created = AdminWhitelist.objects.get_or_create(email=email)
-            if created:
+        if 'add_admin' in request.POST:
+            form = AdminWhitelistForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data.get('email')
+                _, created = AdminWhitelist.objects.get_or_create(email=email)
                 return JsonResponse({
-                    'status': 'success',
-                    'message': f"{email} has been whitelisted."
+                    'status': 'success' if created else 'error',
+                    'message': f"{email} has been whitelisted." if created else "This email is already whitelisted."
                 })
-            else:
-                return JsonResponse({
-                    'status': 'error',
-                    'errors': ['This email is already whitelisted.']
-                })
-        else:
-            return JsonResponse({
-                'status': 'error',
-                'errors': [error for error in form.errors.values()]
-            })
+            return JsonResponse({'status': 'error', 'errors': list(form.errors.values())})
 
-    # Fetch all whitelisted emails to display in the dashboard
+        elif 'add_event' in request.POST:
+            event_form = EventForm(request.POST)
+            if event_form.is_valid():
+                event_form.save()
+                return redirect('admin_dashboard')
+
+    # Fetch required data
     whitelisted_emails = AdminWhitelist.objects.all()
     attendees = Attendee.objects.all()
+    events = Event.objects.all()  # All events
+    latest_events = Event.objects.filter(date__gte=now()).order_by('date')[:3]  # Only upcoming 3 events
 
     return render(request, 'registration/admin_dashboard.html', {
         'form': form,
+        'event_form': event_form,
         'whitelisted_emails': whitelisted_emails,
         'attendees': attendees,
+        'events': events,  
+        'latest_events': latest_events,  # Send only 3 upcoming events
     })
     
+
 @login_required
 def download_attendees_csv(request):
     # Restrict to permanent admins or users with the necessary permissions
@@ -193,78 +176,72 @@ def edit_user_profile(request):
     if request.user.username == "permanentadmin":
         return HttpResponseForbidden("You cannot modify the permanent admin user.")
 
+def generate_qr_and_send_email(attendee):
+    try:
+        # QR code generation
+        qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
+        qrcode_img = qrcode.make(qr_data)
+        qrcode_img = qrcode_img.convert("RGBA")
+
+        background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'my_template.jpg')
+        background = Image.open(background_path).convert("RGBA")
+        qrcode_img = qrcode_img.resize((700, 700))
+        background_width, background_height = background.size
+        qr_width, qr_height = qrcode_img.size
+        position = ((background_width - qr_width) // 2, (background_height - qr_height) // 2)
+
+        background.paste(qrcode_img, position, qrcode_img)
+
+        # Saving QR code as file
+        canvas = BytesIO()
+        background.save(canvas, format='PNG')
+        canvas.seek(0)
+        qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
+
+        attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
+
+        # Prepare email with QR code attachment
+        subject = 'Your Registration QR Code'
+        html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
+        plain_message = strip_tags(html_message)
+        email = EmailMessage(
+            subject,
+            plain_message,
+            to=[attendee.email],
+        )
+        email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
+        email.send()
+
+    except Exception as e:
+        print(f"Error in background task: {e}")
+
 def register(request):
-    events = Event.objects.all()  # Fetch all events from the Event model
+    events = Event.objects.all()
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
             try:
-                # Check if the email is already registered
                 existing_attendee = Attendee.objects.filter(email=form.cleaned_data['email']).first()
                 if existing_attendee:
                     messages.error(request, "This email is already registered.")
-                    return render(request, 'registration/register.html', {'form': form, 'events': events})  # Pass events to context
+                    return render(request, 'registration/register.html', {'form': form, 'events': events})
 
-                # Create the attendee and associate the event object correctly
-                attendee = form.save()  # Save the form directly; it already handles the event ForeignKey.
+                attendee = form.save()
 
-                # Generate QR code 
-                qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
-                qrcode_img = qrcode.make(qr_data)
-
-                # Convert QR code to RGBA to avoid mode conflicts
-                qrcode_img = qrcode_img.convert("RGBA")
-
-                background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'my_template.jpg')
-                background = Image.open(background_path)
-            
-                # Ensure background is also in RGBA mode
-                background = background.convert("RGBA")
-
-                # Resize the QR code to fit the background (adjust sizes as needed)
-                qrcode_img = qrcode_img.resize((700, 700))
-                background_width, background_height = background.size
-                qr_width, qr_height = qrcode_img.size
-
-                # Calculate position to center the QR code
-                position = ((background_width - qr_width) // 2, (background_height - qr_height) // 2)
-
-                # Paste the QR code onto the background image (with transparency)
-                background.paste(qrcode_img, position, qrcode_img)
-
-                # Save the final image to a BytesIO object
-                canvas = BytesIO()
-                background.save(canvas, format='PNG')
-                canvas.seek(0)
-                qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
-
-                # Save QR code to attendee record
-                attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
-                attendee.save()
-
-                # Prepare and send the email with the attached QR code
-                subject = 'Your Registration QR Code'
-                html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
-                plain_message = strip_tags(html_message)
-                email = EmailMessage(
-                    subject,
-                    plain_message,
-                    to=[attendee.email],
-                )
-                email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
-
-                email.send()
+                # Synchronously generate QR code and email before redirecting
+                generate_qr_and_send_email(attendee)  # Run the function without threading
 
                 return redirect('success', attendee_id=attendee.id)
 
             except Exception as e:
                 messages.error(request, "An error occurred while registering. Please try again.")
                 print(f"Error: {e}")
-                return render(request, 'registration/register.html', {'form': form, 'events': events})  # Pass events to context
+                return render(request, 'registration/register.html', {'form': form, 'events': events})
     else:
         form = RegistrationForm()
 
     return render(request, 'registration/register.html', {'form': form, 'events': events})
+
 
 def success(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)
