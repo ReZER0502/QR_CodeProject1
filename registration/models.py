@@ -12,6 +12,13 @@ class Event(models.Model):
     def __str__(self):
         return self.name
 
+class QRTemplate(models.Model):
+    name = models.CharField(max_length = 255)  
+    image = models.ImageField(upload_to ='templates/')  
+    event = models.ForeignKey(Event, on_delete = models.CASCADE, default=1)
+
+    def __str__(self):
+        return f"{self.name} - {self.event.name}"
 class AdminUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         if not email:

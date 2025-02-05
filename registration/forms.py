@@ -2,14 +2,24 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
-from .models import Attendee, AdminUser, AdminWhitelist, Event
+from .models import Attendee, AdminUser, AdminWhitelist, Event, QRTemplate 
 from django import forms
 from django.core.exceptions import ValidationError
+
+class QRTemplateForm(forms.ModelForm):
+    event = forms.ModelChoiceField(
+        queryset = Event.objects.all(),
+        empty_label = "Select an event",
+        widget = forms.Select(attrs = {'class': 'form-control'})
+    )
+    class Meta:
+        model = QRTemplate 
+        fields = ['event', 'image']
 
 class EventForm(forms.ModelForm):
     class Meta:
         model = Event
-        fields = ['name', 'date', 'attendees_count']  # No facilitator field
+        fields = ['name', 'date', 'attendees_count']  
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter event name'}),
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),

@@ -8,11 +8,11 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponse, HttpResponseForbidden
 from PIL import Image
 from django.contrib import messages
-from .forms import RegistrationForm, AdminUserCreationForm, AdminWhitelistForm
+from .forms import RegistrationForm, AdminUserCreationForm, AdminWhitelistForm, QRTemplateForm
 from django.contrib.auth import authenticate,login
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from .models import Attendee, AdminWhitelist
+from .models import Attendee, AdminWhitelist, QRTemplate
 import logging
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -24,6 +24,7 @@ from django.http import JsonResponse
 from .models import Event
 from .forms import EventForm
 from django.utils.timezone import now
+from .models import QRTemplate
 
 def reset_attendance(request):
     if request.method == 'POST':
@@ -31,7 +32,6 @@ def reset_attendance(request):
         return JsonResponse({"success": True, "message": "Attendance has been reset for all attendees."})
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
  
-    
 #Live monitoring function para di na kailangan refresh
 @login_required
 def get_attendees_status(request):
@@ -44,10 +44,25 @@ def get_attendees_status(request):
 
     return JsonResponse({'attendees': data})
 
+@login_required
+def update_attendee_count(request):
+    event_id = request.GET.get('event_id')
+    if not event_id:
+        return JsonResponse({'error': 'Missing event ID'}, status=400)
+
+    try:
+        event = Event.objects.get(id=event_id)
+        attendees_count = event.attendee_set.count()  # Count attendees
+
+        print(f"Event ID: {event_id}, Attendees Count: {attendees_count}")  # Debugging
+        return JsonResponse({'attendees_count': attendees_count})
+
+    except Event.DoesNotExist:
+        print(f"Event ID {event_id} not found")  # Debugging
+        return JsonResponse({'error': 'Invalid event ID'}, status=400)
 
 def admin_login(request):
     permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]  # Hardcoded permanent admins
-
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -97,10 +112,7 @@ def register_admin(request):
         'messages': messages_list
     })
 
-
-
 PERMANENT_ADMIN_EMAILS = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
-
 @login_required
 def admin_dashboard(request):
     if request.user.email not in PERMANENT_ADMIN_EMAILS:
@@ -108,8 +120,10 @@ def admin_dashboard(request):
 
     form = AdminWhitelistForm()
     event_form = EventForm()
+    template_form = QRTemplateForm()  # Initialize the template form
 
     if request.method == 'POST':
+        # Handle adding new admins
         if 'add_admin' in request.POST:
             form = AdminWhitelistForm(request.POST)
             if form.is_valid():
@@ -121,27 +135,44 @@ def admin_dashboard(request):
                 })
             return JsonResponse({'status': 'error', 'errors': list(form.errors.values())})
 
+        # Handle adding new events
         elif 'add_event' in request.POST:
             event_form = EventForm(request.POST)
             if event_form.is_valid():
                 event_form.save()
                 return redirect('admin_dashboard')
 
+        # Handle adding new QR templates (Image Upload)
+        elif 'add_template' in request.POST:
+            template_form = QRTemplateForm(request.POST, request.FILES)
+            if template_form.is_valid():
+                template_form.save()  # Save the new template
+                return redirect('admin_dashboard')  # Redirect to the same page to show the newly added template
+
     # Fetch required data
     whitelisted_emails = AdminWhitelist.objects.all()
     attendees = Attendee.objects.all()
-    events = Event.objects.all()  # All events
+    events = Event.objects.filter(date__gte=now()).order_by('date')[:3]
     latest_events = Event.objects.filter(date__gte=now()).order_by('date')[:3]  # Only upcoming 3 events
+    qr_templates = QRTemplate.objects.all()  # Fetch all QR templates for displaying
 
     return render(request, 'registration/admin_dashboard.html', {
         'form': form,
         'event_form': event_form,
+        'template_form': template_form,  # Add the template form to the context
         'whitelisted_emails': whitelisted_emails,
         'attendees': attendees,
         'events': events,  
         'latest_events': latest_events,  # Send only 3 upcoming events
+        'qr_templates': qr_templates,  # Send the list of templates to the template
     })
-    
+
+
+def templates_view(request):
+    qr_templates = QRTemplate.objects.all()  # Get all QR templates
+    return render(request, 'admin_dashboard.html', {
+        'qr_templates': qr_templates
+    })
 
 @login_required
 def download_attendees_csv(request):
@@ -183,7 +214,13 @@ def generate_qr_and_send_email(attendee):
         qrcode_img = qrcode.make(qr_data)
         qrcode_img = qrcode_img.convert("RGBA")
 
-        background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'my_template.jpg')
+        # Fetch the correct QR template background based on event
+        try:
+            qr_template = QRTemplate.objects.get(event=attendee.event)
+            background_path = qr_template.image.path  # Use uploaded template
+        except QRTemplate.DoesNotExist:
+            background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg')  # Fallback
+
         background = Image.open(background_path).convert("RGBA")
         qrcode_img = qrcode_img.resize((700, 700))
         background_width, background_height = background.size
@@ -215,6 +252,7 @@ def generate_qr_and_send_email(attendee):
     except Exception as e:
         print(f"Error in background task: {e}")
 
+
 def register(request):
     events = Event.objects.all()
     if request.method == 'POST':
@@ -241,7 +279,6 @@ def register(request):
         form = RegistrationForm()
 
     return render(request, 'registration/register.html', {'form': form, 'events': events})
-
 
 def success(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)

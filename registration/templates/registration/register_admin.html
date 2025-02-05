@@ -200,7 +200,8 @@
         {{ form.confirm_password }}
 
         <button type="submit">Register</button>
-        <p>Already have an account? <a href="{% url 'mark_attendance' %}">Login here</a>.</p>
+        <p>Already have an account? <a href="{% url 'mark_attendance' %}">Try and login here!</a>.</p>
+        <p>A Superadmin?<a href="{% url 'admin_login' %}">Login here!</a>.</p>
 
         <!-- Error Container -->
         <div id="errorContainer" class="error-container"></div>

@@ -13,36 +13,40 @@
     <style>
         @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
         :root {
-            --c-gray-900: #000000;
-            --c-gray-800: #1f1f1f;
-            --c-gray-700: #2e2e2e;
-            --c-gray-600: #313131;
-            --c-gray-500: #969593;
-            --c-gray-400: #a6a6a6;
-            --c-gray-300: #bdbbb7;
-            --c-gray-200: #f1f1f1;
-            --c-gray-100: #ffffff;
-
-            --c-green-500: #45ffbc;
-            --c-olive-500: #e3ffa8;
-
-            --c-white: var(--c-gray-100);
-
-            --c-text-primary: var(--c-gray-100);
-            --c-text-secondary: var(--c-gray-200);
-            --c-text-tertiary: var(--c-gray-500);
+            --c-light-gray:rgb(247, 253, 159); /* Light background color */
+            --c-light-blue:rgb(32, 73, 255); /* Light blue for a soft look */
+            --c-soft-beige: #fdf6e3;
+            --c-gray-800:rgb(221, 233, 153); /* Slightly Off-White */
+            --c-gray-700:rgb(255, 255, 255); /* Light Gray for Borders */
+            --c-gray-600:rgb(243, 243, 243); /* Subtle Border Gray */
+            --c-gray-500:rgb(0, 0, 0); /* Lighter Gray for Details */
+            --c-gray-400:rgb(8, 8, 10); /* Not Used for Text */
+            --c-gray-300:rgb(255, 252, 58); /* Not Used for Text */
+            --c-gray-200:rgb(2, 2, 2); /* Not Used for Text */
+            --c-gray-100: #000000; /* Pure Black - Used for Text */
+        
+            --c-green-500: #20c997; /* Accent Color */
+            --c-olive-500: #b5e48c; /* Secondary Accent */
+        
+            --c-white: var(--c-gray-900);
+        
+            /* Set All Text to Black */
+            --c-text-primary: #000000; /* Primary Text */
+            --c-text-secondary: #000000; /* Secondary Text */
+            --c-text-tertiary: #000000; /* Tertiary Text */
         }
 
         body {
             line-height: 1.5;
             min-height: 100vh;
             font-family: "Be Vietnam Pro", sans-serif;
-            background-color: var(--c-gray-900);
+            background: linear-gradient(to right, var(--c-light-blue), var(--c-light-gray)); 
             color: var(--c-text-primary);
             display: flex;
             padding-top: 3vw;
             padding-bottom: 3vw;
             justify-content: center;
+            background-attachment: fixed; 
         }
 
         *,
@@ -339,7 +343,7 @@
         
             &:hover,
             &:focus {
-                color: #87CEEB; /* Light Sky Blue color when hovering/focusing */
+                color:rgb(12, 31, 201); /* Light Sky Blue color when hovering/focusing */
             }
         
             /* Underline animation */
@@ -465,8 +469,6 @@
             margin-top: 10px; /* Add spacing above */
         }
 
-        
-
         .tiles {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -532,6 +534,9 @@
                     bottom: 0;
                 }
             }
+
+            word-break: break-word; /* Ensures long words break */
+            overflow-wrap: break-word; 
         }
         
 
@@ -639,19 +644,18 @@
             }
         }
 
-        .transfer-section {
-            margin-top: 2.5rem;
-        }
-
         .transfer-section-header {
             display: flex;
             align-items: center;
             width: 100%;
-            padding-bottom: 0.75rem;
+            padding-bottom: 0.5rem; /* Reduce bottom padding */
             border-bottom: 1px solid var(--c-gray-600);
-            h2 {
-                font-size: 1.5rem;
-            }
+            margin-top: 21px;
+        }
+
+        .transfer-section-header h2{
+            font-size: 19px; /* Adjust size as needed */
+            font-weight: bold
         }
 
         .payments {
@@ -1153,20 +1157,20 @@
             color: #007bff; /* Icon color on hover */
         }  
 
-        .digital-watch{
+        .digital-watch {
             margin-right: 20px;
         }
-
+        
         /* General styles for the digital watch */
         .digital-watch .hour,
         .digital-watch .minute,
         .digital-watch .second {
             position: relative;
-            display: inline-block;
-            margin: 4px; /* Increased spacing between digit groups */
+            display: flex;
+            margin: 4px;
             font-size: 0;
         }
-
+        
         /* Adjust the colon placement to move it further to the right */
         .digital-watch .hour::before,
         .digital-watch .hour::after,
@@ -1174,161 +1178,157 @@
         .digital-watch .minute::after {
             content: '';
             position: absolute;
-            right: -15px; /* Increased value to move the colon further right */
-            width: 3px; /* Width of the colon dots */
-            height: 3px; /* Height of the colon dots */
-            background-color: #0984e3;
+            right: -15px;
+            width: 4px; /* Slightly increased for better visibility */
+            height: 4px;
+            background-color: #000; /* Black color for better contrast */
+            border-radius: 50%; /* Making the colon dots circular */
         }
-
+        
         /* Adjust the vertical placement of the top and bottom dots */
         .digital-watch .hour::before,
         .digital-watch .minute::before {
-            top: 10px; /* Top dot position */
+            top: 10px;
         }
-
+        
         .digital-watch .hour::after,
         .digital-watch .minute::after {
-            top: 25px; /* Bottom dot position */
+            top: 25px;
         }
-
-
+        
         /* SVG size and margins */
         .digital-watch svg {
             display: inline-block;
-            margin: 4px; /* Increased spacing between digits */
-            width: 16px; /* Increased SVG width */
-            height: 30px; /* Increased SVG height */
+            margin: 4px;
+            width: 18px;
+            height: 34px;
         }
-
+        
         /* Base segment styles */
         .digital-watch svg .segment {
-            fill: rgb(255, 255, 255); /* White segments */
+            fill: #bbb; /* Light gray for inactive segments */
             transition: 0.3s ease-in-out;
         }
-
+        
+        /* Active segment color */
+        .digital-watch svg .segment.active {
+            fill: #000; /* Black for better contrast */
+        }
+        
         /* Horizontal segments */
         .digital-watch svg .segment.a,
         .digital-watch svg .segment.d,
         .digital-watch svg .segment.g {
-            width: 12px; /* Increased width of horizontal segments */
-            height: 3px; /* Increased thickness of horizontal segments */
+            width: 14px;
+            height: 3px;
         }
-
+        
         /* Vertical segments */
         .digital-watch svg .segment.b,
         .digital-watch svg .segment.c,
         .digital-watch svg .segment.e,
         .digital-watch svg .segment.f {
-            width: 3px; /* Increased thickness of vertical segments */
-            height: 12px; /* Increased height of vertical segments */
+            width: 3px;
+            height: 14px;
         }
-
-
-        /* Digit 0 */
+        
+        /* Apply active segments for each digit */
         .num-0 .segment.a,
         .num-0 .segment.b,
         .num-0 .segment.c,
         .num-0 .segment.d,
         .num-0 .segment.e,
         .num-0 .segment.f {
-            fill: #0984e3; /* Active segment color */
+            fill: #000;
         }
         .num-0 .segment.g {
-            fill: #333; /* Inactive segment color */
+            fill: #bbb;
         }
-
-        /* Digit 1 */
+        
         .num-1 .segment.b,
         .num-1 .segment.c {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-1 .segment.a,
         .num-1 .segment.d,
         .num-1 .segment.e,
         .num-1 .segment.f,
         .num-1 .segment.g {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 2 */
+        
         .num-2 .segment.a,
         .num-2 .segment.b,
         .num-2 .segment.g,
         .num-2 .segment.e,
         .num-2 .segment.d {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-2 .segment.c,
         .num-2 .segment.f {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 3 */
+        
         .num-3 .segment.a,
         .num-3 .segment.b,
         .num-3 .segment.g,
         .num-3 .segment.c,
         .num-3 .segment.d {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-3 .segment.e,
         .num-3 .segment.f {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 4 */
+        
         .num-4 .segment.f,
         .num-4 .segment.g,
         .num-4 .segment.b,
         .num-4 .segment.c {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-4 .segment.a,
         .num-4 .segment.d,
         .num-4 .segment.e {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 5 */
+        
         .num-5 .segment.a,
         .num-5 .segment.f,
         .num-5 .segment.g,
         .num-5 .segment.c,
         .num-5 .segment.d {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-5 .segment.b,
         .num-5 .segment.e {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 6 */
+        
         .num-6 .segment.a,
         .num-6 .segment.f,
         .num-6 .segment.g,
         .num-6 .segment.c,
         .num-6 .segment.d,
         .num-6 .segment.e {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-6 .segment.b {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 7 */
+        
         .num-7 .segment.a,
         .num-7 .segment.b,
         .num-7 .segment.c {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-7 .segment.d,
         .num-7 .segment.e,
         .num-7 .segment.f,
         .num-7 .segment.g {
-            fill: #333;
+            fill: #bbb;
         }
-
-        /* Digit 8 */
+        
         .num-8 .segment.a,
         .num-8 .segment.b,
         .num-8 .segment.c,
@@ -1336,22 +1336,21 @@
         .num-8 .segment.e,
         .num-8 .segment.f,
         .num-8 .segment.g {
-            fill: #0984e3;
+            fill: #000;
         }
-
-        /* Digit 9 */
+        
         .num-9 .segment.a,
         .num-9 .segment.b,
         .num-9 .segment.c,
         .num-9 .segment.d,
         .num-9 .segment.f,
         .num-9 .segment.g {
-            fill: #0984e3;
+            fill: #000;
         }
         .num-9 .segment.e {
-            fill: #333;
+            fill: #bbb;
         }
-
+        
         .notification {
             position: fixed;
             top: 50%;
@@ -1443,7 +1442,88 @@
         opacity: 0;
         display: none;
     }
-                    
+
+    .templates-header {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding-bottom: 0.5rem; /* Reduce bottom padding */
+        border-bottom: 1px solid var(--c-gray-600);
+        margin-top: 21px;
+    }
+
+    .templates-header h2{
+        font-size: 19px;
+        font-weight: bold
+    }
+    
+    .template-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* Force 3 columns per row */
+        gap: 5px; /* Reduce spacing */
+        justify-content: center;
+        padding: 5px;
+    }
+    
+    .template-item {
+        text-align: center; 
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 3px;
+        height: auto;
+        max-width: 160px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+    }
+    
+    .template-item:hover {
+        transform: scale(1.07); /* Slightly larger */
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Soft shadow */
+    }
+    
+    /* QR Template Image */
+    .template-image {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+    }
+    
+    /* Template Name */
+    .template-item p {
+        margin-top: 3px; /* Less space between image & text */
+        font-weight: bold;
+        font-size: 13px; /* Slightly smaller */
+    }
+
+    .schedules-header {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding-bottom: 0.5rem; /* Reduce bottom padding */
+        border-bottom: 1px solid var(--c-gray-600);
+        margin-top: 21px;
+    }
+
+    .schedules-header h2 {
+        font-size: 19px; /* Adjust size as needed */
+        font-weight: bold
+    }
+
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding-bottom: 0.5rem; /* Reduce bottom padding */
+        border-bottom: 1px solid var(--c-gray-600);
+        margin-top: 21px;
+    }
+
+    .dashboard-header h2 {
+        font-size: 19px; /* Adjust size as needed */
+        font-weight: bold
+    }
+     
     </style>
 </head>
 <body>
@@ -1483,6 +1563,7 @@
                     <span>
                         {% if user.profile_picture %}
                             <img src="{{ user.profile_picture.url }}" alt="{{ user.first_name }}'s Profile Picture" />
+                            
                         {% else %}
                             <img src="{% static 'profile_pictures/default_profile.png' %}" alt="Default Profile Picture" />
                         {% endif %}
@@ -1551,12 +1632,34 @@
             <div class="app-body-main-content">
 
                 <div id="dashboard" class="tab-content" style="display: block;">
-                    <h2>Dashboard Panel</h2>
-                    <p>You are currently viewing the Dashboard.</p>
+                    <div class = "dashboard-header">
+                        <h2>Dashboard</h2>
+                        <div class="filter-options">
+                            <p>Filter selected: News</p>
+                            <button class="icon-button">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <!-- Button to Open Upload Modal -->
+                            <button class="icon-button">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div id="schedules" class="tab-content" style="display: none;">
-                    <h2>Schedules Panel</h2>
-                    <p>You are currently viewing the Schedules.</p>
+                    <div class = "schedules-header">
+                        <h2>Schedules</h2>
+                        <div class="filter-options">
+                            <p>Filter selected: Dates</p>
+                            <button class="icon-button">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                            <!-- Button to Open Upload Modal -->
+                            <button class="icon-button">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <div id="events" class="tab-content">
@@ -1568,7 +1671,6 @@
                                 <button class="icon-button">
                                     <i class="fas fa-filter"></i>
                                 </button>
-                                <!-- Add Event Button -->
                                 <button class="icon-button" id="add-event-btn" data-bs-toggle="modal" data-bs-target="#eventModal">
                                     <i class="fas fa-plus"></i>
                                 </button>
@@ -1577,7 +1679,7 @@
                 
                         <div class="transfers">
                             {% for event in events %}
-                            <div class="transfer" id="event-{{ event.id }}">
+                            <div class="transfer" id="event-{{ event.id }}" data-event-id="{{ event.id }}">
                                 <div class="transfer-logo">
                                     <img src="{% static 'img/logo.ico' %}" alt="Logo" />
                                 </div>
@@ -1587,7 +1689,7 @@
                                         <dd>{{ event.date }}</dd>
                                     </div>
                                     <div>
-                                        <dt id="attendee-count-{{ event.id }}">{{ event.attendee_set.count }}</dt>
+                                        <dt id="attendees-count-{{ event.id }}">{{ event.attendee_set.count }}</dt>
                                         <dd>Number of Registered Attendees</dd>
                                     </div>
                                     <div>
@@ -1599,7 +1701,7 @@
                             {% empty %}
                             <p>No events available.</p>
                             {% endfor %}
-                        </div>
+                        </div>                                                
                         
                     </section>
 
@@ -1640,16 +1742,79 @@
                             </div>
                         </div>
                     </div>
-                    
-                    
-                </div>
-            
-                                 
-                <div id="templates" class="tab-content" style="display: none;">
-                    <h2>Templates Panel</h2>
-                    <p>You are currently viewing the Templates.</p>
-                </div>
 
+                </div>
+                
+                <div id="templates" class="tab-content" style="display: none;">
+                    <section class="templates">
+                        <div class="templates-header">
+                            <h2>Templates</h2>
+                            <div class="filter-options">
+                                <p>Filter selected: Templates</p>
+                                <button class="icon-button">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                                <!-- Button to Open Upload Modal -->
+                                <button class="icon-button" data-bs-toggle="modal" data-bs-target="#templateModal">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                
+                    <!-- QR Template List -->
+                    <div class="template-list">
+                        {% for template in qr_templates %}
+                        <div class="template-item">
+                            <img src="{{ template.image.url }}" alt="QR Template" class="template-image">
+                            <p>{{ template.name }}</p>
+                            <p>{{ template.event.name }} </p>
+                        </div>
+                        {% empty %}
+                        <p>No templates available.</p>
+                        {% endfor %}
+                    </div>
+                    
+                </div>
+                
+                <div class="modal fade" id="templateModal" tabindex="-1" aria-labelledby="templateModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="templateModalLabel">Upload QR Template</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- QR Template Form -->
+                                <form method="POST" action="{% url 'admin_dashboard' %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                
+                                    <div class="mb-3">
+                                        <label for="{{ template_form.event.id_for_label }}" class="form-label">Select Event:</label>
+                                        {{ template_form.event }}
+                                    </div>
+                
+                                    <div class="mb-3 d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <label for="image-upload" class="form-label me-2">Upload Image:</label>
+                                            <button type="button" class="icon-button me-2" onclick="document.getElementById('image-upload').click()">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <input type="file" id="image-upload" name="{{ template_form.image.name }}" class="d-none" accept="image/*" onchange="previewImage(event)">
+                                            <button type="submit" name="add_template" class="icon-button">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </div>
+                                        <img id="image-preview" src="#" alt="Preview" class="d-none" style="max-width: 80px; max-height: 80px; border: 1px solid #ddd; padding: 5px;">
+                                    </div>
+                                    
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
                 <div id="whitelist-content" class="tab-content" style="display: block;">
                     <section class="service-section">
                         <h2>Whitelisted Emails</h2>
@@ -1771,9 +1936,7 @@
                     <!-- Your overview content here -->
                 </div>
                           
-                <section class="transfer-section">
-                    
-                </section>
+              
             </div>
 
             <div class="app-body-sidebar">
@@ -1899,6 +2062,7 @@
                             <input type="text" placeholder="Type here">
                         </div>
                     </div>
+                    
                     <div class="payment-section-footer">
                         <button class="save-button">
                             Save
@@ -2129,13 +2293,16 @@
             }
         });        
         
-        function fetchAttendees() {
+        function fetchAllData() {
+            // Fetch attendees list
             fetch("{% url 'get_attendees_status' %}")
                 .then(response => response.json())
                 .then(data => {
                     let attendeeList = document.querySelector('.attendee-list');
-                    attendeeList.innerHTML = ''; 
-        
+                    if (!attendeeList) return;  // Avoid errors if attendee list is missing
+                    
+                    attendeeList.innerHTML = '';
+            
                     data.attendees.forEach(attendee => {
                         const li = document.createElement('li');
                         li.classList.add('attendee-item');
@@ -2148,35 +2315,46 @@
                         attendeeList.appendChild(li);
                     });
                 });
-        }        
         
-        setInterval(fetchAttendees, 5000);
-
-        function fetchAttendeeCount(eventId) {
-            $.ajax({
-                url: "{% url 'update_attendee_count' %}",  // Reverse the URL pattern
-                data: { 'event_id': eventId },  // Pass the event ID
-                dataType: 'json',
-                success: function(response) {
-                    // Update the number of attendees in the page
-                    if(response.attendees_count !== undefined) {
-                        $(`#attendees-count-${eventId}`).text(response.attendees_count);
-                    }
-                },
-                error: function(xhr, errmsg, err) {
-                    console.log("Error: " + errmsg);
+            // Fetch attendee count for each event
+            document.querySelectorAll('.transfer').forEach(function(eventCard) {
+                const eventId = eventCard.dataset.eventId;  // Get event ID
+                console.log("Fetching count for event ID:", eventId);  // Debugging
+        
+                if (!eventId) {
+                    console.error("Missing event ID for an event card!");
+                    return;
                 }
+        
+                fetch(`/registration/update-attendee-count/?event_id=${eventId}`)  // Ensure correct URL
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Response:", data);  // Debugging
+                        if (data.attendees_count !== undefined) {
+                            document.querySelector(`#attendees-count-${eventId}`).textContent = data.attendees_count;
+                        }
+                    })
+                    .catch(error => console.error('Error fetching attendee count:', error));
             });
         }
         
-        // Call the function on the page load or on intervals to fetch data
-        setInterval(function() {
-            $('.event-card').each(function() {
-                let eventId = $(this).data('event-id');
-                fetchAttendeeCount(eventId);
-            });
-        }, 5000);  // Update every 10 seconds
-    
+        // Call the function every 5 seconds
+        setInterval(fetchAllData, 5000);        
+
+        function previewImage(event) {
+            var input = event.target;
+            var preview = document.getElementById('image-preview');
+        
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none'); // Show the image
+                }
+                reader.readAsDataURL(input.files[0]); // Read the uploaded file
+            }
+        }        
+        
     </script>    
 
 </body>
