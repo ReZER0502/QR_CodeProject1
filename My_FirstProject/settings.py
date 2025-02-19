@@ -146,4 +146,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = 'http://10.0.0.52:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000
+BASE_URL = 'http://192.168.200.54:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000

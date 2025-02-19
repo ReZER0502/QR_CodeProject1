@@ -167,7 +167,6 @@ def admin_dashboard(request):
         'qr_templates': qr_templates,  # Send the list of templates to the template
     })
 
-
 def templates_view(request):
     qr_templates = QRTemplate.objects.all()  # Get all QR templates
     return render(request, 'admin_dashboard.html', {
@@ -209,17 +208,17 @@ def edit_user_profile(request):
 
 def generate_qr_and_send_email(attendee):
     try:
-        # QR code generation
+        # qr logic gen.
         qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
         qrcode_img = qrcode.make(qr_data)
         qrcode_img = qrcode_img.convert("RGBA")
 
-        # Fetch the correct QR template background based on event
+        # Fetch muna as first...
         try:
             qr_template = QRTemplate.objects.get(event=attendee.event)
-            background_path = qr_template.image.path  # Use uploaded template
+            background_path = qr_template.image.path  # then gamit sya nung updated template based sa event
         except QRTemplate.DoesNotExist:
-            background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg')  # Fallback
+            background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg') #fallback dito
 
         background = Image.open(background_path).convert("RGBA")
         qrcode_img = qrcode_img.resize((700, 700))
@@ -229,15 +228,11 @@ def generate_qr_and_send_email(attendee):
 
         background.paste(qrcode_img, position, qrcode_img)
 
-        # Saving QR code as file
         canvas = BytesIO()
         background.save(canvas, format='PNG')
         canvas.seek(0)
         qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
-
         attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
-
-        # Prepare email with QR code attachment
         subject = 'Your Registration QR Code'
         html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
         plain_message = strip_tags(html_message)
@@ -263,14 +258,9 @@ def register(request):
                 if existing_attendee:
                     messages.error(request, "This email is already registered.")
                     return render(request, 'registration/register.html', {'form': form, 'events': events})
-
                 attendee = form.save()
-
-                # Synchronously generate QR code and email before redirecting
-                generate_qr_and_send_email(attendee)  # Run the function without threading
-
+                generate_qr_and_send_email(attendee)  
                 return redirect('success', attendee_id=attendee.id)
-
             except Exception as e:
                 messages.error(request, "An error occurred while registering. Please try again.")
                 print(f"Error: {e}")
@@ -285,7 +275,6 @@ def success(request, attendee_id):
     return render(request, 'registration/success.html', {'attendee': attendee})
 
 def mark_attendance(request):
-    # Handle login if a user is not logged in
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -294,17 +283,11 @@ def mark_attendance(request):
             login(request, user)
 
     if request.user.is_authenticated:
-        # Check if the logged-in user is the permanent admin
         permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
         if request.user.email in permanent_admin_email:
-            # Skip whitelist checks for the permanent admin
             return handle_attendance_logic(request)
-
-        # Check if the user is in the whitelist
         if AdminWhitelist.objects.filter(email=request.user.email).exists():
             return handle_attendance_logic(request)
-
-        # If not whitelisted, show an error message
         messages.error(request, "You are not authorized to mark attendance.")
         return render(request, 'registration/mark_attendance.html', {
             'error': 'You are not authorized to mark attendance.'
@@ -347,11 +330,11 @@ def handle_attendance_logic(request):
 
     return render(request, 'res.html', {
         'success': False,
-        'message': 'Invalid request.'
+        'message': 'Invalid entry. Please scan the attendees QR Code.'
     })
 
 
-#'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende kay sir ron.
+#'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende sa client.
 
 def download_qr(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)

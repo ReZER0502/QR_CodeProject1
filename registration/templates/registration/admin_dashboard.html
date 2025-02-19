@@ -1523,7 +1523,115 @@
         font-size: 19px; /* Adjust size as needed */
         font-weight: bold
     }
-     
+
+    /* Style the rectangular event buttons */
+    .dropbtn {
+        width: 200px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        backdrop-filter: blur(5px);
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .dropbtn:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .modal3 {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); /* Dark background */
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        opacity: 0; /* Start invisible */
+        transition: opacity 0.3s ease-in-out; /* Smooth fade effect */
+    }
+
+    .modal3-content {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        transform: scale(0.95); /* Start slightly smaller */
+        transition: transform 0.3s ease-in-out; /* Smooth zoom effect */
+    }
+
+    .modal3.show {
+        display: flex;
+        opacity: 1;
+    }
+
+    .modal3-content.show {
+        transform: scale(1); /* Expand to normal size */
+    }    
+
+    .close {
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        color: white;
+    }
+
+    .attendee-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        list-style-type: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+
+    .attendee-item {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    }
+
+    .attendee-name-container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .present {
+        background-color: green;
+    }
+
+    .absent {
+        background-color: red;
+    }
+
+    .dropdown {
+        margin-top: 10px;
+    }
+    
     </style>
 </head>
 <body>
@@ -1821,13 +1929,14 @@
                         <div class="service-section-header">
                             <form id="whitelistForm" method="post" action="{% url 'admin_dashboard' %}">
                                 {% csrf_token %}
+                                <input type="hidden" name="add_admin" value="1">  <!-- Add this hidden input -->
                                 <div class="search-field">
                                     <input type="email" id="email" name="email" class="form-control" placeholder="Enter email" required>
                                     <button type="submit" class="custom-icon-button">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </div>
-                            </form>
+                            </form>                            
                 
                             <!-- Success Messages -->
                             <div id="whitelistSuccessMessage" class="success-messages fade-out" style="display: none;">
@@ -1866,23 +1975,20 @@
                                 </div>
                             </div>
                         </div>
-                
+
                         <div class="arrows-container">
                             <button class="arrow-button left-arrow icon-button" onclick="changePage(-1)">
-                                <i class="fas fa-arrow-left"></i> <!-- Left arrow icon -->
-                            </button>
-                        
+                                <i class="fas fa-arrow-left"></i> 
+                            </button><!-- Test button dito. If 404, change mu yung script logic-->
                             <button class="arrow-button right-arrow icon-button" onclick="changePage(1)">
-                                <i class="fas fa-arrow-right"></i> <!-- Right arrow icon -->
+                                <i class="fas fa-arrow-right"></i> 
                             </button>
                         </div>
-                        <!-- Additional Content for Whitelist goes here -->
                     </section>
                 </div>                
                 
-                <!-- Content for Attendees -->
                 <div id="attendance-content" class="tab-content" style="display: none;">
-                    <h2>Attendees</h2>
+                    <h2>Attendees</h2>                
                     <!-- Filter and Download Buttons -->
                     <div class="action-buttons-container">
                         <!-- Download CSV Button -->
@@ -1891,52 +1997,59 @@
                                 <i class="fas fa-download"></i>
                             </button>
                         </form>
-
+                
                         <form method="POST" id="resetAttendanceForm" style="display: inline;">
                             {% csrf_token %}
                             <!-- Reset Attendance Button -->
                             <button id="resetAttendanceButton" class="icon-button" title="Reset Attendance">
                                 <i class="fas fa-sync-alt"></i> <!-- Using sync icon to represent reset -->
                             </button>
-
                             <!-- Notification Container -->
                             <div id="notification" class="notification hidden"></div>
                         </form>
                     </div>
-                                    
-                    <!-- Attendees List -->
-                    {% if attendees %}
-                    <ul class="attendee-list">
-                        {% for attendee in attendees %}
-                        <li class="attendee-item" data-email="{{ attendee.email }}">
-                            <span class="attendee-name-container">
-                                <span class="attendee-name">{{ attendee.first_name }} {{ attendee.last_name }}</span>
-                                <div class="status-indicator {% if attendee.is_present %}present{% else %}absent{% endif %}"></div>
-                            </span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <div class="no-attendees-message">
-                        <p>No registered attendees</p>
-                    </div>
-                    {% endif %}
 
-                </div>    
-                            
-                <!-- Content for Accounts -->
-                <div id="accounts-content" class="tab-content" style="display: none;">
-                    <h2>Accounts</h2>
-                    <!-- Your accounts content here -->
+                    <div class="dropdown-container">
+                        {% for event in events %}
+                        <div class="dropdown">
+                            <!-- Rectangular Event Button -->
+                            <button onclick="openModal3('modal3-{{ event.id }}')" class="dropbtn">{{ event.name }}</button>
+                        </div>
+                    
+                        <!-- Glassmorphic Modal -->
+                        <div id="modal3-{{ event.id }}" class="modal3">
+                            <div class="modal3-content">
+                                <span class="close" onclick="closeModal3('modal3-{{ event.id }}')">&times;</span>
+                                <h2>{{ event.name }}</h2>
+                                <p>Attendees:</p>
+                                {% if event.attendee_set.all %}
+                                <ul class="attendee-list">
+                                    {% for attendee in event.attendee_set.all %}
+                                    <li class="attendee-item" data-email="{{ attendee.email }}">
+                                        <span class="attendee-name-container">
+                                            <span class="attendee-name">{{ attendee.first_name }} {{ attendee.last_name }}</span>
+                                            <div class="status-indicator {% if attendee.is_present %}present{% else %}absent{% endif %}"></div>
+                                        </span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                                {% else %}
+                                <p>No registered attendees for this event.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>                    
                 </div>
                 
-                <!-- Content for Overview -->
+                <div id="accounts-content" class="tab-content" style="display: none;">
+                    <h2>Accounts</h2>
+                </div>
+                
                 <div id="overview-content" class="tab-content" style="display: none;">
                     <h2>Overview</h2>
-                    <!-- Your overview content here -->
                 </div>
-                          
-              
+    
             </div>
 
             <div class="app-body-sidebar">
@@ -2087,6 +2200,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        console.log("Javascript loaded");
         let currentPage = 0;
         const tilesContainer = document.getElementById("tiles");
         const tileCount = document.querySelectorAll(".tile").length;
@@ -2315,8 +2429,7 @@
                         attendeeList.appendChild(li);
                     });
                 });
-        
-            // Fetch attendee count for each event
+
             document.querySelectorAll('.transfer').forEach(function(eventCard) {
                 const eventId = eventCard.dataset.eventId;  // Get event ID
                 console.log("Fetching count for event ID:", eventId);  // Debugging
@@ -2338,7 +2451,6 @@
             });
         }
         
-        // Call the function every 5 seconds
         setInterval(fetchAllData, 5000);        
 
         function previewImage(event) {
@@ -2349,12 +2461,63 @@
                 var reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
-                    preview.classList.remove('d-none'); // Show the image
+                    preview.classList.remove('d-none'); 
                 }
-                reader.readAsDataURL(input.files[0]); // Read the uploaded file
+                reader.readAsDataURL(input.files[0]); 
             }
-        }        
+        }     
         
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".modal3").forEach(modal => {
+                modal.style.display = "none"; // 3rd modal dito
+            });
+        
+            function openModal3(modalId) {
+                let modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = "flex"; 
+                    setTimeout(() => {
+                        modal.classList.add("show");
+                        modal.querySelector(".modal3-content").classList.add("show");
+                    }, 10); 
+                }
+            }
+        
+            function closeModal3(modalId) {
+                let modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove("show");
+                    modal.querySelector(".modal3-content").classList.remove("show");
+        
+                    setTimeout(() => {
+                        modal.style.display = "none"; 
+                    }, 300); 
+                }
+            }
+        
+            document.querySelectorAll(".dropbtn").forEach(button => {
+                button.addEventListener("click", function () {
+                    let modalId = this.getAttribute("onclick").match(/'([^']+)'/)[1];
+                    openModal3(modalId);
+                });
+            });
+        
+            document.querySelectorAll(".close").forEach(button => {
+                button.addEventListener("click", function () {
+                    let modalId = this.getAttribute("onclick").match(/'([^']+)'/)[1];
+                    closeModal3(modalId);
+                });
+            });
+        
+            window.onclick = function (event) {
+                document.querySelectorAll(".modal3").forEach(modal => {
+                    if (event.target === modal) {
+                        closeModal3(modal.id);
+                    }
+                });
+            };
+        });
+         
     </script>    
 
 </body>

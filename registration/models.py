@@ -79,28 +79,26 @@ class Attendee(models.Model):
     present_time = models.DateTimeField(null=True, blank=True)
     sub_department = models.CharField(max_length=100, blank=True, null=True)
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, default=1)  # ForeignKey to Event
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, default=1)  # ForeignKey para sa Event db
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
-
-
 @receiver(post_migrate)
 def create_permanent_admin(sender, **kwargs):
-    #gamit tayo hashmap para makapag store ng permanent admins
+    #gamit tayo hashmap para makapag store ng permanent admins, meaning they cannot be deleated via sql commands.
     permanent_admins = [
         {
             "email": "gcagbayani@natcco.coop",
             "first_name": "GC",
             "last_name": "Agbayani",
-            "password": "gc_agbayaniIControl-DCU2024"
+            "password": "Ourfuturetod@y2024"
         },
         {
             "email": "gjhalos@natcco.coop", 
             "first_name": "Geronimo",
             "last_name": "Halos",
-            "password": "gj_halosIControl-DCU2024"
+            "password": "Ourfuturetod@y2024"
         }
     ]
     
