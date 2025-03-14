@@ -54,7 +54,7 @@ class AdminUser(AbstractBaseUser, PermissionsMixin):
 
 # Signal to prevent permanent admin deletion
 def prevent_admin_deletion(sender, instance, **kwargs):
-    permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop"]
+    permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop", "agpol@natcco.coop", "spobusan@natcco.coop"]
     
     if instance.email == permanent_admin_email:
         raise Exception("The permanent admin user cannot be deleted.")
@@ -86,11 +86,11 @@ class Attendee(models.Model):
 
 @receiver(post_migrate)
 def create_permanent_admin(sender, **kwargs):
-    #gamit tayo hashmap para makapag store ng permanent admins, meaning they cannot be deleated via sql commands.
+    #gamit tayo hashmap para makapag store ng permanent admins, meaning they cannot be deleated via sql code commands.
     permanent_admins = [
         {
             "email": "gcagbayani@natcco.coop",
-            "first_name": "GC",
+            "first_name": "Gio",
             "last_name": "Agbayani",
             "password": "Ourfuturetod@y2024"
         },
@@ -98,6 +98,18 @@ def create_permanent_admin(sender, **kwargs):
             "email": "gjhalos@natcco.coop", 
             "first_name": "Geronimo",
             "last_name": "Halos",
+            "password": "Ourfuturetod@y2024"
+        },
+        {
+            "email": "agpol@natcco.coop",
+            "first_name": "Alexander",
+            "last_name": "Pol",
+            "password": "Ourfuturetod@y2024"
+        },
+        {
+            "email": "spobusan@natcco.coop",
+            "first_name": "Sean Jerome",
+            "last_name": "Obusan",
             "password": "Ourfuturetod@y2024"
         }
     ]

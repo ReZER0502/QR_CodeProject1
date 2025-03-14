@@ -47,9 +47,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail SMTP
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'melleattack0502@gmail.com' #qr test send 
-EMAIL_HOST_PASSWORD = 'dgva xsbv lyyn askt' #generated app password. hindi yung literal na password ng iyong account
-DEFAULT_FROM_EMAIL = 'mellettack0502@gmail.com'
+EMAIL_HOST_USER = 'dc@natcco.coop' #qr test send 
+EMAIL_HOST_PASSWORD = 'zahr pjxo iwgb rivx' #generated app password. hindi yung literal na password ::)))
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -146,4 +145,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = 'http://192.168.200.54:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000
+BASE_URL = 'http://10.0.0.52:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000

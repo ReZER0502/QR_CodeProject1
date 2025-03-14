@@ -6,7 +6,7 @@ class AttendeeCountConsumer(AsyncWebsocketConsumer):
         self.event_id = self.scope['url_route']['kwargs']['event_id']
         self.room_group_name = f'attendee_count_{self.event_id}'
         
-        # Join room group
+
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -15,7 +15,6 @@ class AttendeeCountConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name

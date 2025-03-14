@@ -17,11 +17,11 @@
             --c-light-blue:rgb(32, 73, 255); /* Light blue for a soft look */
             --c-soft-beige: #fdf6e3;
             --c-gray-800:rgb(221, 233, 153); /* Slightly Off-White */
-            --c-gray-700:rgb(255, 255, 255); /* Light Gray for Borders */
-            --c-gray-600:rgb(243, 243, 243); /* Subtle Border Gray */
+            --c-gray-700:rgb(10, 0, 104); /* Light Gray for Borders */
+            --c-gray-600:rgb(0, 115, 150); /* Subtle Border Gray */
             --c-gray-500:rgb(0, 0, 0); /* Lighter Gray for Details */
             --c-gray-400:rgb(8, 8, 10); /* Not Used for Text */
-            --c-gray-300:rgb(255, 252, 58); /* Not Used for Text */
+            --c-gray-300:rgb(3, 164, 185); /* Not Used for Text */
             --c-gray-200:rgb(2, 2, 2); /* Not Used for Text */
             --c-gray-100: #000000; /* Pure Black - Used for Text */
         
@@ -40,13 +40,15 @@
             line-height: 1.5;
             min-height: 100vh;
             font-family: "Be Vietnam Pro", sans-serif;
-            background: linear-gradient(to right, var(--c-light-blue), var(--c-light-gray)); 
+            background: url("{% static 'img/QR BG Landscape.jpg' %}") no-repeat center center;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Keeps the image in place when scrolling */
             color: var(--c-text-primary);
             display: flex;
             padding-top: 3vw;
             padding-bottom: 3vw;
             justify-content: center;
-            background-attachment: fixed; 
         }
 
         *,
@@ -1630,7 +1632,21 @@
 
     .dropdown {
         margin-top: 10px;
+        background: rgba(4, 83, 148, 0.2); /* Light transparent white */
+        backdrop-filter: blur(10px); /* Frosted glass effect */
+        border: 1px solid rgba(2, 96, 173, 0.3); /* Soft border */
+        border-radius: 8px;
+        padding: 8px;
+        color: black; /* Ensures text is black */
+        width: 220px;
     }
+    
+    .dropdown option {
+        color: black; /* Makes sure options text is black */
+        background: rgba(2, 105, 92, 0.8); /* Slightly solid white for readability */
+    }
+    
+    
     
     </style>
 </head>

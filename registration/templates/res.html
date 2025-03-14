@@ -4,20 +4,22 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Result</title>
+    <title>Ez-Attend Status</title>
     <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon" />
     <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-            color: #333; /* Dark gray text for readability */
-            overflow: hidden; /* Prevent scrollbars */
+        body {
+            line-height: 1.5;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            background: url("{% static 'img/QR BG Landscape.jpg' %}") no-repeat center center;
+            background-size: cover;
+            background-position: center;
+            background-attachment: **fixed**; /* Keeps the image in place when scrolling */
+            color: var(--c-text-primary);
             display: flex;
+            padding-top: 3vw;
+            padding-bottom: 3vw;
             justify-content: center;
-            align-items: center;
-            background-color: #f9f9f9; /* Light gray background for a clean theme */
         }
     
         .container {
@@ -25,14 +27,13 @@
             max-width: 400px; /* Limit width for better responsiveness */
             width: 90%; /* Allow scaling on smaller devices */
             padding: 20px;
-            background-color: #ffffff; /* Solid white background for the container */
+            background-color:transparent; /* Solid white background for the container */
             border-radius: 15px; /* Rounded corners */
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
         }
     
         .success {
@@ -49,6 +50,14 @@
     
         /* Mobile Responsiveness */
         @media (max-width: 600px) {
+            body {
+                background: url("{% static 'img/mobile.jpg' %}") no-repeat center center;
+                background-size: cover;
+                min-height: 100vh;
+                image-rendering: crisp-edges; /* Helps sharpen image */
+                image-rendering: -webkit-optimize-contrast; /* Improves contrast on webkit browsers */
+            }
+            
             .container {
                 padding: 15px; /* Adjust padding for smaller devices */
                 border-radius: 10px; /* Slightly less rounded corners for compact devices */

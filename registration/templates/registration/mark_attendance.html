@@ -4,34 +4,47 @@
     {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>I-Mark</title>
+    <title>Ez-AttendMarking</title>
 
     <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon" />
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9; /* Light theme background */
-            color: #333; /* Dark text for contrast */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-    
-
+        body {
+            line-height: 1.5;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            background: url("{% static 'img/QR BG Landscape.jpg' %}") no-repeat center center;
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
+            background-attachment: **fixed**; /* Keeps the image in place when scrolling */
+            color: var(--c-text-primary);
+            display: flex;
+            padding-top: 3vw;
+            padding-bottom: 3vw;
+            justify-content: center;
         }
-    
+        
         .login-container {
-            background-color: #ffffff; /* White form background */
-            padding: 40px; /* Maintains consistent padding */
-            border-radius: 8px;
-            max-width: 380px; /* Same size as the original */
+            z-index: 10;
+            max-height: 85vh;
+            padding: 30px;
+            width: 350px;
+            background: transparent;
+            border-radius: 15px;
+            animation: fadeIn 1s ease-in-out;
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items horizontally */
+            justify-content: center; /* Optional: Center content vertically */
+            text-align: center; /* Ensures text inside is centered */
+        }
+        
+
+        .form-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
             width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
         }
     
         .logo {
@@ -131,45 +144,54 @@
                 font-size: 12px; /* Smaller text for additional info */
             }
         }
+
+        .center-text {
+            text-align: center; /* Center text horizontally */
+            margin-top: 10px;  /* Optional: Adds spacing */
+        }
+        
     </style>
     
 </head>
 <body>
 
-<div class="login-container">
-    <!-- Logo inside the login container -->
-    <img src="{% static 'img/1.png' %}" alt="Logo" class="logo">
+    <div class="login-container">
+        <!-- Logo inside the login container -->
+        <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo">
 
-    <h1>Admin Scan</h1>
+        <h1>Admin Scan</h1>
+        <div class="form-wrapper">
+            <form method="post">
+                {% csrf_token %}
+                <input type="email" name="email" placeholder="Email" required>
 
-    <form method="post">
-        {% csrf_token %}
-        <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
 
-        <input type="password" name="password" placeholder="Password" required>
+                <button type="submit">Login</button>
 
-        <button type="submit">Login</button>
+                {% if error %}
+                    <p class="error-message" id="error-message">{{ error }}</p>
+                {% endif %}
+            </form>
+        </div>
 
+        <div class="center-text">
+            <p>Don't have an admin account? <a href="{% url 'register_admin' %}">Register here</a></p>
+            <p style="font-size: 9px;">Only Authorized Admins have access. Thank You</p>
+        </div>
+        
+    </div>
+
+    <script>
         {% if error %}
-            <p class="error-message" id="error-message">{{ error }}</p>
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'block'; 
+
+            setTimeout(function() {
+                errorMessage.style.display = 'none'; 
+            }, 3000);
         {% endif %}
-    </form>
-
-    <p>Don't have an admin account? <a href="{% url 'register_admin' %}">Register here</a></p>
-    <p></p>
-    <p style="font-size: 9px;">Only Authorized Admins have access. Thank You</p>
-</div>
-
-<script>
-    {% if error %}
-        const errorMessage = document.getElementById('error-message');
-        errorMessage.style.display = 'block'; 
-
-        setTimeout(function() {
-            errorMessage.style.display = 'none'; 
-        }, 3000);
-    {% endif %}
-</script>
+    </script>
 
 </body>
 </html>

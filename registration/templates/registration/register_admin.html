@@ -7,32 +7,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{% static 'img/logo.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <title>I-Scan Admin</title>
+    <title>Ez-Attend AdminRegistry</title>
     <style>
         body, html {
             height: 100%;
+            width: 100%;
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            color: #333;
+            padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            font-family: "Be Vietnam Pro", sans-serif;
+            background-image: url("{% static 'img/QR BG Landscape.jpg' %}");
+            background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
         }
-    
+        
         form {
-            background-color: #ffffff; /* Light background */
+            background-color: transparent;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
             text-align: center;
             position: relative;
-            top: -30px;
+            margin-top: 20px; /* Prevents overlap */
         }
     
         h1 {
@@ -153,12 +155,19 @@
         /* Mobile View Optimization */
         @media (max-width: 600px) {
             body {
-                padding: 20px; /* Add padding for smaller screens */
+                background: none; /* Removes overlapping image */
+                background-color: #fff; /* Set a temporary color to clear previous bg */
+                background-image: url("{% static 'img/mobile.jpg' %}");
+                background-repeat: no-repeat;
+                background-position: left center;
+                background-size: cover;
             }
-    
+        
             form {
-                padding: 20px; /* Reduce padding for the form */
-                border-radius: 8px; /* Slightly smaller border-radius */
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%; /* Better fit for small screens */
+                max-width: 350px;
             }
     
             h1 {
@@ -190,8 +199,8 @@
 <body>
     <form method="post" id="adminForm">
         {% csrf_token %}
-        <img src="{% static 'img/1.png' %}" alt="Logo" class="logo">
-        <h1>Admin Register</h1>
+        <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo">
+        <h1>Scanner Registration</h1>
 
         {{ form.first_name }}
         {{ form.last_name }}
