@@ -23,8 +23,9 @@ import csv
 from django.http import JsonResponse
 from .models import Event
 from .forms import EventForm
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from .models import QRTemplate
+from .models import MealClaim 
 
 def reset_attendance(request):
     if request.method == 'POST':
@@ -39,7 +40,7 @@ def get_attendees_status(request):
     data = [{
         'first_name': attendee.first_name,
         'last_name': attendee.last_name,
-        'is_present': attendee.is_present  # True/False value
+        'is_present': attendee.is_present  # boolean
     } for attendee in attendees]
 
     return JsonResponse({'attendees': data})
@@ -52,13 +53,13 @@ def update_attendee_count(request):
 
     try:
         event = Event.objects.get(id=event_id)
-        attendees_count = event.attendee_set.count()  # Count attendees
+        attendees_count = event.attendee_set.count() 
 
-        print(f"Event ID: {event_id}, Attendees Count: {attendees_count}")  # Debugging
+        print(f"Event ID: {event_id}, Attendees Count: {attendees_count}")  
         return JsonResponse({'attendees_count': attendees_count})
 
     except Event.DoesNotExist:
-        print(f"Event ID {event_id} not found")  # Debugging
+        print(f"Event ID {event_id} not found")  
         return JsonResponse({'error': 'Invalid event ID'}, status=400)
 
 def admin_login(request):
@@ -67,16 +68,14 @@ def admin_login(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
-        # Check if the email belongs to a permanent admin
         if email in permanent_admin_emails:
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect('admin_dashboard')  # Redirect to the admin dashboard
+                return redirect('admin_dashboard')  
             else:
                 return render(request, 'registration/login.html', {'error': 'Invalid credentials.'})
 
-        # For non-permanent admins, deny access to the dashboard
         return render(request, 'registration/login.html', {'error': 'Restricted Area!'})
 
     return render(request, 'registration/login.html')
@@ -120,10 +119,9 @@ def admin_dashboard(request):
 
     form = AdminWhitelistForm()
     event_form = EventForm()
-    template_form = QRTemplateForm()  # Initialize the template form
+    template_form = QRTemplateForm()  
 
     if request.method == 'POST':
-        # Handle adding new admins
         if 'add_admin' in request.POST:
             form = AdminWhitelistForm(request.POST)
             if form.is_valid():
@@ -135,62 +133,53 @@ def admin_dashboard(request):
                 })
             return JsonResponse({'status': 'error', 'errors': list(form.errors.values())})
 
-        # Handle adding new events
         elif 'add_event' in request.POST:
             event_form = EventForm(request.POST)
             if event_form.is_valid():
                 event_form.save()
                 return redirect('admin_dashboard')
 
-        # Handle adding new QR templates (Image Upload)
         elif 'add_template' in request.POST:
             template_form = QRTemplateForm(request.POST, request.FILES)
             if template_form.is_valid():
-                template_form.save()  # Save the new template
-                return redirect('admin_dashboard')  # Redirect to the same page to show the newly added template
+                template_form.save()  
+                return redirect('admin_dashboard')  
 
-    # Fetch required data
     whitelisted_emails = AdminWhitelist.objects.all()
     attendees = Attendee.objects.all()
     events = Event.objects.filter(date__gte=now()).order_by('date')[:3]
-    latest_events = Event.objects.filter(date__gte=now()).order_by('date')[:3]  # Only upcoming 3 events
-    qr_templates = QRTemplate.objects.all()  # Fetch all QR templates for displaying
+    latest_events = Event.objects.filter(date__gte=now()).order_by('date')[:3] 
+    qr_templates = QRTemplate.objects.all()  
 
     return render(request, 'registration/admin_dashboard.html', {
         'form': form,
         'event_form': event_form,
-        'template_form': template_form,  # Add the template form to the context
+        'template_form': template_form,  
         'whitelisted_emails': whitelisted_emails,
         'attendees': attendees,
         'events': events,  
-        'latest_events': latest_events,  # Send only 3 upcoming events
-        'qr_templates': qr_templates,  # Send the list of templates to the template
+        'latest_events': latest_events,  
+        'qr_templates': qr_templates,  
     })
 
 def templates_view(request):
-    qr_templates = QRTemplate.objects.all()  # Get all QR templates
+    qr_templates = QRTemplate.objects.all()  
     return render(request, 'admin_dashboard.html', {
         'qr_templates': qr_templates
     })
 
 @login_required
 def download_attendees_csv(request):
-    # Restrict to permanent admins or users with the necessary permissions
     if request.user.email not in PERMANENT_ADMIN_EMAILS:
         return HttpResponseForbidden("You do not have permission to perform this action.")
 
-    # Create the HttpResponse object with the appropriate CSV header
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="attendees.csv"'
-
     writer = csv.writer(response)
-    # Write the header row, including 'Present Time'
     writer.writerow(['First Name', 'Last Name', 'Email', 'Present Time', 'Status'])
 
-    # Query all attendees and write their data
     attendees = Attendee.objects.all()
     for attendee in attendees:
-        # Format the 'present_time' before writing it to the CSV
         present_time = attendee.present_time.strftime('%Y-%m-%d %H:%M:%S') if attendee.present_time else 'N/A'
         writer.writerow([
             attendee.first_name,
@@ -208,32 +197,35 @@ def edit_user_profile(request):
 
 def generate_qr_and_send_email(attendee):
     try:
-        # qr logic gen.
+        # Generate QR code data, retest mo nga dito then verify kasi 1 1/2 minute time yung processing... 
         qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
-        qrcode_img = qrcode.make(qr_data)
-        qrcode_img = qrcode_img.convert("RGBA")
+        qr = qrcode.QRCode(box_size=10, border=2)
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill="black", back_color="white").convert("RGBA")
 
-        # Fetch muna as first...
+        # qr resizing
+        qr_img = qr_img.resize((500, 500), Image.LANCZOS)
+
+        # bg resizing
         try:
             qr_template = QRTemplate.objects.get(event=attendee.event)
-            background_path = qr_template.image.path  # then gamit sya nung updated template based sa event
+            background_path = qr_template.image.path
         except QRTemplate.DoesNotExist:
-            background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg') #fallback dito
+            background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg')
 
         background = Image.open(background_path).convert("RGBA")
-        qrcode_img = qrcode_img.resize((700, 700))
-        background_width, background_height = background.size
-        qr_width, qr_height = qrcode_img.size
-        position = ((background_width - qr_width) // 2, (background_height - qr_height) // 2)
-
-        background.paste(qrcode_img, position, qrcode_img)
+        background = background.resize((700, 700), Image.LANCZOS)  # reduced sized dito... adjust if needed
+        position = ((background.width - qr_img.width) // 2, (background.height - qr_img.height) // 2)
+        background.paste(qr_img, position, qr_img)
 
         canvas = BytesIO()
-        background.save(canvas, format='PNG')
+        background.save(canvas, format='PNG', optimize=True)
         canvas.seek(0)
-        qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.first_name}_{attendee.last_name}.png')
+        qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.id}.png')
         attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
-        subject = 'Your Registration QR Code'
+        
+        subject = 'Your QR Code is Ready!'
         html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
         plain_message = strip_tags(html_message)
         email = EmailMessage(
@@ -243,10 +235,9 @@ def generate_qr_and_send_email(attendee):
         )
         email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
         email.send()
-
+        
     except Exception as e:
-        print(f"Error in background task: {e}")
-
+        print(f"Error in QR generation: {e}")
 
 def register(request):
     events = Event.objects.all()
@@ -259,15 +250,13 @@ def register(request):
                     messages.error(request, "This email is already registered.")
                     return render(request, 'registration/register.html', {'form': form, 'events': events})
                 attendee = form.save()
-                generate_qr_and_send_email(attendee)  
+                generate_qr_and_send_email(attendee)
                 return redirect('success', attendee_id=attendee.id)
             except Exception as e:
                 messages.error(request, "An error occurred while registering. Please try again.")
                 print(f"Error: {e}")
-                return render(request, 'registration/register.html', {'form': form, 'events': events})
     else:
         form = RegistrationForm()
-
     return render(request, 'registration/register.html', {'form': form, 'events': events})
 
 def success(request, attendee_id):
@@ -298,43 +287,57 @@ def mark_attendance(request):
     })
 
 def handle_attendance_logic(request):
-    # Process the attendance logic
     attendee_id = request.GET.get('attendee_id')
     if attendee_id:
         try:
             attendee = Attendee.objects.get(id=attendee_id)
-
-            if attendee.is_present:
-                return render(request, 'res.html', {
-                    'success': False,
-                    'message': 'Attendee already marked present!'
-                })
-            else:
-                # Mark the attendee as present
-                attendee.is_present = True
-                attendee.present_time = timezone.now() + timedelta(hours=8)  # Adjust time zone as needed
-                attendee.save()
-            
             attendee_name = f"{attendee.first_name} {attendee.last_name}"
-            return render(request, 'res.html', {
-                'success': True,
-                'message': 'Attendance marked successfully!',
-                'attendee_name': attendee_name
-            })
+            current_time = localtime(timezone.now()).time() 
+            meal_claim, _ = MealClaim.objects.get_or_create(attendee=attendee)
 
+            breakfast_start = timezone.datetime.strptime("06:00", "%H:%M").time()
+            breakfast_end = timezone.datetime.strptime("07:00", "%H:%M").time()
+            lunch_start = timezone.datetime.strptime("11:00", "%H:%M").time()
+            lunch_end = timezone.datetime.strptime("13:00", "%H:%M").time()
+            dinner_start = timezone.datetime.strptime("17:00", "%H:%M").time()
+            dinner_end = timezone.datetime.strptime("18:00", "%H:%M").time()
+
+            if breakfast_start <= current_time <= breakfast_end:
+                if meal_claim.breakfast_claimed:
+                    return render(request, 'res.html', {'success': False, 'message': 'Breakfast already claimed!', 'attendee_name': attendee_name})
+                meal_claim.breakfast_claimed = True
+                meal_claim.save()
+                return render(request, 'res.html', {'success': True, 'message': 'Breakfast claimed successfully!', 'attendee_name': attendee_name})
+
+            elif lunch_start <= current_time <= lunch_end:
+                if meal_claim.lunch_claimed:
+                    return render(request, 'res.html', {'success': False, 'message': 'Lunch already claimed!', 'attendee_name': attendee_name})
+                meal_claim.lunch_claimed = True
+                meal_claim.save()
+                return render(request, 'res.html', {'success': True, 'message': 'Lunch claimed successfully!', 'attendee_name': attendee_name})
+
+            elif dinner_start <= current_time <= dinner_end:
+                if meal_claim.dinner_claimed:
+                    return render(request, 'res.html', {'success': False, 'message': 'Dinner already claimed!', 'attendee_name': attendee_name})
+                meal_claim.dinner_claimed = True
+                meal_claim.save()
+                return render(request, 'res.html', {'success': True, 'message': 'Dinner claimed successfully!', 'attendee_name': attendee_name})
+
+            # pag hindi meal time, mark attendance then advice warning sa admin scanner sya
+            elif not attendee.is_present:
+                attendee.is_present = True
+                attendee.present_time = timezone.now() + timedelta(hours=8) 
+                attendee.save()
+                return render(request, 'res.html', {'success': True, 'message': 'Attendance marked successfully!, Late Attendee', 'attendee_name': attendee_name})
+
+            else:
+                return render(request, 'res.html', {'success': False, 'message': 'Invalid scan time or already attended.'})
+        
         except Attendee.DoesNotExist:
-            return render(request, 'res.html', {
-                'success': False,
-                'message': 'Attendee not found.'
-            })
+            return render(request, 'res.html', {'success': False, 'message': 'Attendee not found.'})
 
-    return render(request, 'res.html', {
-        'success': False,
-        'message': 'Invalid entry. Please scan the attendees QR Code.'
-    })
-
-
-#'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende sa client.
+    return render(request, 'res.html', {'success': False, 'message': 'Invalid entry. Please scan the attendee\'s QR Code.'})
+    #'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende sa gusto.
 
 def download_qr(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)

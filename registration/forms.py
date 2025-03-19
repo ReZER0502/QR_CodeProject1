@@ -56,11 +56,11 @@ class RegistrationForm(forms.ModelForm):
         fields = ['first_name', 'last_name', 'email', 'department', 'sub_department', 'event']
     event = forms.ModelChoiceField(queryset=Event.objects.all(), required=True, label="Event", empty_label="Select Event")
     
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if not email.endswith('@natcco.coop'):
-            raise ValidationError("Only @natcco.coop emails are allowed.")
-        return email
+   # def clean_email(self):
+    #    email = self.cleaned_data.get('email')
+     #   if not email.endswith('@natcco.coop'):
+      #      raise ValidationError("Only @natcco.coop emails are allowed.")
+       # return email
 
     def clean_first_name(self):
         first_name = self.cleaned_data.get('first_name')

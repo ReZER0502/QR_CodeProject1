@@ -162,36 +162,41 @@
                 background-position: left center;
                 background-size: cover;
             }
-        
+
             form {
-                padding: 20px;
+                padding: 15px;
                 border-radius: 8px;
-                width: 90%; /* Better fit for small screens */
-                max-width: 350px;
+                width: 80%; /* Reduce form width */
+                max-width: 280px; /* Decrease max width */
             }
-    
+
             h1 {
-                font-size: 24px; /* Reduce heading size for mobile */
+                font-size: 22px; /* Reduce heading size slightly */
             }
-    
+
             input, select {
-                width: calc(100% - 30px); /* Slightly smaller inputs for mobile */
+                width: 80%; /* Make input fields shorter */
+                max-width: 250px; /* Limit max width */
+                font-size: 12px; /* Adjust font size */
+                padding: 8px; /* Reduce padding */
+            }
+
+            button {
+                width: 80%; /* Make button same width as inputs */
+                max-width: 250px; /* Limit max width */
+                padding: 8px; /* Smaller padding */
                 font-size: 13px; /* Adjust font size */
             }
-    
-            button {
-                padding: 10px; /* Smaller button padding */
-                font-size: 14px; /* Adjust font size */
-            }
-    
+
             p {
-                font-size: 12px; /* Adjust paragraph font size */
+                font-size: 11px; /* Adjust paragraph font size */
             }
-    
+
             .logo {
-                width: 70px; /* Adjust logo size for smaller screens */
+                width: 60px; /* Reduce logo size slightly */
             }
         }
+
     </style>
     
 </head>
