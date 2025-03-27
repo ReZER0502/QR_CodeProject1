@@ -26,6 +26,9 @@ from .forms import EventForm
 from django.utils.timezone import now, localtime
 from .models import QRTemplate
 from .models import MealClaim 
+import pandas as pd
+from django.db import transaction
+
 
 def reset_attendance(request):
     if request.method == 'POST':
@@ -194,6 +197,72 @@ def download_attendees_csv(request):
 def edit_user_profile(request):
     if request.user.username == "permanentadmin":
         return HttpResponseForbidden("You cannot modify the permanent admin user.")
+    
+logger = logging.getLogger(__name__)
+
+def bulk_register(request):
+    if request.method == "POST" and request.FILES.get("attendee_file"):
+        print("File upload detected")
+        file = request.FILES["attendee_file"]
+
+        try:
+            if file.name.endswith(".csv"):
+                df = pd.read_csv(file)  # Read CSV
+            elif file.name.endswith(".xlsx"):
+                df = pd.read_excel(file, engine="openpyxl")  # Read Excel
+            else:
+                messages.error(request, "Invalid file format. Please upload a CSV or Excel file.")
+                return redirect("register")
+
+            # Check for required columns
+            required_columns = ["Coop Name", "Email"]
+            for col in required_columns:
+                if col not in df.columns:
+                    messages.error(request, f"Missing required column: {col}")
+                    return redirect("register")
+
+            df["Email"] = df["Email"].str.strip()  # Remove spaces from emails
+            existing_emails = set(Attendee.objects.filter(email__in=df["Email"]).values_list("email", flat=True))
+            
+            event = Event.objects.filter(date__gte=timezone.now()).order_by("date").first()  # Get next upcoming event
+            if not event:
+                messages.error(request, "No upcoming event found.")
+                return redirect("register")
+
+            attendees_to_create = []
+            for _, row in df.iterrows():
+                if row["Email"] in existing_emails:
+                    continue  # Skip duplicates
+                
+                attendees_to_create.append(
+                    Attendee(
+                        first_name=row["Coop Name"],
+                        last_name="N/A",
+                        email=row["Email"],
+                        department="Visitor",
+                        sub_department="Visitor",
+                        event=event,
+                    )
+                )
+
+            # Bulk insert attendees
+            with transaction.atomic():
+                new_attendees = Attendee.objects.bulk_create(attendees_to_create, batch_size=500)
+
+            # Send QR codes (Consider making this async for large files)
+            for attendee in new_attendees:
+                generate_qr_and_send_email(attendee)
+
+            messages.success(request, f"Successfully registered {len(new_attendees)} attendees.")
+            return redirect("register")
+
+        except Exception as e:
+            messages.error(request, f"Error processing file: {e}")
+            print(f"File upload error: {e}")
+            return redirect("register")
+
+    messages.error(request, "Invalid form submission.")
+    return redirect("register")
 
 def generate_qr_and_send_email(attendee):
     try:
@@ -214,8 +283,9 @@ def generate_qr_and_send_email(attendee):
         except QRTemplate.DoesNotExist:
             background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg')
 
+        # reduced sized dito... adjust if needed but will be further tested baka the qr generation may take too long...
         background = Image.open(background_path).convert("RGBA")
-        background = background.resize((700, 700), Image.LANCZOS)  # reduced sized dito... adjust if needed
+        background = background.resize((700, 700), Image.LANCZOS)  
         position = ((background.width - qr_img.width) // 2, (background.height - qr_img.height) // 2)
         background.paste(qr_img, position, qr_img)
 
@@ -239,8 +309,10 @@ def generate_qr_and_send_email(attendee):
     except Exception as e:
         print(f"Error in QR generation: {e}")
 
+#RETEST F(X) FOR QR SNIP / F(X) TIME INTERVALS / TRY HASHMAP 03/21/2025
 def register(request):
-    events = Event.objects.all()
+    today = timezone.now().date()
+    events = Event.objects.filter(date__gte=today)
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
@@ -295,14 +367,20 @@ def handle_attendance_logic(request):
             current_time = localtime(timezone.now()).time() 
             meal_claim, _ = MealClaim.objects.get_or_create(attendee=attendee)
 
-            breakfast_start = timezone.datetime.strptime("06:00", "%H:%M").time()
-            breakfast_end = timezone.datetime.strptime("07:00", "%H:%M").time()
+            breakfast_start = timezone.datetime.strptime("05:00", "%H:%M").time()
+            breakfast_end = timezone.datetime.strptime("07:00", "%H:%M").time() #test
             lunch_start = timezone.datetime.strptime("11:00", "%H:%M").time()
             lunch_end = timezone.datetime.strptime("13:00", "%H:%M").time()
             dinner_start = timezone.datetime.strptime("17:00", "%H:%M").time()
             dinner_end = timezone.datetime.strptime("18:00", "%H:%M").time()
+            
+            if not attendee.is_present:
+                attendee.is_present = True
+                attendee.present_time = timezone.now() + timedelta(hours=8) 
+                attendee.save()
+                return render(request, 'res.html', {'success': True, 'message': 'Attendance marked successfully!, Late Attendee', 'attendee_name': attendee_name})
 
-            if breakfast_start <= current_time <= breakfast_end:
+            elif breakfast_start <= current_time <= breakfast_end:
                 if meal_claim.breakfast_claimed:
                     return render(request, 'res.html', {'success': False, 'message': 'Breakfast already claimed!', 'attendee_name': attendee_name})
                 meal_claim.breakfast_claimed = True
@@ -324,11 +402,6 @@ def handle_attendance_logic(request):
                 return render(request, 'res.html', {'success': True, 'message': 'Dinner claimed successfully!', 'attendee_name': attendee_name})
 
             # pag hindi meal time, mark attendance then advice warning sa admin scanner sya
-            elif not attendee.is_present:
-                attendee.is_present = True
-                attendee.present_time = timezone.now() + timedelta(hours=8) 
-                attendee.save()
-                return render(request, 'res.html', {'success': True, 'message': 'Attendance marked successfully!, Late Attendee', 'attendee_name': attendee_name})
 
             else:
                 return render(request, 'res.html', {'success': False, 'message': 'Invalid scan time or already attended.'})

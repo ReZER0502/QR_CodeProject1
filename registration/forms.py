@@ -6,6 +6,8 @@ from .models import Attendee, AdminUser, AdminWhitelist, Event, QRTemplate
 from django import forms
 from django.core.exceptions import ValidationError
 
+class AttendeeUploadForm(forms.Form):
+    file = forms.FileField() 
 class QRTemplateForm(forms.ModelForm):
     event = forms.ModelChoiceField(
         queryset = Event.objects.all(),

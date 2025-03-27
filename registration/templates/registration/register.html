@@ -31,11 +31,34 @@
             justify-content: center;
         }
 
+        .hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s;
+        }
+        
+        .visible {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
         .logo {
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 15px; /* Add spacing if needed */
+            cursor: pointer;
+            transition: transform 0.4s ease-in-out;
+        }
+
+        .logo.spin {
+            transform: rotateY(180deg); /* Smooth flip effect */
+        }
+
+        .logo:hover{
+            transform: scale(1.1);
         }
         
         .logo-img {
@@ -45,13 +68,29 @@
         
         /* Registration Container */
         .register-container {
+            position: relative;
+            align-items: center;
+            justify-content: center;
             z-index: 10;
-            max-height: 85vh;
+            max-height: 55vh;
             padding: 30px;
             width: 350px;
-            background: transparent;
+            background: rgba(255, 255, 255, 0.2); /* Transparent white */
+            backdrop-filter: blur(10px); /* Blur effect for glass effect */
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
             border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle white border */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
             animation: fadeIn 1s ease-in-out;
+            justify-content: space-between;
+            min-height: 500px;
+        }
+
+        .upload-container{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Fade-In Animation */
@@ -222,21 +261,58 @@
                 font-size: 0.8rem;
             }
         }
-        
-        
+    
+        /* Upload Form Container (Always Centered and Above Everything) */
+        .upload-form-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1); /* Transparent Glass Effect */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            z-index: 9999; /* Super high so nothing blocks it */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        /* When Active (Make it Visible) */
+        .upload-form-container.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Hide Register Container When Upload Form is Shown */
+        .register-container.hidden {
+            display: none;
+        }
+
     </style>
 </head>
 
 <body>
-    <!-- Particles Container -->
-    
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
     <div class="register-container">
-        <div class="logo">
+        <div class="logo" onclick = "toggleForms()">
             <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img">
         </div>
 
-        <form method="POST" action="{% url 'register' %}" class="registration-form">
+        <form method="POST" action="{% url 'register' %}" class="registration-form" id = "manualForm">
             {% csrf_token %}
 
             <div class="input-container">
@@ -307,21 +383,56 @@
                 <button type="submit">Register</button>
             </div>
         </form>
-
+        
         <div class="admin-container">
             <h2>Attendee Registration</h2>
             <p>Please have your Administrator scan your QR code.</p>
         </div>
     </div>
 
-    <script>
-       
+    <div class="upload-form-container">
 
+        <div class="switch-back" onclick="toggleForms()">
+            <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img">
+        </div>
+
+        <form method="POST" action="{% url 'bulk_register' %}" enctype="multipart/form-data" id="uploadForm" class="hidden">
+            {% csrf_token %}
+            <div class="upload-container">
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click(); return false;">
+                    Upload CSV / Excel
+                </button>
+                <input type="file" id="fileInput" name="attendee_file" accept=".csv, .xlsx" hidden>
+            </div>
+            <div class="button-container">
+                <button type="submit" name="bulk_upload">Upload & Register</button>
+            </div>
+        </form>
+        
+    </div>
+
+    <script>
+
+        function toggleForms() {
+            const manualForm = document.querySelector(".register-container");
+            const uploadContainer = document.querySelector(".upload-form-container");
+            const uploadForm = document.getElementById("uploadForm"); //Test only....try
+        
+            if (manualForm.classList.contains("hidden")) {
+                manualForm.classList.remove("hidden");
+                uploadContainer.classList.remove("show");
+                uploadForm.classList.remove("visible"); 
+            } else {
+                manualForm.classList.add("hidden");
+                uploadContainer.classList.add("show");
+                uploadForm.classList.add("visible"); 
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.querySelector('.registration-form');
             const inputs = form.querySelectorAll('input, select');
 
-            // Show errors and add animations
             form.querySelectorAll('.error').forEach(error => {
                 if (error.innerText.trim()) {
                     form.classList.add('shake');
@@ -333,7 +444,6 @@
                 }
             });
 
-            // Clear errors on input
             inputs.forEach(input => {
                 input.addEventListener('input', () => {
                     const error = input.closest('.input-container').querySelector('.error');
@@ -367,7 +477,9 @@
                 });
             }
         }
+
     </script>
+
 </body>
 
 </html>

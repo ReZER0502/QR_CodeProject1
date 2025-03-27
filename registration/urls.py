@@ -15,4 +15,5 @@ urlpatterns = [
     path('get-attendees-status/', views.get_attendees_status, name='get_attendees_status'),
     path('admin/reset_attendance/', views.reset_attendance, name='reset_attendance'),
     path('update-attendee-count/', views.update_attendee_count, name='update_attendee_count'),
+    path("bulk-register/", views.bulk_register, name="bulk_register"),
 ]
