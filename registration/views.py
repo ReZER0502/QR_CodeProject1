@@ -28,7 +28,11 @@ from .models import QRTemplate
 from .models import MealClaim 
 import pandas as pd
 from django.db import transaction
-
+import hmac
+import hashlib
+import time
+from django.utils.http import urlencode
+from datetime import datetime, time as dt_time
 
 def reset_attendance(request):
     if request.method == 'POST':
@@ -202,41 +206,56 @@ logger = logging.getLogger(__name__)
 
 def bulk_register(request):
     if request.method == "POST" and request.FILES.get("attendee_file"):
-        print("File upload detected")
         file = request.FILES["attendee_file"]
+        event_id = int(request.POST.get("event_id", 0)) 
 
         try:
+            # Detect file type and read into DataFrame
             if file.name.endswith(".csv"):
-                df = pd.read_csv(file)  # Read CSV
+                df = pd.read_csv(file, encoding="utf-8", header=0)
             elif file.name.endswith(".xlsx"):
-                df = pd.read_excel(file, engine="openpyxl")  # Read Excel
+                df = pd.read_excel(file, engine="openpyxl")
             else:
                 messages.error(request, "Invalid file format. Please upload a CSV or Excel file.")
                 return redirect("register")
 
-            # Check for required columns
-            required_columns = ["Coop Name", "Email"]
-            for col in required_columns:
-                if col not in df.columns:
-                    messages.error(request, f"Missing required column: {col}")
-                    return redirect("register")
+            # Strip spaces from column names and standardize
+            df.columns = df.columns.str.strip()
 
-            df["Email"] = df["Email"].str.strip()  # Remove spaces from emails
-            existing_emails = set(Attendee.objects.filter(email__in=df["Email"]).values_list("email", flat=True))
-            
-            event = Event.objects.filter(date__gte=timezone.now()).order_by("date").first()  # Get next upcoming event
-            if not event:
-                messages.error(request, "No upcoming event found.")
+            # Find columns dynamically (case-insensitive)
+            name_column = next((col for col in df.columns if "delegate name" in col.lower()), None)
+            email_column = next((col for col in df.columns if "email" in col.lower()), None)
+
+            if not name_column or not email_column:
+                messages.error(request, "Missing required columns: Delegate Name or Email")
                 return redirect("register")
+
+            # Trim spaces and convert to string
+            df[email_column] = df[email_column].astype(str).str.strip()
+            df[name_column] = df[name_column].astype(str).str.strip()
+
+            # Get existing emails to prevent duplicates
+            existing_emails = set(Attendee.objects.values_list("email", flat=True))
+
+            event = Event.objects.filter(id=event_id).first()
+            if not event:
+                messages.error(request, "Invalid event selection.")
+                return redirect("register")
+
+            # Remove duplicate emails in the uploaded file
+            df = df.drop_duplicates(subset=["Email"], keep="first")
 
             attendees_to_create = []
             for _, row in df.iterrows():
                 if row["Email"] in existing_emails:
                     continue  # Skip duplicates
-                
+
+                # Ensure first name is within max length
+                first_name = str(row[name_column]).strip()[:70]  # Adjust based on your model
+
                 attendees_to_create.append(
                     Attendee(
-                        first_name=row["Coop Name"],
+                        first_name=first_name,
                         last_name="N/A",
                         email=row["Email"],
                         department="Visitor",
@@ -258,32 +277,48 @@ def bulk_register(request):
 
         except Exception as e:
             messages.error(request, f"Error processing file: {e}")
-            print(f"File upload error: {e}")
+            logger.error(f"File upload error: {e}", exc_info=True)
             return redirect("register")
 
     messages.error(request, "Invalid form submission.")
     return redirect("register")
 
+SECRET_KEY = settings.SECRET_KEY
+
+def generate_secure_qr_url(attendee):
+    """Generate a hashed URL with an expiration timestamp."""
+    expiry_time = int(time.time()) + (60 * 60 * 2) 
+
+    data = f"{attendee.id}:{expiry_time}"
+    hash_digest = hmac.new(settings.SECRET_KEY.encode(), data.encode(), hashlib.sha256).hexdigest()[:16]
+
+    params = urlencode({"auth": hash_digest, "id": attendee.id, "exp": expiry_time})
+    return f"{settings.BASE_URL}/registration/mark_attendance/?{params}"
+
 def generate_qr_and_send_email(attendee):
     try:
-        # Generate QR code data, retest mo nga dito then verify kasi 1 1/2 minute time yung processing... 
-        qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?attendee_id={attendee.id}"
+        event_end_time = datetime.combine(attendee.event.date, dt_time(20, 0))
+        event_end_timestamp = int(event_end_time.timestamp()) # Expire at event end
+    
+        data = f"{attendee.id}:{event_end_timestamp}"
+        hash_digest = hmac.new(settings.SECRET_KEY.encode(), data.encode(), hashlib.sha256).hexdigest()[:16]
+
+        qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?id={attendee.id}&auth={hash_digest}&exp={event_end_timestamp}"
         qr = qrcode.QRCode(box_size=10, border=2)
         qr.add_data(qr_data)
         qr.make(fit=True)
         qr_img = qr.make_image(fill="black", back_color="white").convert("RGBA")
 
-        # qr resizing
+        # Resize QR code
         qr_img = qr_img.resize((500, 500), Image.LANCZOS)
 
-        # bg resizing
+        # Load background template
         try:
             qr_template = QRTemplate.objects.get(event=attendee.event)
             background_path = qr_template.image.path
         except QRTemplate.DoesNotExist:
             background_path = os.path.join(settings.BASE_DIR, 'staticfiles', 'img', 'default_template.jpg')
 
-        # reduced sized dito... adjust if needed but will be further tested baka the qr generation may take too long...
         background = Image.open(background_path).convert("RGBA")
         background = background.resize((700, 700), Image.LANCZOS)  
         position = ((background.width - qr_img.width) // 2, (background.height - qr_img.height) // 2)
@@ -294,18 +329,15 @@ def generate_qr_and_send_email(attendee):
         canvas.seek(0)
         qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.id}.png')
         attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
-        
+
+        # Send Email with QR Code
         subject = 'Your QR Code is Ready!'
         html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
         plain_message = strip_tags(html_message)
-        email = EmailMessage(
-            subject,
-            plain_message,
-            to=[attendee.email],
-        )
+        email = EmailMessage(subject, plain_message, to=[attendee.email])
         email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
         email.send()
-        
+
     except Exception as e:
         print(f"Error in QR generation: {e}")
 
@@ -359,58 +391,53 @@ def mark_attendance(request):
     })
 
 def handle_attendance_logic(request):
-    attendee_id = request.GET.get('attendee_id')
-    if attendee_id:
-        try:
-            attendee = Attendee.objects.get(id=attendee_id)
-            attendee_name = f"{attendee.first_name} {attendee.last_name}"
-            current_time = localtime(timezone.now()).time() 
-            meal_claim, _ = MealClaim.objects.get_or_create(attendee=attendee)
+    attendee_id = request.GET.get("id")
+    auth_hash = request.GET.get("auth")
+    expiry_time = request.GET.get("exp")
 
-            breakfast_start = timezone.datetime.strptime("05:00", "%H:%M").time()
-            breakfast_end = timezone.datetime.strptime("07:00", "%H:%M").time() #test
-            lunch_start = timezone.datetime.strptime("11:00", "%H:%M").time()
-            lunch_end = timezone.datetime.strptime("13:00", "%H:%M").time()
-            dinner_start = timezone.datetime.strptime("17:00", "%H:%M").time()
-            dinner_end = timezone.datetime.strptime("18:00", "%H:%M").time()
-            
-            if not attendee.is_present:
-                attendee.is_present = True
-                attendee.present_time = timezone.now() + timedelta(hours=8) 
-                attendee.save()
-                return render(request, 'res.html', {'success': True, 'message': 'Attendance marked successfully!, Late Attendee', 'attendee_name': attendee_name})
+    if not (attendee_id and auth_hash and expiry_time):
+        return HttpResponseForbidden("Invalid QR code")
 
-            elif breakfast_start <= current_time <= breakfast_end:
-                if meal_claim.breakfast_claimed:
-                    return render(request, 'res.html', {'success': False, 'message': 'Breakfast already claimed!', 'attendee_name': attendee_name})
-                meal_claim.breakfast_claimed = True
-                meal_claim.save()
-                return render(request, 'res.html', {'success': True, 'message': 'Breakfast claimed successfully!', 'attendee_name': attendee_name})
+    if int(expiry_time) < int(time.time()):
+        return HttpResponseForbidden("QR code expired")
 
-            elif lunch_start <= current_time <= lunch_end:
-                if meal_claim.lunch_claimed:
-                    return render(request, 'res.html', {'success': False, 'message': 'Lunch already claimed!', 'attendee_name': attendee_name})
-                meal_claim.lunch_claimed = True
-                meal_claim.save()
-                return render(request, 'res.html', {'success': True, 'message': 'Lunch claimed successfully!', 'attendee_name': attendee_name})
+    data = f"{attendee_id}:{expiry_time}"
+    expected_hash = hmac.new(SECRET_KEY.encode(), data.encode(), hashlib.sha256).hexdigest()[:16]
+    if not hmac.compare_digest(expected_hash, auth_hash):
+        return HttpResponseForbidden("Invalid QR code")
 
-            elif dinner_start <= current_time <= dinner_end:
-                if meal_claim.dinner_claimed:
-                    return render(request, 'res.html', {'success': False, 'message': 'Dinner already claimed!', 'attendee_name': attendee_name})
-                meal_claim.dinner_claimed = True
-                meal_claim.save()
-                return render(request, 'res.html', {'success': True, 'message': 'Dinner claimed successfully!', 'attendee_name': attendee_name})
+    try:
+        attendee = Attendee.objects.get(id=attendee_id)
+    except Attendee.DoesNotExist:
+        return render(request, 'res.html', {'success': False, 'message': 'Attendee not found.'})
 
-            # pag hindi meal time, mark attendance then advice warning sa admin scanner sya
+    attendee_name = f"{attendee.first_name} {attendee.last_name}"
+    current_time = localtime(now()).time() 
+    meal_claim, _ = MealClaim.objects.get_or_create(attendee=attendee)
 
-            else:
-                return render(request, 'res.html', {'success': False, 'message': 'Invalid scan time or already attended.'})
-        
-        except Attendee.DoesNotExist:
-            return render(request, 'res.html', {'success': False, 'message': 'Attendee not found.'})
+    meal_times = {
+        "breakfast": (dt_time(5, 0), dt_time(7, 0)), 
+        "lunch": (dt_time(11, 0), dt_time(13, 0)), 
+        "dinner": (dt_time(17, 0), dt_time(18, 0)), 
+    }
 
-    return render(request, 'res.html', {'success': False, 'message': 'Invalid entry. Please scan the attendee\'s QR Code.'})
-    #'C:\Windows\Fonts\ArialNova-Bold.ttf' Pwede natin tong palitan, depende sa gusto.
+
+    if not attendee.is_present:
+        attendee.is_present = True
+        attendee.present_time = now() + timedelta(hours=8)
+        attendee.save()
+        return render(request, 'res.html', {'success': True, 'message': 'Attendance marked successfully!' 'Late Attendee', 'attendee_name': attendee_name})
+
+    for meal, (start, end) in meal_times.items():
+        if start <= current_time <= end:
+            claimed_attr = f"{meal}_claimed" 
+            if getattr(meal_claim, claimed_attr):  
+                return render(request, 'res.html', {'success': False, 'message': f'{meal.capitalize()} already claimed!', 'attendee_name': attendee_name})
+            setattr(meal_claim, claimed_attr, True)  
+            meal_claim.save()
+            return render(request, 'res.html', {'success': True, 'message': f'{meal.capitalize()} claimed successfully!', 'attendee_name': attendee_name})
+
+    return render(request, 'res.html', {'success': False, 'message': 'Invalid scan time or already attended.', 'attendee_name': attendee_name})
 
 def download_qr(request, attendee_id):
     attendee = get_object_or_404(Attendee, id=attendee_id)

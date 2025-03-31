@@ -293,6 +293,45 @@
         .register-container.hidden {
             display: none;
         }
+    
+        .messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            z-index: 1000;
+        }
+        
+        .alert {
+            background-color: rgba(255, 77, 77, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeInOut 5s ease-in-out;
+        }
+        
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+        
 
     </style>
 </head>
@@ -390,28 +429,72 @@
         </div>
     </div>
 
-    <div class="upload-form-container">
 
+    <div class="upload-form-container">
         <div class="switch-back" onclick="toggleForms()">
             <img src="{% static 'img/logo.png' %}" alt="Logo" class="logo-img">
         </div>
-
+    
         <form method="POST" action="{% url 'bulk_register' %}" enctype="multipart/form-data" id="uploadForm" class="hidden">
             {% csrf_token %}
             <div class="upload-container">
+                <p id="fileNameDisplay" style="margin-top: 10px; font-weight: bold;"></p> 
                 <button class="upload-btn" onclick="document.getElementById('fileInput').click(); return false;">
                     Upload CSV / Excel
                 </button>
-                <input type="file" id="fileInput" name="attendee_file" accept=".csv, .xlsx" hidden>
+                <input type="file" id="fileInput" name="attendee_file" accept=".csv, .xlsx" hidden onchange="displayFileName()">
             </div>
+
+            <div class="input-container">
+                <i class="fas fa-calendar-alt"></i>
+                <select id="event" name="event_id" required>
+                    <option value="">Select Event</option>
+                    {% for event in events %}
+                    <option value="{{ event.id }}" {% if request.POST.event_id == event.id|stringformat:"s" %}selected{% endif %}>
+                        {{ event.name }} ({{ event.date }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="error">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="button-container">
                 <button type="submit" name="bulk_upload">Upload & Register</button>
             </div>
         </form>
-        
     </div>
 
+    <script src="{% static 'js/messages.js' %}"></script>
+    
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    alert.style.animation = "fadeInOut 5s ease-in-out";
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 5000);
+                });
+            }, 500);
+        });
+        
+        function displayFileName() {
+            var input = document.getElementById('fileInput');
+            var fileNameDisplay = document.getElementById('fileNameDisplay');
+            
+            if (input.files.length > 0) {
+                fileNameDisplay.textContent = "Selected file: " + input.files[0].name;
+            } else {
+                fileNameDisplay.textContent = "";
+            }
+        }
 
         function toggleForms() {
             const manualForm = document.querySelector(".register-container");

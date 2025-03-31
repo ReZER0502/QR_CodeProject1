@@ -71,7 +71,7 @@ class AdminWhitelist(models.Model):
         return self.email
 
 class Attendee(models.Model):
-    first_name = models.CharField(max_length=20)
+    first_name = models.CharField(max_length=80)
     last_name = models.CharField(max_length=20, default='N/A')
     email = models.EmailField(max_length=254, unique=True)
     department = models.CharField(max_length=100, default="Visitor")
