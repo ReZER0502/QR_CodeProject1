@@ -332,6 +332,34 @@
             }
         }
         
+        .upload-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            border: 2px dashed #ccc; /* Dashed border for a "drop-zone" feel */
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px; /* Adjust width as needed */
+            transition: border-color 0.3s ease;
+        }
+    
+        .upload-container:hover {
+            border-color: #007bff; /* Change border color on hover */
+        }
+    
+        .upload-container i {
+            font-size: 20px;
+            color: #007bff;
+        }
+    
+        .file-name {
+            font-weight: bold;
+            color: #333;
+        }
 
     </style>
 </head>
@@ -437,11 +465,9 @@
     
         <form method="POST" action="{% url 'bulk_register' %}" enctype="multipart/form-data" id="uploadForm" class="hidden">
             {% csrf_token %}
-            <div class="upload-container">
-                <p id="fileNameDisplay" style="margin-top: 10px; font-weight: bold;"></p> 
-                <button class="upload-btn" onclick="document.getElementById('fileInput').click(); return false;">
-                    Upload CSV / Excel
-                </button>
+            <div class="upload-container" onclick="document.getElementById('fileInput').click();" style="cursor: pointer;">
+                <i class="fas fa-file-upload"></i>
+                <p id="fileNameDisplay" style="margin-top: 10px; font-weight: bold;">Click to upload CSV / Excel</p> 
                 <input type="file" id="fileInput" name="attendee_file" accept=".csv, .xlsx" hidden onchange="displayFileName()">
             </div>
 
