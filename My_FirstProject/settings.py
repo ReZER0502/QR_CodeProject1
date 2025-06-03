@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-luj&v0_#m=o4whr1yh-o%#1fp$o=zf0p4*rr7*&@1y(tr#3e2^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','*']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost','qr.natcco.coop:6083', 'qr.natcco.coop', '*']
 
 # Application definition
 AUTH_USER_MODEL = "registration.AdminUser"
@@ -41,14 +41,33 @@ INSTALLED_APPS = [
     "widget_tweaks"
 ]
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': r'C:\xampp\htdocs\QR_CodeProject1\django_debug.log' #file path nung debug_log
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
 # Used Email for sending to attendees pag nag register kaagad. Pwede i set to DC gmail.
 # Yung nakasaad na gmail jan ay yan mismo yung magsesend sa email nung nag register
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail SMTP
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'dc@natcco.coop' #qr test send 'dc@natcco.coop' 
-EMAIL_HOST_PASSWORD = 'zahr pjxo iwgb rivx' #generated app password. hindi yung literal na password ::))) 'zahr pjxo iwgb rivx'
+EMAIL_HOST_USER = 'melleattack0502@gmail.com' #qr test send 'dc@natcco.coop' 
+EMAIL_HOST_PASSWORD = 'dgva xsbv lyyn askt' #tdyt oban ueiq ahkj generated app password. hindi yung literal na password ::))) 'zahr pjxo iwgb rivx'
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -95,7 +114,7 @@ DATABASES = {
     }
 }
 
-# Password validationfsafasfsaf
+# Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -145,4 +164,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Folder where QR codes will be saved
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
-BASE_URL = 'http://192.168.200.94:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000
+BASE_URL = 'http://192.168.200.181:8000'  #Usedomain - VITRO MY IP 10.0.0.52:8000  NATCCO MY IP 10.100.1.69:8000

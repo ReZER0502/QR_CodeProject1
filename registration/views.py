@@ -256,7 +256,7 @@ def bulk_register(request):
                 attendees_to_create.append(
                     Attendee(
                         first_name=first_name,
-                        last_name="N/A",
+                        last_name="",
                         email=row["Email"],
                         department="Visitor",
                         sub_department="Visitor",
@@ -324,18 +324,24 @@ def generate_qr_and_send_email(attendee):
         position = ((background.width - qr_img.width) // 2, (background.height - qr_img.height) // 2)
         background.paste(qr_img, position, qr_img)
 
+        # Generate the flat filename (no folders)
+        filename = f"{attendee.last_name}_{attendee.first_name}_qr.png".replace(" ", "_").lower()
+
+        # Save image to memory
         canvas = BytesIO()
         background.save(canvas, format='PNG', optimize=True)
         canvas.seek(0)
-        qr_code_file = ContentFile(canvas.getvalue(), name=f'qr_code_{attendee.id}.png')
-        attendee.qr_code.save(f'qr_code_{attendee.id}.png', qr_code_file, save=True)
+        qr_code_file = ContentFile(canvas.getvalue(), name=filename)
+
+        # Save to attendee model (goes to qrcodes/ folder via upload_to)
+        attendee.qr_code.save(filename, qr_code_file, save=True)
 
         # Send Email with QR Code
         subject = 'Your QR Code is Ready!'
         html_message = render_to_string('registration/email_template.html', {'attendee': attendee, 'qr_data': qr_data})
         plain_message = strip_tags(html_message)
         email = EmailMessage(subject, plain_message, to=[attendee.email])
-        email.attach(f'qr_code_{attendee.first_name}_{attendee.last_name}.png', canvas.getvalue(), 'image/png')
+        email.attach(filename, canvas.getvalue(), 'image/png')
         email.send()
 
     except Exception as e:

@@ -74,10 +74,10 @@ class Attendee(models.Model):
     first_name = models.CharField(max_length=80)
     last_name = models.CharField(max_length=20, default='N/A')
     email = models.EmailField(max_length=254, unique=True)
-    department = models.CharField(max_length=100, default="Visitor")
+    department = models.CharField(max_length=100, default="Visitor") # To change to coop
     is_present = models.BooleanField(default=False)
     present_time = models.DateTimeField(null=True, blank=True)
-    sub_department = models.CharField(max_length=100, blank=True, null=True, default="Visitor") # no sub depart si coop...
+    sub_department = models.CharField(max_length=100, blank=True, null=True, default="Visitor") # to change to coop..
     qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     event = models.ForeignKey(Event, on_delete=models.CASCADE, default=1)  # ForeignKey para sa Event db
 
