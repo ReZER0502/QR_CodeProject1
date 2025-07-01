@@ -166,6 +166,7 @@
         .button-container {
             display: flex;
             justify-content: center;
+            margin-top: 35px;
         }
         
         button {
@@ -191,11 +192,11 @@
         /* Admin Info */
         .admin-container {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         
         .admin-container h2 {
-            margin-bottom: 5px;
+            margin-bottom: 0px;
             color: #333;
         }
         
@@ -409,20 +410,17 @@
             <div class="input-container">
                 <i class="fas fa-building"></i>
                 <select id="department" name="department" onchange="updateSubDepartment()" required>
-                    <option value="">Select Department</option>
-                    <option value="IT">IT</option>
-                    <option value="HR">HR</option>
-                    <option value="Finance">Finance</option>
-                    <option value="ASG">ASG</option>
-                    <option value="ETCG">ETCG</option>
-                    <option value="HEAD UNIT">HEAD UNIT</option>
+                    <option value="" disabled selected hidden>Select Identity</option>
+                    <option value="COOP">COOP</option>
+                    <option value="NON-COOP">NON-COOP</option>
+                    <option value="ITG">ITG</option>
                 </select>
             </div>
 
             <div class="input-container">
                 <i class="fas fa-sitemap"></i>
                 <select id="sub_department" name="sub_department" required>
-                    <option value="">Select Sub-Department</option>
+
                 </select>
             </div>
 
@@ -553,6 +551,7 @@
                 }
             });
 
+
             inputs.forEach(input => {
                 input.addEventListener('input', () => {
                     const error = input.closest('.input-container').querySelector('.error');
@@ -566,17 +565,25 @@
         function updateSubDepartment() {
             const departmentSelect = document.getElementById('department');
             const subDepartmentSelect = document.getElementById('sub_department');
+
             const departments = {
-                'IT': ['Software Development', 'Data Center & Network Operations', 'Database SQL'],
-                'HR': ['Recruitment', 'Employee Relations'],
-                'Finance': ['Accounting', 'Payroll'],
-                'ASG': ['Procurement', 'Gen. Services', 'HR Assistant'],
-                'ETCG': ['Stab-Fund', 'Consultancy', 'KRC'],
-                'HEAD UNIT': ['IT', 'HR', 'Finance', 'ASG', 'ETCG', 'DATA CENTER UNIT'],
+                'COOP': ['NATCCO', 'ADTEMPCO', 'AMPC', 'AKEMPCO', 'ALMUCO', 'ADCC', 'ADMPC', 'AHSMPC'],
+                'NON-COOP': ['GUEST'],
+                'ITG': ['DCU', 'SDU', 'SSIS', 'ADMIN'],
             };
 
-            subDepartmentSelect.innerHTML = '<option value="">Select Sub-Department</option>';
+            subDepartmentSelect.innerHTML = '';
+
+            const placeholderOption = document.createElement('option');
+            placeholderOption.textContent = 'Select Sub Identity';
+            placeholderOption.value = '';
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            placeholderOption.hidden = true;
+
+            subDepartmentSelect.appendChild(placeholderOption);
             const selectedDepartment = departmentSelect.value;
+
             if (departments[selectedDepartment]) {
                 departments[selectedDepartment].forEach(subDept => {
                     const option = document.createElement('option');
@@ -586,6 +593,7 @@
                 });
             }
         }
+
 
     </script>
 

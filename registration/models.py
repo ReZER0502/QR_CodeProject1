@@ -45,24 +45,20 @@ class AdminUser(AbstractBaseUser, PermissionsMixin):
 
     objects = AdminUserManager()
 
-    USERNAME_FIELD = 'email'  # Use email as the unique identifier
-    REQUIRED_FIELDS = ['first_name', 'last_name']  # Only these fields are required
+    USERNAME_FIELD = 'email'  
+    REQUIRED_FIELDS = ['first_name', 'last_name']  
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 
 
-# Signal to prevent permanent admin deletion
 def prevent_admin_deletion(sender, instance, **kwargs):
     permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop", "agpol@natcco.coop", "spobusan@natcco.coop"]
     
     if instance.email == permanent_admin_email:
         raise Exception("The permanent admin user cannot be deleted.")
-
-# Connect the delete signal to prevent the permanent admin deletion
 pre_delete.connect(prevent_admin_deletion, sender=AdminUser)
 
-# Admin whitelist model
 class AdminWhitelist(models.Model):
     email = models.EmailField(unique=True)
     added_at = models.DateTimeField(auto_now_add=True)
@@ -97,7 +93,7 @@ class MealClaim(models.Model):
 
 @receiver(post_migrate)
 def create_permanent_admin(sender, **kwargs):
-    #gamit tayo hashmap para makapag store ng permanent admins, meaning they cannot be deleated via sql code commands.
+    #hashmap (dict) para makapag store ng permanent admins, meaning they cannot be deleated via sql code commands.
     permanent_admins = [
         {
             "email": "gcagbayani@natcco.coop",
