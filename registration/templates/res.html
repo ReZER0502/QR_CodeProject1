@@ -14,70 +14,226 @@
             background: url("{% static 'img/QR BG Landscape.jpg' %}") no-repeat center center;
             background-size: cover;
             background-position: center;
-            background-attachment: **fixed**; /* Keeps the image in place when scrolling */
+            background-attachment: fixed;
             color: var(--c-text-primary);
             display: flex;
             padding-top: 3vw;
             padding-bottom: 3vw;
             justify-content: center;
         }
-    
+   
         .container {
             position: relative;
-            max-width: 400px; /* Limit width for better responsiveness */
-            width: 90%; /* Allow scaling on smaller devices */
+            max-width: 400px;
+            width: 90%;
             padding: 20px;
-            background-color:transparent; /* Solid white background for the container */
-            border-radius: 15px; /* Rounded corners */
+            background-color:transparent;
+            border-radius: 15px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
-    
+   
         .success {
-            color: #28a745; /* Green text for success messages */
+            color: #28a745;
             font-size: 20px;
             margin-bottom: 15px;
         }
-    
+   
         .error {
-            color: #dc3545; /* Red text for error messages */
+            color: #dc3545;
             font-size: 20px;
             margin-bottom: 15px;
         }
-    
-        /* Mobile Responsiveness */
+   
         @media (max-width: 600px) {
             body {
                 background: url("{% static 'img/mobile.jpg' %}") no-repeat center center;
                 background-size: cover;
                 min-height: 100vh;
-                image-rendering: crisp-edges; /* Helps sharpen image */
-                image-rendering: -webkit-optimize-contrast; /* Improves contrast on webkit browsers */
+                image-rendering: crisp-edges;
+                image-rendering: -webkit-optimize-contrast;
             }
-            
+           
             .container {
-                padding: 15px; /* Adjust padding for smaller devices */
-                border-radius: 10px; /* Slightly less rounded corners for compact devices */
+                padding: 15px;
+                border-radius: 10px;
             }
-    
+   
             .success, .error {
-                font-size: 16px; /* Adjust font size for better fit on smaller screens */
+                font-size: 16px;
             }
         }
-    </style>    
 
+        /* From Uiverse.io by Peary74 */
+        button {
+        font-family: inherit;
+        font-size: 20px;
+        background: #212121;
+        color: white;
+        fill: rgb(155, 153, 153);
+        padding: 0.7em 1em;
+        padding-left: 0.9em;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border: none;
+        border-radius: 15px;
+        font-weight: 1000;
+        margin: 1em auto;
+        transition: background 0.3s ease-in-out;
+        }
+
+        button span {
+        display: block;
+        margin-left: 0.3em;
+        transition: all 0.3s ease-in-out;
+        }
+
+        button svg {
+        display: block;
+        transform-origin: center center;
+        transition: transform 0.3s ease-in-out;
+        }
+
+        button:hover {
+        background: #000;
+        }
+
+        button:hover .svg-wrapper {
+        transform: scale(1.25);
+        transition: 0.5s linear;
+        }
+
+        button:hover svg {
+        transform: translateX(3.1em) scale(1.1);
+        fill: #fff;
+        }
+
+        button:hover span {
+        opacity: 0;
+        transition: 0.5s linear;
+        }
+
+        button:active {
+        transform: scale(0.95);
+        }
+
+        .svg-wrapper-1 {
+        display: flex;
+        }
+
+        #qr-reader {
+            border: 2px dashed red;
+            width: 100%;
+            max-width: 100%;
+            height: 300px;
+            margin: 20px auto;
+            position: relative;
+            background: black;
+            border: 1px solid #ccc;
+        }
+
+    </style>    
 </head>
 <body>
 
     <div class="container">
-        {% if success %}
-            <div class="success">{{ message }} - {{ attendee_name }}</div>
-        {% else %}
-            <div class="error">{{ message }}</div>
-        {% endif %}
+        <div id="status-message">
+            {% if success %}
+                <div class="success">{{ message }} - {{ attendee_name }}</div>
+            {% else %}
+                <div class="error">{{ message }}</div>
+            {% endif %}
+        </div>
+
+        <button onclick="clearMessageAndStartScanner()">
+            <div class="svg-wrapper-1">
+                <div class="svg-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="30" class="icon">
+                        <path d="M20 5h-3.17l-1.84-2.46A2 2 0 0 0 13.38 2h-2.76a2 2 0 0 0-1.61.84L7.17 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm-8 13a5 5 0 1 1 5-5 5 5 0 0 1-5 5zm0-8.5a3.5 3.5 0 1 0 3.5 3.5A3.5 3.5 0 0 0 12 9.5z"></path>
+                    </svg>
+                </div>
+                <span>SCAN AGAIN</span>
+            </div>
+        </button>
+        <div id="qr-reader" style="margin-top: 20px; max-width: 400px; margin-inline: auto;"></div>
+
     </div>
+
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script>
+        let qrReader;
+        function clearMessageAndStartScanner() {
+            const statusDiv = document.getElementById('status-message');
+            if (statusDiv) {
+                statusDiv.style.display = 'none';
+            }
+
+            console.log("Opening camera...");
+            setTimeout(startScanner, 300);
+        }
+
+        function requestCameraPermissionAndStart() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then((stream) => {
+                    stream.getTracks().forEach(track => track.stop());
+                    console.log("Camera permission granted.");
+                    startScanner();
+                })
+                .catch((err) => {
+                    console.error("Camera access denied or not available:", err);
+                    alert("⚠️ Camera access is blocked. Please allow it in your browser settings.");
+                });
+        }
+
+        function startScanner() {
+            if (!qrReader) {
+                qrReader = new Html5Qrcode("qr-reader");
+            }
+
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    const config = { fps: 10, qrbox: 250 };
+                    const cameraId = devices[0].id; // First camera
+
+                    qrReader.start(
+                        {facingMode: "environment"},
+                        config,
+                        qrCodeMessage => {
+                            console.log("QR Code detected:", qrCodeMessage);
+                            window.location.href = qrCodeMessage;
+                        },
+                        errorMessage => {
+                            console.warn("QR scan error:", errorMessage);
+                        }
+                    ).catch(err => {
+                        console.error("QR start failed (from getCameras):", err);
+                        alert("Could not start camera: " + err);
+                    });
+                } else {
+                    alert("No cameras found on this device.");
+                }
+            }).catch(err => {
+                console.error("Camera access error:", err);
+                alert("Camera access error: " + err);
+            });
+        }
+
+    </script>
+
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+

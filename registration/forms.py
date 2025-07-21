@@ -107,7 +107,7 @@ class AdminUserCreationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.set_password(self.cleaned_data["password"])  # Hash password
+        user.set_password(self.cleaned_data["password"])  # Hash pass
         if commit:
             user.save()
         return user

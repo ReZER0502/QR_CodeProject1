@@ -129,7 +129,7 @@ def admin_dashboard(request):
     template_form = QRTemplateForm()  
 
     if request.method == 'POST':
-        if 'add_admin' in request.POST:
+        if 'add_admin' in request.POST: 
             form = AdminWhitelistForm(request.POST)
             if form.is_valid():
                 email = form.cleaned_data.get('email')
@@ -156,7 +156,7 @@ def admin_dashboard(request):
     attendees = Attendee.objects.all()
     events = Event.objects.filter(date__gte=now()).order_by('date')[:3]
     latest_events = Event.objects.filter(date__gte=now()).order_by('date')[:3] 
-    qr_templates = QRTemplate.objects.all()  
+    qr_templates = QRTemplate.objects.filter(event__date__gte=now())
 
     return render(request, 'registration/admin_dashboard.html', {
         'form': form,
@@ -298,12 +298,12 @@ def generate_secure_qr_url(attendee):
 def generate_qr_and_send_email(attendee):
     try:
         event_end_time = datetime.combine(attendee.event.date, dt_time(20, 0))
-        event_end_timestamp = int(event_end_time.timestamp()) # Expire at event end
+        event_end_timestamp = int(event_end_time.timestamp()) # Expire at event endtime here
     
         data = f"{attendee.id}:{event_end_timestamp}"
         hash_digest = hmac.new(settings.SECRET_KEY.encode(), data.encode(), hashlib.sha256).hexdigest()[:16]
 
-        qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?id={attendee.id}&auth={hash_digest}&exp={event_end_timestamp}"
+        qr_data = f"{settings.BASE_URL}/registration/mark_attendance/?id={attendee.id}&auth={hash_digest}&exp={event_end_timestamp}" #Event end
         qr = qrcode.QRCode(box_size=10, border=2)
         qr.add_data(qr_data)
         qr.make(fit=True)
