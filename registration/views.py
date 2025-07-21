@@ -70,7 +70,7 @@ def update_attendee_count(request):
         return JsonResponse({'error': 'Invalid event ID'}, status=400)
 
 def admin_login(request):
-    permanent_admin_emails = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop", "spobusan@natcco.coop", "agpol@natcco.coop"]  # Hardcoded permanent admins
+    permanent_admin_emails = ["Permanent admin emails dito  "] 
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -118,7 +118,7 @@ def register_admin(request):
         'messages': messages_list
     })
 
-PERMANENT_ADMIN_EMAILS = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop", "spobusan@natcco.coop", "agpol@natcco.coop"]
+PERMANENT_ADMIN_EMAILS = [" Permanent admin emails dito "]
 @login_required
 def admin_dashboard(request):
     if request.user.email not in PERMANENT_ADMIN_EMAILS:
@@ -382,7 +382,7 @@ def mark_attendance(request):
             login(request, user)
 
     if request.user.is_authenticated:
-        permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop", "agpol@natcco.coop", "spobusan@natcco.coop"]
+        permanent_admin_email = [" # permanent admin emails dito "]
         if request.user.email in permanent_admin_email:
             return handle_attendance_logic(request)
         if AdminWhitelist.objects.filter(email=request.user.email).exists():
