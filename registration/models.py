@@ -53,7 +53,7 @@ class AdminUser(AbstractBaseUser, PermissionsMixin):
 
 
 def prevent_admin_deletion(sender, instance, **kwargs):
-    permanent_admin_email = ["gcagbayani@natcco.coop", "gjhalos@natcco.coop", "agpol@natcco.coop", "spobusan@natcco.coop"]
+    permanent_admin_email = ["# Permanent Emails here..."]
     
     if instance.email == permanent_admin_email:
         raise Exception("The permanent admin user cannot be deleted.")
@@ -96,28 +96,16 @@ def create_permanent_admin(sender, **kwargs):
     #hashmap (dict) para makapag store ng permanent admins, meaning they cannot be deleated via sql code commands.
     permanent_admins = [
         {
-            "email": "gcagbayani@natcco.coop",
-            "first_name": "Gio",
-            "last_name": "Agbayani",
-            "password": "Ourfuturetod@y2024"
+            #permanent email 1
         },
         {
-            "email": "gjhalos@natcco.coop", 
-            "first_name": "Geronimo",
-            "last_name": "Halos",
-            "password": "Ourfuturetod@y2024"
+            #permanent email 2
         },
         {
-            "email": "agpol@natcco.coop",
-            "first_name": "Alexander",
-            "last_name": "Pol",
-            "password": "Ourfuturetod@y2024"
+            #permanent email 3
         },
         {
-            "email": "spobusan@natcco.coop",
-            "first_name": "Sean Jerome",
-            "last_name": "Obusan",
-            "password": "Ourfuturetod@y2024"
+            #permanent email 4
         }
     ]
     
